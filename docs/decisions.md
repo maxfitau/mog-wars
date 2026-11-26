@@ -16,3 +16,7 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 10 | Rank-ups are paid for with Mog Points (a sink), not decided by lifetime points | The brief lists "rank-up costs", which reads as a price; it also keeps points useful at every level |
 | 11 | Rank names beyond Chad and Mog God are placeholders and all positive: Rookie, Grunt, Fighter, Veteran, Captain, Warlord, Chad, Alpha, Titan, Mog God | Avoids ranks that demean low-ranked players, which would clash with the appearance-bullying risk in docs/compliance.md |
 | 12 | Aura power rises about 10 percent per rank (Mog God about 1.9x a Rookie) | Rewards progress without letting a veteran carry a team alone |
+| 13 | Single currency Mog Points; all numbers in `src/shared/EconomyConfig.luau` | One source of truth keeps the sim, code and docs in sync |
+| 14 | Full rewards for 8 wars a day, half after; barracks capped at 8 hours | Healthy play for young players, no grind pressure |
+| 15 | Rank ladder 250 to 16,000 (casual: Chad day 6, Mog God day 44) | Meets the owner's pacing targets per `tools/pacing.py` |
+| 16 | Box odds sum to 100 and are shown; no pity or luck boosts | Matches Roblox paid-random rules even though boxes are never sold |

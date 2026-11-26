@@ -8,3 +8,8 @@ Roblox game. Read `DESIGN.md` (the design brief) and `CLAUDE.md` (how to work on
 2. `rojo plugin install`, then `rojo serve`, and press Connect in the Rojo plugin inside Roblox Studio.
 3. Clone this repo outside OneDrive, for example `C:\dev\mog-wars` on Windows. Work on either
    machine and sync only through GitHub: `git pull` before you start, `git push` when you stop.
+
+## Needs playtest
+
+Cloud sessions have no Studio, Rojo or Luau runtime. Not yet run or verified: all `tests/*.test.luau`, StyLua,
+Selene, and every slice in `docs/slices.md` (none is built yet). See `docs/morning-notes.md`.

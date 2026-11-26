@@ -1,0 +1,7 @@
+# Same line endings on Windows and Mac: no CRLF noise in diffs.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.rbxl binary
+*.rbxm binary

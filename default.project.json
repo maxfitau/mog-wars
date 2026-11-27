@@ -12,6 +12,12 @@
         "$path": "src/server"
       }
     },
+    "Players": {
+      "$className": "Players",
+      "$properties": {
+        "MaxPlayers": 16
+      }
+    },
     "StarterPlayer": {
       "StarterPlayerScripts": {
         "Client": {

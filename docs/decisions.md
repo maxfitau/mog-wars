@@ -106,3 +106,4 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 100 | Signs are real boards on posts, one per place, instead of floating labels; zones are bright cyan Neon with a pillar of light and a point light | Floating labels piled up on screen; kids need to see the zones from anywhere |
 | 101 | The first-session hint shows only on War Island | It pointed at zones from Training Island |
 | 102 | Bots are switched on by Features.bots (on at launch) | One flag turns them off if they cause problems |
+| 103 | `Players.MaxPlayers` is now set to 16 by Rojo sync (`$properties` on the Players service in `default.project.json`), applied automatically on every Connect | No Claude session has Studio GUI access to click Game Settings; Rojo sync sets the real property the same as a human would, so the manual step in decision 99 no longer has to be remembered each time |

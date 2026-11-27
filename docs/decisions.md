@@ -22,3 +22,5 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 16 | Box odds sum to 100 and are shown; no pity or luck boosts | Matches Roblox paid-random rules even though boxes are never sold |
 | 17 | Slice 1 uses a single placeholder team and aura power 1 per player; the map is built by code | No Studio editing is needed to test; factions and rank scaling arrive in slices 2 and 8 |
 | 18 | Zone state is exposed as part attributes (`OwnerFaction`, `Progress`) and there are no remotes | Clients can read but never write; a HUD can read attributes later |
+| 19 | Faction 4 is named "Aura Collective" in code (placeholder "Aura Cartel" renamed) | Avoids the drug-cartel connotation flagged in docs/compliance.md; one line in FactionRules.luau changes it back |
+| 20 | Factions use Roblox Teams and matching spawn pad colours; no remote can change a faction | Built-in spawning does the base routing; server-only assignment stops cheating |

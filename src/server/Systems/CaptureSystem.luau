@@ -1,7 +1,7 @@
 --!strict
 -- Slice 1 capture system. The server alone decides who is standing in a zone and how full the bar is.
 -- There are NO remotes here: clients cannot ask for, or change, anything about a zone.
--- Zones are any parts tagged "Zone". Everyone is on one placeholder team until slice 2 adds factions.
+-- Zones are any parts tagged "Zone". Presence is counted per faction (set by FactionSystem).
 
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
@@ -11,13 +11,12 @@ local RunService = game:GetService("RunService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local CaptureBar = require(Shared:WaitForChild("CaptureBar"))
 local Config = require(Shared:WaitForChild("EconomyConfig"))
+local FactionRules = require(Shared:WaitForChild("FactionRules"))
 local ZoneGeometry = require(Shared:WaitForChild("ZoneGeometry"))
 
-local PLAYER_TEAM = 1
 local HEADROOM = 8 -- studs above the zone that still count as standing in it
 local UNOWNED_COLOR = Color3.fromRGB(200, 200, 200)
 local PUSH_COLOR = Color3.fromRGB(255, 200, 60)
-local OWNED_COLOR = Color3.fromRGB(70, 200, 110)
 
 type ZoneRecord = {
 	part: BasePart,
@@ -54,14 +53,15 @@ local function unregister(instance: Instance)
 	end
 end
 
--- Aura power of everyone alive and standing in the zone. Rank scaling arrives in slice 8.
-local function powerInZone(zone: BasePart): number
-	local power = 0
+-- Aura power per faction of everyone alive and standing in the zone. Rank scaling arrives in slice 8.
+local function powersInZone(zone: BasePart): { [number]: number }
+	local powers: { [number]: number } = {}
 	for _, player in Players:GetPlayers() do
 		local character = player.Character
 		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 		local root = character and character:FindFirstChild("HumanoidRootPart")
-		if humanoid and root and root:IsA("BasePart") and humanoid.Health > 0 then
+		local faction = player:GetAttribute("Faction")
+		if type(faction) == "number" and FactionRules.byId(faction) and humanoid and root and root:IsA("BasePart") and humanoid.Health > 0 then
 			local offset = zone.CFrame:PointToObjectSpace(root.Position)
 			if
 				ZoneGeometry.contains(
@@ -74,11 +74,16 @@ local function powerInZone(zone: BasePart): number
 					HEADROOM
 				)
 			then
-				power += 1
+				powers[faction] = (powers[faction] or 0) + 1
 			end
 		end
 	end
-	return power
+	return powers
+end
+
+local function ownerColor(owner: number): Color3
+	local faction = FactionRules.byId(owner)
+	return if faction then FactionRules.color(faction) else UNOWNED_COLOR
 end
 
 local function show(record: ZoneRecord)
@@ -89,28 +94,24 @@ local function show(record: ZoneRecord)
 		record.shownProgress = rounded
 		record.part:SetAttribute("Progress", rounded)
 		if state.owner ~= 0 then
-			record.part.Color = OWNED_COLOR
+			record.part.Color = ownerColor(state.owner)
 		else
 			record.part.Color = UNOWNED_COLOR:Lerp(PUSH_COLOR, rounded)
 		end
 	end
 	if record.part:GetAttribute("OwnerFaction") ~= state.owner then
 		record.part:SetAttribute("OwnerFaction", state.owner)
-		record.part.Color = if state.owner ~= 0 then OWNED_COLOR else UNOWNED_COLOR
+		record.part.Color = if state.owner ~= 0 then ownerColor(state.owner) else UNOWNED_COLOR
 	end
 end
 
 local function tick(dt: number)
 	for _, record in zones do
-		local power = powerInZone(record.part)
-		local powers: { [number]: number } = {}
-		if power > 0 then
-			powers[PLAYER_TEAM] = power
-		end
+		local powers = powersInZone(record.part)
 		local result = CaptureBar.step(record.state, powers, dt, params)
 		record.state = result.state
 		if result.captured then
-			print(("[mog-wars] zone %s captured by team %d"):format(record.part.Name, result.newOwner))
+			print(("[mog-wars] zone %s captured by faction %d"):format(record.part.Name, result.newOwner))
 		end
 		show(record)
 	end

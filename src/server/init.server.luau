@@ -2,8 +2,8 @@
 -- Mog Wars server entry point. Systems expose init() then start(); this file runs them in order.
 local Systems = script:WaitForChild("Systems")
 
--- Order matters: the map must exist before the capture system looks for zones.
-local order = { "PlaceholderMap", "CaptureSystem" }
+-- Order matters: factions create the Teams first, then the map builds matching spawns, then captures start.
+local order = { "FactionSystem", "PlaceholderMap", "CaptureSystem" }
 
 local loaded = {}
 for _, name in order do

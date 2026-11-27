@@ -7,6 +7,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("EconomyConfig"))
+local Pace = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Pace"))
 local DataService = require(script.Parent:WaitForChild("DataService"))
 local PopupSystem = require(script.Parent:WaitForChild("PopupSystem"))
 local Events = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("Events"))
@@ -122,6 +123,12 @@ function RankVisuals.init()
 		local info = Config.ranks[rank]
 		PopupSystem.send(player, "rankup", rank, if info then info.name else "")
 		Events.fire(player, "rank", rank)
+	end
+	DataService.onLevelUp = function(player: Player, level: number)
+		-- a rank-up level gets the big rank-up banner instead
+		if (level - 1) % Pace.levels.perRank ~= 0 or level > 6 * Pace.levels.perRank then
+			PopupSystem.send(player, "levelup", level, ("x%.2f AURA"):format(Pace.levels.growth))
+		end
 	end
 	Players.PlayerAdded:Connect(watch)
 	for _, player in Players:GetPlayers() do

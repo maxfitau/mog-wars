@@ -9,6 +9,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
+local Levels = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Levels"))
 local Pace = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Pace"))
 local DataService = require(script.Parent:WaitForChild("DataService"))
 local PopupSystem = require(script.Parent:WaitForChild("PopupSystem"))
@@ -75,7 +76,7 @@ function StealSystem.steal(victim: Player, attacker: Player?)
 		return
 	end
 	local war = Stats.get(victim).aura
-	if war < Pace.steal.minWarAura then
+	if war < Pace.steal.minWarAura * Levels.multiplier((victim:GetAttribute("Level") :: any) or 0) then
 		return
 	end
 	local isLeader = leader == victim
@@ -239,7 +240,7 @@ function StealSystem.start()
 				end
 			end
 			for player, value in paid do
-				local shown = DataService.addAura(player, value)
+				local shown = DataService.addAura(player, value, true)
 				if shown > 0 then
 					Stats.add(player, "aura", shown)
 					Stats.add(player, "stolen", shown)
@@ -253,11 +254,13 @@ function StealSystem.start()
 		while true do
 			task.wait(2)
 			local best: Player? = nil
-			local bestAura = Pace.steal.bountyMinAura - 1
+			local bestAura = 0
 			if Workspace:GetAttribute("WarPhase") == "War" then
 				for _, player in Players:GetPlayers() do
 					local aura = Stats.get(player).aura
-					if aura > bestAura then
+					-- the crown threshold is "seconds of income", so it grows with the leader's level
+					local needed = Pace.steal.bountyMinAura * Levels.multiplier((player:GetAttribute("Level") :: any) or 0)
+					if aura > bestAura and aura >= needed then
 						best, bestAura = player, aura
 					end
 				end

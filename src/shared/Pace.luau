@@ -91,6 +91,22 @@ Pace.chest = {
 	seconds = 4, -- the chest scene after the results (the gap between wars grows by this much)
 }
 
+-- BIG NUMBERS. Every rank has 10 levels (Rookie I-X ... Mog God I-X), then endless "Mog God *1, *2 ...". Every level multiplies ALL
+-- aura income by `growth`. The owner's idea was about 2.5; that would give Mog God I about 1e20 aura a second, so the default is
+-- 1.74, which gives trillions a second at Mog God I and reaches the letter suffixes (aa, ab ...) in the star levels. Set it to 2.5
+-- if you want even bigger numbers. Aura and levels are SCORE AND STATUS ONLY: they never change an ability, speed or capture speed.
+Pace.levels = {
+	perRank = 10,
+	growth = 1.74,
+	nominalIncome = 4, -- aura a second a normal player earns at level 0 (+1 for the war, +3 on a flag, and so on)
+	-- How long a level takes at the nominal income, by the level you are leaving: { from this level, seconds per level }.
+	-- Early levels take about a minute, then it slows: Rookie ~1 min, Sigma ~10 min, Chadlite ~30 min, Chad ~1 hr,
+	-- Gigachad ~3 hr, Mog God about 2.5 days, and the star levels an hour each.
+	seconds = { { 0, 60 }, { 1, 54 }, { 11, 120 }, { 21, 180 }, { 31, 720 }, { 41, 21600 }, { 51, 3600 } },
+	maxLevel = 400,
+	maxAura = 1e300, -- saved aura is clamped here (a double holds up to about 1.8e308)
+}
+
 Pace.capture = {
 	secondsPerFlag = { gold = 4, diamond = 6, ultra = 8 }, -- one player alone, per flag
 	extraPlayerBonus = 0.25, -- each extra teammate on the flag adds this much speed

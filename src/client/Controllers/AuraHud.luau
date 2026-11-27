@@ -10,7 +10,7 @@ local TweenService = game:GetService("TweenService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("EconomyConfig"))
 local NumberFormat = require(Shared:WaitForChild("NumberFormat"))
-local RankRules = require(Shared:WaitForChild("RankRules"))
+local Levels = require(Shared:WaitForChild("Levels"))
 local UiTheme = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("UiTheme"))
 
 local AuraHud = {}
@@ -129,6 +129,17 @@ function AuraHud.init()
 	local ABILITY_AT = { [2] = "Glow-Up Dash", [3] = "Mog Stare", [4] = "Jawline Slam", [5] = "Hair Flip", [6] = "Mewing Shield", [7] = "Total Mog" }
 	local lastDecile = -1
 	local targetAura, shownAura = 0, 0
+	local lastTier = -1
+	local tierFlash = Instance.new("TextLabel")
+	tierFlash.BackgroundTransparency = 1
+	tierFlash.Size = UDim2.new(1, 0, 0, 22)
+	tierFlash.Position = UDim2.new(0, 0, 1, 2)
+	tierFlash.Font = Enum.Font.GothamBlack
+	tierFlash.TextScaled = true
+	tierFlash.TextColor3 = Color3.fromRGB(255, 215, 80)
+	tierFlash.TextTransparency = 1
+	tierFlash.Text = ""
+	tierFlash.Parent = auraLabel
 	local function sparkle()
 		for index = 1, 7 do -- a little burst of stars at the end of the bar at every 10 percent
 			local star = Instance.new("Frame")
@@ -158,10 +169,14 @@ function AuraHud.init()
 		end
 		local auraValue = player:GetAttribute("Aura")
 		local aura = if type(auraValue) == "number" then auraValue else 0
-		local rank, floor, ceiling = RankRules.progress(Config, aura)
-		local shownRank = math.max(rank, if type(player:GetAttribute("Rank")) == "number" then player:GetAttribute("Rank") else 1)
+		local level, floor, ceiling = Levels.progress(aura)
+		local names = {}
+		for index, entry in Config.ranks do
+			names[index] = entry.name
+		end
+		local shownRank = Levels.rankOfLevel(level)
 		local color = COLORS[math.clamp(shownRank, 1, #COLORS)]
-		rankLabel.Text = string.upper(Config.ranks[math.clamp(shownRank, 1, #Config.ranks)].name)
+		rankLabel.Text = string.upper(Levels.name(level, names)) .. (if level > 0 then "" else "")
 		rankLabel.TextColor3 = color
 		fill.BackgroundColor3 = color
 		targetAura = aura
@@ -174,8 +189,9 @@ function AuraHud.init()
 				sparkle() -- sparkle (and, once you add a sound id, a ding) at every 10 percent
 			end
 			lastDecile = decile
-			local nextName = ABILITY_AT[shownRank + 1]
-			teaser.Text = if nextName then ("%s unlocks in %s aura!"):format(nextName, NumberFormat.format(ceiling - aura)) else ("Next rank in %s aura!"):format(NumberFormat.format(ceiling - aura))
+			local nextRank = Levels.rankOfLevel(level + 1)
+			local nextName = if nextRank > shownRank then ABILITY_AT[nextRank] else nil
+			teaser.Text = if nextName then ("%s unlocks in %s aura!"):format(nextName, NumberFormat.format(ceiling - aura)) else ("Next level in %s aura!"):format(NumberFormat.format(ceiling - aura))
 		else
 			fill.Size = UDim2.new(1, 0, 1, 0)
 			barLabel.Text = "MAX RANK!"
@@ -190,9 +206,18 @@ function AuraHud.init()
 	end
 	game:GetService("RunService").RenderStepped:Connect(function(dt) -- the number rolls up instead of jumping
 		shownAura += (targetAura - shownAura) * math.min(1, dt * 8)
-		if math.abs(targetAura - shownAura) < 1 then
+		if math.abs(targetAura - shownAura) < math.max(1, targetAura * 1e-4) then
 			shownAura = targetAura
 		end
+		local _, tier = NumberFormat.suffix(shownAura)
+		if tier > lastTier and lastTier >= 0 then
+			scale.Scale = 1.25 -- NEW TIER: the counter pops and flashes the new suffix
+			TweenService:Create(scale, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
+			tierFlash.Text = "NEW TIER: " .. string.upper((NumberFormat.suffix(shownAura))) .. "!"
+			tierFlash.TextTransparency = 0
+			TweenService:Create(tierFlash, TweenInfo.new(1.6), { TextTransparency = 1 }):Play()
+		end
+		lastTier = tier
 		auraLabel.Text = ("%s aura"):format(NumberFormat.format(math.floor(shownAura + 0.5)))
 	end)
 	player:GetAttributeChangedSignal("Aura"):Connect(refresh)

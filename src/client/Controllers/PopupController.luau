@@ -365,6 +365,9 @@ function PopupController.init()
 			softNote(("-%s aura"):format(number), Color3.fromRGB(255, 120, 120))
 		elseif kind == "whoosh" then
 			showBanner("WHOOSH!", Color3.fromRGB(150, 220, 255), 1.2)
+		elseif kind == "levelup" then
+			showBanner(("LEVEL UP! %s"):format(if type(detail) == "string" then detail else ""), Color3.fromRGB(120, 255, 170), 1.5)
+			punch()
 		elseif kind == "rankup" then
 			showBanner(("RANK UP! %s"):format(if type(detail) == "string" then string.upper(detail) else ""), Color3.fromRGB(255, 215, 60), 2.4)
 			punch()

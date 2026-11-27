@@ -1,23 +1,44 @@
 --!strict
--- Pure number formatting for the floating number pop-ups: 12, 1.2K, 4.7M. Suffixes: K, M, B, T, Qa.
--- The classic mistake is a number like 999,950 showing as "1000.0K". This rounds first and, if the rounded
--- value reaches 1000, moves up to the next suffix ("1M"). The client formats for display only and never reads
--- the text back as a number.
+-- Pure number formatting for big idle-game numbers, used EVERYWHERE aura is shown: 999, 1.23K, 12.3K, 123K, 1.23M ... B, T, then
+-- letter pairs aa, ab, ac ... az, ba, bb ... ("35.8ab"). Always three significant digits. Rounding happens first, so 999,950
+-- shows "1.00M", never "1000K". The client formats for display only and never reads the text back as a number.
 
 local NumberFormat = {}
 
-local SUFFIXES = { "K", "M", "B", "T", "Qa" }
+local NAMED = { "", "K", "M", "B", "T" } -- tiers 0 to 4 (1, thousand, million, billion, trillion)
 
 local function finite(value: number): boolean
 	return value == value and value ~= math.huge and value ~= -math.huge
 end
 
-local function trim(text: string): string
-	-- "1.0" becomes "1", "1.2" stays "1.2"
-	return (text:gsub("%.0$", ""))
+-- The suffix for a tier number: K, M, B, T, then aa (tier 5), ab, ac ... az, ba ... zz (tier 680). Beyond that "e" notation.
+local function suffixFor(tier: number): string
+	if tier < #NAMED then
+		return NAMED[tier + 1]
+	end
+	local index = tier - #NAMED
+	if index >= 26 * 26 then
+		return "e" .. tostring(tier * 3)
+	end
+	local first = index // 26
+	local second = index % 26
+	return string.char(97 + first) .. string.char(97 + second)
 end
 
--- Short text for a number: no suffix below 1000, then one decimal and a suffix. Negative numbers get a minus.
+-- Returns the suffix and tier number a value uses ("" and 0 below 1000).
+function NumberFormat.suffix(value: number): (string, number)
+	if not finite(value) or value < 1000 then
+		return "", 0
+	end
+	local tier = math.floor(math.log10(value) / 3 + 1e-9)
+	local rounded = value / 10 ^ (tier * 3)
+	if rounded >= 999.5 then
+		tier += 1
+	end
+	return suffixFor(tier), tier
+end
+
+-- Short text for a number with three significant digits. Negative numbers get a minus.
 function NumberFormat.format(value: number): string
 	if not finite(value) then
 		return "0"
@@ -28,20 +49,28 @@ function NumberFormat.format(value: number): string
 	if value < 1000 then
 		return tostring(math.floor(value))
 	end
-	local power = 1
-	while power < #SUFFIXES and value >= 1000 ^ (power + 1) do
-		power += 1
+	local tier = math.floor(math.log10(value) / 3 + 1e-9)
+	local scaled = value / 10 ^ (tier * 3)
+	-- three significant digits: 1.23, 12.3, 123
+	local text: string
+	if scaled < 9.995 then
+		text = string.format("%.2f", scaled)
+	elseif scaled < 99.95 then
+		text = string.format("%.1f", scaled)
+	elseif scaled < 999.5 then
+		text = string.format("%.0f", scaled)
+	else
+		tier += 1 -- 999.6 rounds up into the next tier: 1.00 of it
+		text = "1.00"
 	end
-	local scaled = value / 1000 ^ power
-	local rounded = math.floor(scaled * 10 + 0.5) / 10
-	if rounded >= 1000 and power < #SUFFIXES then
-		power += 1
-		rounded = math.floor(value / 1000 ^ power * 10 + 0.5) / 10
+	if tonumber(text) and tonumber(text) :: number >= 999.5 then
+		tier += 1
+		text = "1.00"
 	end
-	return trim(string.format("%.1f", rounded)) .. SUFFIXES[power]
+	return text .. suffixFor(tier)
 end
 
--- Colour tier for a pop-up: "white" under 1,000, "gold" under 1,000,000, "purple" from there.
+-- Colour tier for a pop-up: "white" under 1,000, "gold" under a million, "purple" from there.
 function NumberFormat.tier(value: number): string
 	if not finite(value) or value < 1000 then
 		return "white"

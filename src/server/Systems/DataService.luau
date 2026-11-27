@@ -8,6 +8,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
 local ProfileStore = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("ProfileStore"))
+local Levels = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Levels"))
 local RankRules = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("RankRules"))
 local BoxRoll = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("BoxRoll"))
 local BarracksRules = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("BarracksRules"))
@@ -143,8 +144,9 @@ local function load(player: Player)
 	profiles[player] = profile
 	player:SetAttribute("Points", profile.Data.points)
 	-- a rank already earned is kept; total aura can only raise it
-	profile.Data.rank = math.max(profile.Data.rank, RankRules.rankForAura(Config, profile.Data.aura))
+	profile.Data.rank = math.max(profile.Data.rank, Levels.rankOfLevel(Levels.levelForAura(profile.Data.aura)))
 	player:SetAttribute("Rank", profile.Data.rank)
+	player:SetAttribute("Level", Levels.levelForAura(profile.Data.aura))
 	player:SetAttribute("Aura", profile.Data.aura)
 	syncUnlocks(player, profile.Data :: any)
 	syncInventory(player, profile.Data :: any)
@@ -400,12 +402,15 @@ local auraRemainder: { [Player]: number } = setmetatable({}, { __mode = "k" }) :
 -- the +1 ticks, the territory bonus and trickle, and the daily reward. Overtime and Main Character Mode (both off in
 -- the simple game) can multiply it. Returns the aura shown to the player (after any multiplier), or 0 if data is not
 -- loaded. A new rank is announced with a "rankup" pop-up.
-function DataService.addAura(player: Player, aura: number): number
+function DataService.addAura(player: Player, aura: number, alreadyScaled: boolean?): number
 	local data = DataService.get(player)
 	if not data or aura ~= aura or aura <= 0 or aura == math.huge then
 		return 0
 	end
-	local base = math.floor(aura * DataService.auraMultiplier(player) + 0.5)
+	-- BIG NUMBERS: every level multiplies all income (Levels.multiplier), so every reward is "N seconds of current income".
+	-- Values that already come from the war tally (stolen orbs, bounty) pass alreadyScaled=true so they are not scaled twice.
+	local levelMultiplier = if alreadyScaled then 1 else Levels.multiplier(player:GetAttribute("Level") :: any or 0)
+	local base = math.floor(aura * DataService.auraMultiplier(player) * levelMultiplier + 0.5)
 	local shown = base
 	-- combo (captures, shoves, orbs and stashes close together) and crits (MEGA MOG! x5, ULTRA MOG! x10) multiply the gain
 	local comboValue = player:GetAttribute("ComboMult")
@@ -430,9 +435,15 @@ function DataService.addAura(player: Player, aura: number): number
 	if critTier and DataService.onCrit then
 		DataService.onCrit(player, critTier, shown)
 	end
-	data.aura += shown
+	data.aura = math.min(data.aura + shown, Levels.MAX_AURA)
 	player:SetAttribute("Aura", data.aura)
-	local newRank = RankRules.rankForAura(Config, data.aura)
+	local newLevel = Levels.levelForAura(data.aura)
+	local oldLevel = player:GetAttribute("Level")
+	player:SetAttribute("Level", newLevel)
+	if type(oldLevel) == "number" and newLevel > oldLevel and DataService.onLevelUp then
+		DataService.onLevelUp(player, newLevel)
+	end
+	local newRank = Levels.rankOfLevel(newLevel)
 	if newRank > data.rank then
 		data.rank = newRank
 		player:SetAttribute("Rank", newRank)
@@ -502,6 +513,7 @@ function DataService.setTitle(player: Player, title: string)
 end
 
 -- Something to call when a player earns a new rank (set by PopupSystem wiring in RankVisuals).
+DataService.onLevelUp = nil :: ((Player, number) -> ())?
 DataService.onRankUp = nil :: ((Player, number) -> ())?
 
 -- The player has seen the unlock card for an ability ("shove", "dash" or "stare"). Saved, so it shows only once.

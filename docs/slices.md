@@ -324,3 +324,8 @@ flags and use ramp routes to raised flags. Simple placeholder scenery for each t
 nearest 1-flag territory. Studio-only `AssetCheck` hunts the "ContentId 203785492" error.
 **Test:** pure tests in `tests/Territories.test.luau` and `tests/NumberFormat.test.luau`; see `docs/PLAYTEST.md`, "Territories".
 **Done when:** holding 2 of 3 flags pays nothing, holding all 3 pays once, and every shown number matches what the server granted.
+
+## Slice 26: Paintball combat
+Three blasters (Splatter, Splash Cannon, Long Shot), health 100, 25 damage hits, splat = 3s respawn at the faction corner with a 2s shield. Server-side shots (`CombatSystem`): rate limit, direction check, ammo, fire interval, server raycast. Splat pays 10 aura + a few Mog Points (half for bots), assists, streak announcements, kill feed, defend bonus. Contested flags hold still. Mog-off duels are off in wars (`Features.mogOffsInWar`). Bots shoot, strafe and take cover. Weapons unlock by rank or from Gold/Diamond boxes (save version 10).
+**Test:** `tests/CombatRules.test.luau`, `tests/PlayerData.test.luau`, `tests/BoxRoll.test.luau`; see `docs/PLAYTEST.md`, "Combat".
+**Done when:** you can splat a bot in 4 hits, a splat pays once per 20 seconds per victim, shielded players cannot be hurt or shoot, and a contested flag does not move.

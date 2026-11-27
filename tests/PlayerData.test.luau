@@ -134,6 +134,12 @@ check("a new day resets the multiplier", PlayerData.rewardMultiplier(player, day
 PlayerData.recordWar(player, day + 1)
 check("a new day restarts the war count", player.warsToday == 1 and player.lastWarDay == day + 1)
 
+-- version 10: weapons
+local v9: any = { version = 9, points = 5, rank = 2, warsToday = 0, lastWarDay = 0, boxes = {}, units = {}, cosmetics = {}, boxDay = 0, boxesToday = 0, streakDay = 0, lastClaimDay = 0, barracksSince = 1, trainingLevel = 0, trainingProgress = 0, trainingDay = 0, trainingToday = 0, equipped = {}, receipts = {}, season = { week = 0, points = {}, prevWeek = 0, prevPoints = {}, claimed = 0 }, lifetimeWars = 0, lifetimeCaptures = 0 }
+check("migrate upgrades version 9 and adds an empty weapons table", PlayerData.migrate(v9) and PlayerData.isValid(v9) and next(v9.weapons) == nil and v9.version == PlayerData.CURRENT_VERSION)
+local weaponPlayer = PlayerData.template()
+check("unlockWeapon records a blaster once", PlayerData.unlockWeapon(weaponPlayer, "longshot") == true and PlayerData.unlockWeapon(weaponPlayer, "longshot") == false and weaponPlayer.weapons.longshot == true)
+
 if failures > 0 then
 	error(failures .. " test(s) failed")
 end

@@ -30,6 +30,10 @@ local function baseOf(faction: number): (number, number)
 end
 
 local function place(player: Player, character: Model)
+	if player:GetAttribute("SplatRespawn") == true then
+		player:SetAttribute("SplatRespawn", nil)
+		return -- after a splat you respawn at your faction's corner spawn
+	end
 	local faction = player:GetAttribute("Faction")
 	if type(faction) ~= "number" or Workspace:GetAttribute("WarPhase") ~= "War" then
 		return -- no faction yet, or not a war: stay at the home base

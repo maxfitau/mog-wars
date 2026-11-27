@@ -8,6 +8,7 @@ export type Drop = {
 	amount: number?,
 	unit: string?,
 	cosmetic: string?,
+	weapon: string?,
 }
 
 export type Tier = {
@@ -17,7 +18,7 @@ export type Tier = {
 
 local BoxRoll = {}
 
-local VALID_KINDS = { points = true, unit = true, cosmetic = true }
+local VALID_KINDS = { points = true, unit = true, cosmetic = true, weapon = true }
 
 -- Returns true when the tier is well formed, otherwise false and a stable reason string.
 function BoxRoll.validate(tier: Tier): (boolean, string?)
@@ -40,6 +41,9 @@ function BoxRoll.validate(tier: Tier): (boolean, string?)
 		end
 		if drop.kind == "cosmetic" and drop.cosmetic == nil then
 			return false, "bad_cosmetic"
+		end
+		if drop.kind == "weapon" and drop.weapon == nil then
+			return false, "bad_weapon"
 		end
 		sum += drop.weight
 	end

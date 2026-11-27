@@ -10,6 +10,7 @@ export type Drop = {
 	kind: string, -- "points", "unit" or "cosmetic"
 	amount: number?, -- for "points"
 	unit: string?, -- for "unit": "tank" or "horse"
+	weapon: string?, -- for "weapon": a blaster id
 	cosmetic: string?, -- for "cosmetic": a cosmetic id, never anything that changes power
 }
 
@@ -218,7 +219,8 @@ local config: Config = {
 			gold = {
 				displayName = "Gold Box",
 				drops = {
-					{ weight = 50, kind = "points", amount = 20 },
+					{ weight = 48, kind = "points", amount = 20 },
+					{ weight = 2, kind = "weapon", weapon = "splashcannon" },
 					{ weight = 25, kind = "points", amount = 40 },
 					{ weight = 8, kind = "points", amount = 80 },
 					{ weight = 5, kind = "unit", unit = "horse" },
@@ -229,7 +231,8 @@ local config: Config = {
 			diamond = {
 				displayName = "Diamond Box",
 				drops = {
-					{ weight = 30, kind = "points", amount = 80 },
+					{ weight = 27, kind = "points", amount = 80 },
+					{ weight = 3, kind = "weapon", weapon = "longshot" },
 					{ weight = 25, kind = "points", amount = 150 },
 					{ weight = 12, kind = "points", amount = 300 },
 					{ weight = 10, kind = "unit", unit = "horse" },

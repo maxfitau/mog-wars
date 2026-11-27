@@ -13,6 +13,7 @@ local Features = {
 	treadmill = true,
 	dailyStreak = true,
 	cosmeticShop = true,
+	mogOffsInWar = false, -- mog-off duels are OFF during wars (paintball combat replaces them); the code stays for an event
 	bots = true, -- fills a war with bots when fewer than 8 real players are fighting
 
 	-- OFF at launch, switched on as later weekly updates

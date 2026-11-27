@@ -81,6 +81,10 @@ function PopupController.init()
 			show(("+%s Mog Points"):format(number), amount)
 		elseif kind == "aura" then
 			show(("+%s aura"):format(number), amount)
+		elseif kind == "splat" then
+			show("SPLAT!", 1000000) -- big and purple
+		elseif kind == "announce" then
+			show(("%s x%d!"):format(if type(detail) == "string" then string.upper(detail) else "STREAK", amount), 5000)
 		elseif kind == "box" then
 			local tier = if type(detail) == "string" then Config.boxes.tiers[detail] else nil
 			show(("+%s %s"):format(number, if tier then tier.displayName else "Box"), amount * 100) -- boxes always look special

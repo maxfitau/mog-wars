@@ -9,7 +9,7 @@ local PopupSystem = {}
 
 local remote: RemoteEvent? = nil
 
-local KINDS = { points = true, aura = true, box = true }
+local KINDS = { points = true, aura = true, box = true, splat = true, announce = true }
 
 -- Show a pop-up to one player. Bad kinds and non-positive or non-finite amounts are ignored.
 function PopupSystem.send(player: Player, kind: string, amount: number, detail: string)

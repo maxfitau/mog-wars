@@ -22,6 +22,7 @@ export type Data = {
 	trainingToday: number, -- strides counted on trainingDay (daily cap)
 	equipped: { [string]: string }, -- cosmetic slot to the cosmetic id worn there
 	receipts: { [string]: number }, -- Robux purchase ids already applied, with when (never grant twice)
+	weapons: { [string]: boolean }, -- blasters unlocked from boxes (rank unlocks need no entry)
 	lifetimeWars: number, -- wars the player took part in (used to reveal screens gradually)
 	lifetimeCaptures: number, -- zone captures the player was paid for
 	season: { week: number, points: { [string]: number }, prevWeek: number, prevPoints: { [string]: number }, claimed: number },
@@ -29,14 +30,14 @@ export type Data = {
 
 local PlayerData = {}
 
-PlayerData.CURRENT_VERSION = 9
+PlayerData.CURRENT_VERSION = 10
 PlayerData.MAX_RECEIPT_ENTRIES = 400
 PlayerData.MAX_UNITS = 1000
 PlayerData.MAX_BOXES_PER_TIER = 1000
 PlayerData.MAX_POINTS = 1_000_000_000 -- far above anything reachable; stops runaway or overflowing values
 
 function PlayerData.template(): Data
-	return { version = PlayerData.CURRENT_VERSION, points = 0, rank = 1, warsToday = 0, lastWarDay = 0, boxes = {}, units = {}, cosmetics = {}, boxDay = 0, boxesToday = 0, streakDay = 0, lastClaimDay = 0, barracksSince = 0, trainingLevel = 0, trainingProgress = 0, trainingDay = 0, trainingToday = 0, equipped = {}, receipts = {}, lifetimeWars = 0, lifetimeCaptures = 0, season = { week = 0, points = {}, prevWeek = 0, prevPoints = {}, claimed = 0 } }
+	return { version = PlayerData.CURRENT_VERSION, points = 0, rank = 1, warsToday = 0, lastWarDay = 0, boxes = {}, units = {}, cosmetics = {}, boxDay = 0, boxesToday = 0, streakDay = 0, lastClaimDay = 0, barracksSince = 0, trainingLevel = 0, trainingProgress = 0, trainingDay = 0, trainingToday = 0, equipped = {}, receipts = {}, weapons = {}, lifetimeWars = 0, lifetimeCaptures = 0, season = { week = 0, points = {}, prevWeek = 0, prevPoints = {}, claimed = 0 } }
 end
 
 local function isWholeNumber(value: any): boolean
@@ -209,6 +210,15 @@ function PlayerData.takeUnit(data: Data, unit: string): boolean
 	return true
 end
 
+-- Unlock a blaster. Returns false if the id is bad or it is already unlocked.
+function PlayerData.unlockWeapon(data: Data, id: string): boolean
+	if type(id) ~= "string" or id == "" or data.weapons[id] then
+		return false
+	end
+	data.weapons[id] = true
+	return true
+end
+
 -- Add a cosmetic. Returns false if the id is bad or already owned.
 function PlayerData.addCosmetic(data: Data, id: string): boolean
 	if type(id) ~= "string" or id == "" or data.cosmetics[id] then
@@ -268,6 +278,10 @@ function PlayerData.migrate(data: any): boolean
 		data.lifetimeWars = if experienced then 3 else 0
 		data.lifetimeCaptures = if experienced then 1 else 0
 		data.version = 9
+	end
+	if data.version == 9 then
+		data.weapons = {}
+		data.version = 10
 	end
 	return true
 end
@@ -336,6 +350,7 @@ function PlayerData.isValid(data: any): boolean
 		and PlayerData.equippedValid(data.equipped)
 		and PlayerData.receiptsValid(data.receipts)
 		and PlayerData.seasonValid(data.season)
+		and PlayerData.cosmeticsValid(data.weapons)
 		and isWholeNumber(data.lifetimeWars)
 		and data.lifetimeWars >= 0
 		and isWholeNumber(data.lifetimeCaptures)

@@ -317,7 +317,19 @@ local function tick(dt: number)
 			end
 		end
 
-		local result = CaptureBar.step(record.state, powers, dt, params)
+		-- A flag cannot be captured while an enemy is alive inside it: with two or more factions present it is
+		-- CONTESTED and the bar holds still until the others are splatted or leave.
+		local present = 0
+		for _, power in powers do
+			if power > 0 then
+				present += 1
+			end
+		end
+		local contested = present >= 2
+		if record.part:GetAttribute("Contested") ~= contested then
+			record.part:SetAttribute("Contested", contested)
+		end
+		local result = if contested then { state = record.state, captured = false, newOwner = 0 } else CaptureBar.step(record.state, powers, dt, params)
 		record.state = result.state
 		if result.captured then
 			-- One flag changed hands. The territory changes hands only if one faction now holds ALL its flags.
@@ -419,6 +431,17 @@ end
 -- `loser` is nil when the winner beat a bot; `factor` scales the reward (bots pay less).
 function CaptureSystem.creditMogOffWin(winner: Player, loser: Player?, factor: number?)
 	credit(winner, loser, Config.capture.mogOffWin * (factor or 1))
+end
+
+-- The faction that owns the flag zone containing this point (0 if none or unowned). Used for the defend bonus.
+function CaptureSystem.ownerAt(position: Vector3): number
+	for _, record in zones do
+		local offset = record.part.CFrame:PointToObjectSpace(position)
+		if ZoneGeometry.contains(offset.X, offset.Y, offset.Z, record.part.Size.X, record.part.Size.Y, record.part.Size.Z, HEADROOM) then
+			return record.state.owner
+		end
+	end
+	return 0
 end
 
 -- Every ground-level flag with its position, size and current owner, for the spawn system.

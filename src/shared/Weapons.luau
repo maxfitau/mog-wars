@@ -36,6 +36,7 @@ Weapons.combat = {
 	shieldSeconds = 2, -- no damage and no shooting right after spawning
 	splatAura = 10, -- aura for a splat (aura means aura points)
 	splatPoints = 5, -- Mog Points for a splat
+	farmCooldownSeconds = 20, -- the same victim pays the same killer only once in this time (no farming a friend or a bot)
 	assistFraction = 0.5, -- an assist pays this fraction of a splat
 	botRewardFactor = 0.5, -- splatting a bot pays half
 	assistWindowSeconds = 8, -- damage within this long before a splat counts as an assist

@@ -166,3 +166,6 @@ second on a treadmill) straight into the aura level, and is not limited by the d
 its members get an aura trickle every minute (Gold 10, Diamond 20, Ultra 50). With six territories (three of them Gold) the average
 capture pays more than the old nine zones, so the rank costs were raised (table above) to keep casual pacing at Chad on day 6 and Mog
 God on day 41. Aura rewards are not in the pacing simulation; they speed up reaching the top aura level.
+
+## Combat rewards (built, not in the pacing simulation)
+A splat pays 10 aura and 5 Mog Points (half against a bots), an assist half of that, plus 5 aura for defending your own zone. The same victim pays the same killer once per 20 seconds, and the daily reward halving applies. Splat points are small next to captures; if they feel too strong, lower `splatPoints` in `src/shared/Weapons.luau`.

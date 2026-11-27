@@ -34,6 +34,9 @@ local function describe(drop: BoxRoll.Drop): string
 	elseif drop.kind == "unit" then
 		return ("%s unit"):format((drop.unit or "?"):sub(1, 1):upper() .. (drop.unit or "?"):sub(2))
 	end
+	if drop.kind == "weapon" then
+		return "Blaster: " .. (drop.weapon or "?")
+	end
 	return "Cosmetic: " .. (drop.cosmetic or "?")
 end
 
@@ -192,6 +195,8 @@ function BoxHud.init()
 		if ok == true then
 			if kind == "points" then
 				toast.Text = ("You got %d Mog Points!"):format(if type(amount) == "number" then amount else 0)
+			elseif kind == "weapon" then
+				toast.Text = ("New blaster unlocked: %s!"):format(tostring(id))
 			elseif kind == "unit" then
 				toast.Text = ("You got a %s unit!"):format(tostring(id))
 			else

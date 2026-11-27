@@ -36,6 +36,10 @@ Six territories, ten capture flags, all on War Island. Names, positions, flag co
 - On capture, everyone who helped gets rewards by contribution: Gold +100 aura, Diamond +300 aura, Ultra +1,000 aura (aura means aura points), plus Mog Points and a box of that territory's tier.
 - A faction that holds a territory gets a small aura trickle every minute (more for harder territories).
 
+## Combat (paintball)
+War Island fights are kid-friendly paintball: cartoon, no gore. Health 100, a hit takes 25 (4 hits to splat), the server decides every shot. A splat is a cartoon poof, then a 3-second respawn at your faction corner with a 2-second shield (no shooting while shielded). A splat gives +10 aura and some Mog Points with big pop-ups; assists count; streaks announce "MOGGING x3!" and "UNSTOPPABLE x5!"; a kill feed shows "Kodo splatted Nova" top right. A flag cannot be captured while an enemy is alive inside it (contested). Defending your own zone gives a small bonus per splat. Mog-off duels are off during wars (kept behind a setting for an event). Shove stays.
+Three blasters, all earned by playing and never sold, none strictly better: Splatter (starter, medium), Splash Cannon (close, 3-ball spread; Rookie or boxes), Long Shot (long, one strong shot, zoom; Sigma or boxes). Rank and prestige damage bonus is capped at +10%. Bots carry blasters, strafe, take cover and aim slightly worse; bot splats pay half.
+
 ## Islands
 One place, two islands (no separate places).
 - War Island: everyone spawns here, straight into the war. It has the territories, the capture zones, the faction bases and a portal by each base.

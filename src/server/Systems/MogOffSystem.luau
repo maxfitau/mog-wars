@@ -19,6 +19,7 @@ local Config = require(Shared:WaitForChild("EconomyConfig"))
 local MogOffRules = require(Shared:WaitForChild("MogOffRules"))
 local ShoveRules = require(Shared:WaitForChild("ShoveRules"))
 local BotService = require(script.Parent:WaitForChild("BotService"))
+local Features = require(Shared:WaitForChild("Features"))
 local CaptureSystem = require(script.Parent:WaitForChild("CaptureSystem"))
 local SeasonService = require(script.Parent:WaitForChild("SeasonService"))
 
@@ -334,7 +335,7 @@ function MogOffSystem.start()
 			if scanAccumulator >= SCAN_SECONDS then
 				local dt = scanAccumulator
 				scanAccumulator = 0
-				if warOn then
+				if warOn and Features.mogOffsInWar then
 					scan(dt)
 				else
 					pairTimers = {}

@@ -94,3 +94,20 @@ Then check the flags are ON the landmarks and reachable:
 - Walk up the long ramps: the Gate ramp (from the north edge up the back of the head), the statue ramp (from the west, up to the head), the brain ramp, the pan ramp, the lighthouse ramp. FAIL if a ramp is too steep to walk or you slide off.
 - Each flag is a glowing zone with a light pillar at: both tower bases and the top of the Gate's head; each cliff; the lighthouse base and top; the statue's head; the top of the brain; the yolk.
 - A bot should climb each ramp on its own to reach the raised flags. FAIL if bots stand at the bottom of a ramp forever.
+
+## Combat (paintball): what you are looking for
+Needs a Studio playtest (cloud tests cover only the rules). Start a War Island session (bots fill it).
+1. **Shoot**: click (PC) or press FIRE (phone). A coloured ball flies and leaves a paint splat. Crosshair in the screen centre, ammo "Splatter 12/12" bottom right, health bar bottom middle. FAIL: nothing fires, or ammo never goes down.
+2. **Reload**: empty the magazine; it says "Reloading..." for about 1.5 s, then refills. R reloads early. FAIL: you can keep firing while empty or reloading.
+3. **Hit a bot**: hitmarker flashes, 4 hits = "SPLAT!" pop-up, +10 aura / a few points pop-ups, a cartoon poof and a kill-feed line top right in faction colours. FAIL: no reward, or the same bot pays again within 20 s.
+4. **Get hit**: red screen flash and an arrow toward the shooter. 4 hits = poof, "Splatted! Back in 3", respawn at your faction corner (not the front line) with a shield glow for 2 s. FAIL: you respawn at the front line or can shoot while shielded.
+5. **Streaks**: splat 3 different bots in a row without dying: "MOGGING x3!"; 5: "UNSTOPPABLE x5!".
+6. **Contested flag**: stand in a flag with an enemy bot also inside: the HUD says CONTESTED and the bar does not move. Splat it, then the bar fills. FAIL: the bar moves while contested.
+7. **Defend bonus**: splat an enemy while standing in a zone your faction owns: aura is 15 instead of 10 (5 for a bot).
+8. **Weapons**: 1/2/3 switch (a locked one is greyed out). At Rookie Splash Cannon unlocks (3 balls, short range); at Sigma Long Shot (zoom, one 50 hit). FAIL: you can equip a locked weapon.
+9. **Phone**: FIRE button bottom right, SWAP cycles blasters, shots drift slightly toward an enemy near the crosshair.
+10. **Bots**: they shoot at you in range, strafe, hide behind props when hurt, and miss a fair amount. FAIL: they never shoot, or kill you in under 2 s.
+11. **Mog-offs**: no duel prompt should appear during a war.
+12. **Training Island**: you cannot shoot or be shot there.
+## What to tune first
+`src/shared/Weapons.luau`: `botSpreadDeg` (bot accuracy), `botFireIntervalMin/Max`, `damage`, `fireInterval`, `splatPoints`, `splatAura`, `shieldSeconds`, `respawnSeconds`, `aimAssistDegrees`, `farmCooldownSeconds`. Re-run `python3 tools/pacing.py` after changing rewards.

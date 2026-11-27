@@ -79,6 +79,12 @@ local function update()
 	local name = if type(territoryName) == "string" then territoryName else zone.Name
 	title.Text = ("%s: %d/%d flag%s"):format(name, held, total, if total == 1 then "" else "s")
 	local flagLabel = if type(flagName) == "string" and total > 1 then flagName .. ". " else ""
+	if zone:GetAttribute("Contested") == true then
+		subtitle.Text = flagLabel .. "CONTESTED - splat the enemy to capture!"
+		subtitle.TextColor3 = Color3.fromRGB(255, 160, 30)
+		return
+	end
+	subtitle.TextColor3 = Color3.new(1, 1, 1)
 	if shown > 0 then
 		subtitle.Text = ("%s%s is capturing: %d%%"):format(flagLabel, factionName(capturer), math.floor(shown * 100))
 	else

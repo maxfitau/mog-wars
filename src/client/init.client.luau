@@ -4,7 +4,7 @@
 local Controllers = script:WaitForChild("Controllers")
 local Features = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Features"))
 
-local order = { "CaptureHud", "PointsHud", "WarHud", "ShoveController", "MogOffController", "RankHud", "BoxHud", "UnitsHud", "RewardsHud", "TrainingHud", "ShopHud" }
+local order = { "CaptureHud", "PointsHud", "WarHud", "ShoveController", "MogOffController", "RankHud", "BoxHud", "UnitsHud", "RewardsHud", "TrainingHud", "ShopHud", "CombatController", "KillFeed" }
 if Features.seasons then
 	table.insert(order, "SeasonHud") -- switched off at launch
 end

@@ -300,6 +300,12 @@ function DataService.openBox(player: Player, tierId: any, random: () -> number):
 			local unitConfig = (Config.units :: any)[drop.unit]
 			result.kind, result.amount = "points", if unitConfig then unitConfig.sellValue else 0
 		end
+	elseif drop.kind == "weapon" and drop.weapon then
+		if PlayerData.unlockWeapon(data, drop.weapon) then
+			result.id = drop.weapon
+		else -- already unlocked: pay a consolation instead
+			result.kind, result.amount = "points", Config.boxes.duplicateCosmeticPoints
+		end
 	elseif drop.kind == "cosmetic" and drop.cosmetic then
 		if PlayerData.addCosmetic(data, drop.cosmetic) then
 			result.id = drop.cosmetic

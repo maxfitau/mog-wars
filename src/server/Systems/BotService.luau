@@ -36,6 +36,7 @@ export type Bot = {
 	routeIndex: number,
 	thinkAt: number,
 	moveAt: number,
+	holdUntil: number, -- combat (strafing, taking cover) drives the movement until this server time
 }
 
 export type Waypoint = { x: number, z: number, y: number }
@@ -204,6 +205,7 @@ local function spawnBot(faction: number)
 		routeIndex = 0,
 		thinkAt = 0,
 		moveAt = 0,
+		holdUntil = 0,
 	}
 	table.insert(bots, bot)
 	humanoid.Died:Connect(function()
@@ -300,7 +302,7 @@ local function think()
 					bot.humanoid:MoveTo(baseSpot(bot.faction, -bot.id))
 					bot.moveAt = now + 4
 				end
-			elseif bot.humanoid.WalkSpeed > 0 then -- (a stunned bot has walk speed 0)
+			elseif bot.humanoid.WalkSpeed > 0 and now >= bot.holdUntil then -- (a stunned bot has walk speed 0)
 				if now >= bot.thinkAt or not bot.target then
 					local index = BotRules.chooseZone(bot.faction, bot.root.Position.X, bot.root.Position.Z, flat, assigned, random)
 					if index and views[index] then
@@ -384,6 +386,27 @@ end
 -- The bot's push is weakened until `untilTime` (a server time).
 function BotService.weaken(bot: Bot, untilTime: number)
 	bot.penaltyUntil = math.max(bot.penaltyUntil, untilTime)
+end
+
+-- A splatted bot pops back at its base (its body is never destroyed, so the war stays full).
+function BotService.respawn(bot: Bot, seconds: number)
+	if not BotService.isAlive(bot) then
+		return
+	end
+	bot.target = nil
+	bot.route = nil
+	bot.routeIndex = 0
+	bot.thinkAt = 0
+	bot.moveAt = 0
+	bot.model:PivotTo(CFrame.new(baseSpot(bot.faction, -bot.id)))
+	bot.root.AssemblyLinearVelocity = Vector3.zero
+	BotService.stun(bot, seconds)
+end
+
+-- Combat takes over a bot's movement for a moment (strafe or cover).
+function BotService.moveTo(bot: Bot, point: Vector3, seconds: number)
+	bot.holdUntil = Workspace:GetServerTimeNow() + seconds
+	bot.humanoid:MoveTo(point)
 end
 
 function BotService.byId(id: number): Bot?

@@ -62,6 +62,7 @@ end
 local function makePortal(name: string, x: number, z: number, size: number, color: Color3, destination: string)
 	local pad = makePart(name, Vector3.new(size, 1, size), Vector3.new(x, 0.5, z), color)
 	pad.CanCollide = false
+	pad.CanQuery = false
 	pad.Material = Enum.Material.Neon
 	pad.Transparency = 0.2
 	pad:SetAttribute("Destination", destination)
@@ -111,6 +112,7 @@ function PlaceholderMap.start()
 		local glow = Color3.fromRGB(0, 235, 255) -- bright cyan until someone owns it
 		local zone = makePart(Territories.partName(territory, entry.index), Vector3.new(flag.size, 1, flag.size), Vector3.new(flag.x, flag.y + 0.5, flag.z), glow)
 		zone.CanCollide = false -- players walk straight onto it
+		zone.CanQuery = false -- paintballs pass through
 		zone.Transparency = 0.15
 		zone.Material = Enum.Material.Neon -- glows
 		zone:SetAttribute("Value", Territories.tiers[territory.tier].value)

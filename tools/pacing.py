@@ -46,7 +46,7 @@ def load():
     war, capture, aura = block(text, "war"), block(text, "capture"), block(text, "aura")
     cfg["war"] = {k: number(war, k) for k in ("winnerBonusPoints", "participantBonusPoints",
                                               "fullRewardWarsPerDay", "reducedRewardMultiplier")}
-    cfg["capture"] = {k: number(capture, k) for k in ("basePool", "sideValue", "centreValue")}
+    cfg["capture"] = {k: number(capture, k) for k in ("basePool",)}
     cfg["aura"] = {"perRankBonus": number(aura, "perRankBonus")}
     cfg["ranks"] = [(m.group(1), int(m.group(2))) for m in re.finditer(
         r'\{\s*name\s*=\s*"([^"]+)"\s*,\s*cost\s*=\s*(\d+)\s*\}', block(text, "ranks"))]
@@ -74,6 +74,10 @@ def load():
     cfg["boxRules"] = [(int(m.group(1)), m.group(2)) for m in re.finditer(
         r'\{\s*minValue\s*=\s*(\d+)\s*,\s*tier\s*=\s*"([^"]+)"\s*\}', boxes)]
     cfg["boxDailyCap"] = number(boxes, "dailyCap")
+    layout = (CONFIG.parent / "MapLayout.luau").read_text(encoding="utf-8")
+    cfg["zoneValues"] = [int(v) for v in re.findall(r"value\s*=\s*(\d+)", block(strip_comments(layout), "zones"))]
+    if not cfg["zoneValues"]:
+        sys.exit("MapLayout.luau has no zones")
     streak = block(text, "dailyStreak")
     cfg["streak"] = [cfg["boxEV"][t] for t in re.findall(r'"([^"]+)"', block(streak, "rewards"))]  # the daily box, valued at its expected points
     bar = block(text, "barracks")
@@ -100,10 +104,8 @@ def tier_for(cfg, value):
 
 def simulate(cfg, p, max_days=400):
     ranks = cfg["ranks"]
-    avg_pool = cfg["capture"]["basePool"] * (4 * cfg["capture"]["sideValue"] + cfg["capture"]["centreValue"]) / 5
-    side_tier = tier_for(cfg, cfg["capture"]["sideValue"])
-    centre_tier = tier_for(cfg, cfg["capture"]["centreValue"])
-    avg_box = (4 * cfg["boxEV"][side_tier] + cfg["boxEV"][centre_tier]) / 5
+    avg_pool = cfg["capture"]["basePool"] * sum(cfg["zoneValues"]) / len(cfg["zoneValues"])
+    avg_box = sum(cfg["boxEV"][tier_for(cfg, v)] for v in cfg["zoneValues"]) / len(cfg["zoneValues"])
     rank, points, streak_day = 1, 0.0, 0
     days_to = {}
     history = []
@@ -122,8 +124,7 @@ def simulate(cfg, p, max_days=400):
         per_war = (p["captures"] * avg_pool * min(0.9, p["share"] * share_mult)
                    + p["winRate"] * cfg["war"]["winnerBonusPoints"] + (1 - p["winRate"]) * cfg["war"]["participantBonusPoints"])
         earned = per_war * mult
-        # Every paid contributor earns one box per capture, up to the daily cap. Four of the five zones
-        # are side zones and one is the centre zone.
+        # Every paid contributor earns one box per capture, up to the daily cap, at the average zone's tier.
         boxes_today = min(cfg["boxDailyCap"], wars * p["captures"])
         earned += boxes_today * avg_box
         rewards = cfg["streak"]

@@ -16,6 +16,7 @@ local FactionRules = require(Shared:WaitForChild("FactionRules"))
 local BoxRoll = require(Shared:WaitForChild("BoxRoll"))
 local ContributionScoring = require(Shared:WaitForChild("ContributionScoring"))
 local RankRules = require(Shared:WaitForChild("RankRules"))
+local SpawnRules = require(Shared:WaitForChild("SpawnRules"))
 local ShoveRules = require(Shared:WaitForChild("ShoveRules"))
 local UnitRules = require(Shared:WaitForChild("UnitRules"))
 local WarRules = require(Shared:WaitForChild("WarRules"))
@@ -276,6 +277,16 @@ end
 
 function CaptureSystem.creditMogOffWin(winner: Player, loser: Player)
 	credit(winner, loser, Config.capture.mogOffWin)
+end
+
+-- Every zone with its position, size and current owner, for the spawn system.
+function CaptureSystem.zoneList(): { SpawnRules.ZoneInfo }
+	local list: { SpawnRules.ZoneInfo } = {}
+	for _, record in zones do
+		local position = record.part.Position
+		table.insert(list, { x = position.X, z = position.Z, size = record.part.Size.X, owner = record.state.owner })
+	end
+	return list
 end
 
 -- The zone part this player is standing in, or nil.

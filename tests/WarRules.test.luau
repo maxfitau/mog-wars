@@ -50,6 +50,11 @@ check("multiplier never rounds a reward to zero", WarRules.applyMultiplier(1, 0.
 check("bad multiplier pays nothing", WarRules.applyMultiplier(80, 0) == 0 and WarRules.applyMultiplier(80, 0 / 0) == 0)
 check("bad amount pays nothing", WarRules.applyMultiplier(-5, 1) == 0)
 
+check("a 12 minute war is allowed", WarRules.clampWarSeconds(720) == 720)
+check("a 5 minute war is raised to 10", WarRules.clampWarSeconds(300) == 600)
+check("a 30 minute war is cut to 15", WarRules.clampWarSeconds(1800) == 900)
+check("a nan length falls back to 10 minutes", WarRules.clampWarSeconds(0 / 0) == 600)
+
 check("phase cycle", WarRules.nextPhase("War") == "Intermission" and WarRules.nextPhase("Intermission") == "War")
 check("phase lengths", WarRules.phaseSeconds("War", 600, 20) == 600 and WarRules.phaseSeconds("Intermission", 600, 20) == 20)
 

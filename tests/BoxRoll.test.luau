@@ -50,8 +50,8 @@ for _, tier in Config.dailyStreak.rewards do
 end
 
 -- which tier a capture gives
-check("a side zone gives gold", BoxRoll.tierForValue(Config.capture.sideValue, Config.boxes.tierForValue) == "gold")
-check("the centre zone gives diamond", BoxRoll.tierForValue(Config.capture.centreValue, Config.boxes.tierForValue) == "diamond")
+check("a zone worth 1 gives gold", BoxRoll.tierForValue(1, Config.boxes.tierForValue) == "gold")
+check("a zone worth 2 gives diamond", BoxRoll.tierForValue(2, Config.boxes.tierForValue) == "diamond")
 check("a zone worth 3 gives ultra", BoxRoll.tierForValue(3, Config.boxes.tierForValue) == "ultra")
 check("a zone worth 10 still gives ultra", BoxRoll.tierForValue(10, Config.boxes.tierForValue) == "ultra")
 check("a worthless zone gives no box", BoxRoll.tierForValue(0, Config.boxes.tierForValue) == nil)

@@ -22,7 +22,7 @@ change, run `python3 tools/pacing.py --ranks` (it reads the config file directly
 
 | Source | Amount |
 |---|---|
-| Zone capture | Pool of 100 points per zone value (side zone 1, centre zone 2), split by contribution |
+| Zone capture | Pool of 100 points per zone value (eight zones worth 1, the centre worth 2), split by contribution |
 | Capture box | Every paid contributor also earns one box: Gold for a side zone, Diamond for the centre zone, Ultra for a zone worth 3 or more (none yet). Max 12 a day |
 | War bonus | 60 for the winning faction, 20 for anyone who contributed at least 5 units |
 | Daily box (7-day streak) | Gold on days 1 to 3, Diamond on days 4 to 6, Ultra on day 7, then the cycle repeats. Skipping a day restarts at day 1 |
@@ -66,23 +66,23 @@ zone's value, so fighting for the centre is worth more.
 ## Pacing simulation
 
 `tools/pacing.py` assumes: a capture share per player type, win rate, one box per capture (capped at 12 a day)
-at the average zone's box value, the daily box and barracks, and half point rewards after 8 wars. Results from
+at the average zone's box value (the zone values come from `src/shared/MapLayout.luau`), the daily box and barracks, and half point rewards after 8 wars. Results from
 the current config:
 
 | Player | Wars/day | Days/week | Days to Chad | Days to Mog God |
 |---|---|---|---|---|
-| Light | 2 | 4 | 16 | 113 |
-| **Casual** | **3** | **6** | **6** | **43** |
-| Regular | 5 | 7 | 4 | 23 |
-| Hardcore | 12 | 7 | 2 | 12 |
+| Light | 2 | 4 | 18 | 123 |
+| **Casual** | **3** | **6** | **6** | **47** |
+| Regular | 5 | 7 | 4 | 25 |
+| Hardcore | 12 | 7 | 2 | 13 |
 
-Target met: a casual player reaches Chad in about a week (day 6) and Mog God in about six weeks (day 43),
+Target met: a casual player reaches Chad in about a week (day 6) and Mog God in about seven weeks (day 47),
 inside the one to two month goal. A light player takes about four months, a deliberate choice: they still
 progress every session, and no tier is gated by money.
 
 ## Concerns and what to tune first
 
-- **Hardcore speed.** 12 days to Mog God is fast. If real data shows this, raise the Gigachad and Mog God costs
+- **Hardcore speed.** 13 days to Mog God is fast. If real data shows this, raise the Gigachad and Mog God costs
   rather than cutting rewards.
 - **Capture pool vs players.** The pool is fixed, so full servers pay each player less; the sim assumes an
   average share. Watch real averages in the first playtests.

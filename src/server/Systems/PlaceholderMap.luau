@@ -1,12 +1,14 @@
 --!strict
--- Slice 1 placeholder map: a baseplate, four faction home bases and five capture zones, all made by code so no Studio
--- editing is needed. Skipped if the place already has a part tagged "Zone" (a real map replaces this).
+-- Placeholder map built by code from src/shared/MapLayout.luau: a baseplate, four faction home bases and the
+-- capture zones. Skipped if the place already has a part tagged "Zone" (a real map replaces this one).
 
 local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
-local FactionRules = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("FactionRules"))
+local Shared = ReplicatedStorage:WaitForChild("Shared")
+local FactionRules = require(Shared:WaitForChild("FactionRules"))
+local MapLayout = require(Shared:WaitForChild("MapLayout"))
 
 local PlaceholderMap = {}
 
@@ -30,16 +32,17 @@ function PlaceholderMap.start()
 		return
 	end
 
-	makePart("Baseplate", Vector3.new(200, 2, 200), Vector3.new(0, -1, 0), Color3.fromRGB(90, 100, 110))
+	local plate = MapLayout.baseplateSize
+	makePart("Baseplate", Vector3.new(plate, 2, plate), Vector3.new(0, -1, 0), Color3.fromRGB(90, 100, 110))
 
-	-- One safe home base per faction, in the four corners. Spawn pads share the faction's team colour,
-	-- so Roblox sends each player to their own base.
-	local corners = { Vector3.new(-80, 0.5, -80), Vector3.new(80, 0.5, -80), Vector3.new(80, 0.5, 80), Vector3.new(-80, 0.5, 80) }
+	-- One safe home base per faction. Spawn pads share the faction's team colour, so Roblox sends each player
+	-- to their own base first; SpawnSystem then moves them to the front line during a war.
 	for index, faction in FactionRules.factions do
+		local base = MapLayout.bases[index]
 		local spawn = Instance.new("SpawnLocation")
 		spawn.Name = "Base_" .. faction.name
-		spawn.Size = Vector3.new(16, 1, 16)
-		spawn.Position = corners[index]
+		spawn.Size = Vector3.new(MapLayout.baseSize, 1, MapLayout.baseSize)
+		spawn.Position = Vector3.new(base.x, 0.5, base.z)
 		spawn.Anchored = true
 		spawn.Neutral = false
 		spawn.TeamColor = BrickColor.new(faction.brickColor)
@@ -48,20 +51,16 @@ function PlaceholderMap.start()
 		spawn.Parent = Workspace
 	end
 
-	-- Four side zones (worth 1) and a centre zone (worth 2), all open ground between the bases.
-	local zoneSpots = {
-		{ name = "Zone_North", position = Vector3.new(0, 0.5, -60), value = 1 },
-		{ name = "Zone_East", position = Vector3.new(60, 0.5, 0), value = 1 },
-		{ name = "Zone_South", position = Vector3.new(0, 0.5, 60), value = 1 },
-		{ name = "Zone_West", position = Vector3.new(-60, 0.5, 0), value = 1 },
-		{ name = "Zone_Centre", position = Vector3.new(0, 0.5, 0), value = 2 },
-	}
-	for _, spot in zoneSpots do
-		local size = if spot.value == 2 then Vector3.new(36, 1, 36) else Vector3.new(28, 1, 28)
-		local zone = makePart(spot.name, size, spot.position, Color3.fromRGB(200, 200, 200))
+	for _, spec in MapLayout.zones do
+		local zone = makePart(
+			spec.name,
+			Vector3.new(spec.size, 1, spec.size),
+			Vector3.new(spec.x, 0.5, spec.z),
+			Color3.fromRGB(200, 200, 200)
+		)
 		zone.CanCollide = false -- players walk straight onto it
 		zone.Transparency = 0.3
-		zone:SetAttribute("Value", spot.value)
+		zone:SetAttribute("Value", spec.value)
 		CollectionService:AddTag(zone, "Zone")
 	end
 end

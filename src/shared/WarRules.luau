@@ -84,6 +84,18 @@ function WarRules.applyMultiplier(amount: number, multiplier: number): number
 	return math.max(1, math.floor(amount * multiplier))
 end
 
+-- A war lasts between 10 and 15 minutes (DESIGN.md). A configured value outside that, or not a number, is
+-- brought back into range so a bad config edit cannot make a war last seconds or hours.
+WarRules.MIN_WAR_SECONDS = 600
+WarRules.MAX_WAR_SECONDS = 900
+
+function WarRules.clampWarSeconds(configured: number): number
+	if configured ~= configured then
+		return WarRules.MIN_WAR_SECONDS
+	end
+	return math.clamp(configured, WarRules.MIN_WAR_SECONDS, WarRules.MAX_WAR_SECONDS)
+end
+
 -- The war cycle is Intermission, then War, then back to Intermission.
 function WarRules.nextPhase(phase: string): string
 	return if phase == "War" then "Intermission" else "War"

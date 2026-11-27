@@ -43,8 +43,6 @@ export type Config = {
 		secondsForOneAura: number,
 		tickSeconds: number,
 		basePool: number,
-		sideValue: number,
-		centreValue: number,
 		decayPerSecond: number,
 		minContribution: number,
 		minAward: number,
@@ -94,7 +92,7 @@ export type Config = {
 
 local config: Config = {
 	war = {
-		durationSeconds = 600,
+		durationSeconds = 720, -- 12 minutes; WarRules keeps it between 10 and 15 minutes (DESIGN.md)
 		intermissionSeconds = 20, -- break between wars while the map resets and winners are shown
 		playersPerServer = 16,
 		winnerBonusPoints = 60,
@@ -107,8 +105,6 @@ local config: Config = {
 		secondsForOneAura = 24, -- one player with aura power 1 captures an empty zone alone in this many seconds
 		tickSeconds = 0.25,
 		basePool = 100, -- Mog Points shared among contributors when a zone worth 1 is captured
-		sideValue = 1,
-		centreValue = 2,
 		decayPerSecond = 0.02, -- an abandoned, half-captured zone slowly falls back (fraction of the bar per second)
 		minContribution = 3, -- contribution units needed before a player is paid at all (stops standing-by freeloading)
 		minAward = 5, -- smallest payout for a paid contributor

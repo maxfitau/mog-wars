@@ -34,7 +34,7 @@ shoving rivals, winning tapping duels called mog-offs, and spending the Mog Poin
 | System | What it does | Rules that matter |
 |---|---|---|
 | Factions | Four placeholder factions: Jawline Legion, Mewing Order, Sigma Syndicate, Aura Cartel (names may change, see `docs/compliance.md`) | Server assigns and balances; a player cannot switch mid-war |
-| Map | Four home bases (safe, cannot be captured) and five contested zones (four side zones, one centre zone worth double) | Zones are tagged parts; the server finds them by tag |
+| Map | Four home bases (safe, cannot be captured) and nine contested zones (eight worth 1, the centre worth double). Layout is data in `src/shared/MapLayout.luau` | Zones are tagged parts; the server finds them by tag |
 | Capture bar | Per zone; stronger faction presence pushes progress; enemies push it back | Pure math in `src/shared`, server runs it every tick (`docs/economy.md` has the numbers) |
 | Aura power | Each player's contribution to the bar, a little higher with rank | Capped so a Mog God is at most about 2x an NPC |
 | Shove | Short cooldown ability: knocks a rival back and briefly weakens their push | Server validates range and cooldown |

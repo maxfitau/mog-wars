@@ -40,7 +40,7 @@ not built or playtested** because I could not reach your PC, Studio or `DESIGN.m
 - Everything in `docs/slices.md` marked "In Studio".
 
 ## What I assumed (see `docs/decisions.md`)
-War 10 minutes, 16 players, 4 factions; four safe bases and five contested zones; mog-offs decided by taps only;
+War 10 minutes, 16 players, 4 factions; four safe bases and (then) five contested zones, now nine; mog-offs decided by taps only;
 boxes never sold; ranks paid with Mog Points; positive rank names; aura +10 percent per rank; 8 full-rate wars
 a day then half; barracks capped at 8 hours.
 

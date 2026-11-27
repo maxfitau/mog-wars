@@ -29,7 +29,7 @@ end
 
 local function setPhase(name: string)
 	phase = name
-	endsAt = Workspace:GetServerTimeNow() + WarRules.phaseSeconds(name, Config.war.durationSeconds, Config.war.intermissionSeconds)
+	endsAt = Workspace:GetServerTimeNow() + WarRules.phaseSeconds(name, WarRules.clampWarSeconds(Config.war.durationSeconds), Config.war.intermissionSeconds)
 	Workspace:SetAttribute("WarPhase", name)
 	Workspace:SetAttribute("WarPhaseEndsAt", endsAt)
 	Workspace:SetAttribute("WarNumber", warNumber)

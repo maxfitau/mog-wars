@@ -108,3 +108,23 @@ progress every session, and no tier is gated by money.
 - **Box value.** Boxes now carry more of the income than before (one per capture). If they feel too strong,
   lower the Diamond or Ultra point amounts first.
 - **Everything here is untested with real players.** Treat it as the first draft to adjust from analytics.
+
+## Big numbers plan (planned, not built)
+
+`DESIGN.md` plans floating numbers such as +12, +1.2K and +4.7M, exponential growth and a multiplier for every prestige.
+The current economy is much smaller (a rank costs at most 24,000 points), so these need new numbers. Method, from the
+simulator-economy skill: choose the numbers with a pacing table first, then build.
+
+| Topic | Plan |
+|---|---|
+| Growth of prices | `cost = floor(baseCost * costGrowth ^ owned)`. Use about 1.07 to 1.15 for things bought many times; about 1.5 to 3 for rare big ones (arena stations, prestige) |
+| Prestige gains | Gains multiplied by `q ^ k` after `k` prestiges (multiplicative, so numbers grow exponentially) |
+| Prestige cost growth | Costs after prestige scaled by `g ^ k`. Each prestige climb takes about `g / q` times as long as the last. Aim for `g / q` between 1.0 and 1.25 (for example `q = 2`, `g = 2` to `2.5`), so the start of every climb feels fast and the whole climb stays bounded |
+| Offline and recruits | Efficiency 0.25 to 0.5 and an 8 to 12 hour cap, as barracks already does (8 hours) |
+| Number format | Round first, then pick the suffix, so 999,950 shows "1.0M" and never "1000.0K". Suffixes K, M, B, T, Qa now; more later. The client formats for display only and never reads text back |
+| Precision | Luau numbers are exact only up to about 9e15. Before any balance can pass about 1e15, store large values as a mantissa and exponent (or a base 10 log). Prestige will get there, so build this into slice 19, not later |
+| CRITs and combos | Server-rolled; crit chance about 5 percent for 2 to 5 times; combo multiplier rises per chained action inside a short window and is capped. Not purchasable, so no paid random item. Amounts are always whole numbers decided by the server |
+| Display scale | Today a capture pays tens to a few hundred points. To show "+1.2K" early, either scale every amount by one global factor, or let prestige multipliers grow them. Decide when building; either way the pacing table is run again |
+
+Tools: run the simulator skill's pacing calculator (`lune run scripts/balance.luau`, needs the free Lune tool) on the new config
+before building, and copy its tested number maths into the game rather than rewriting it.

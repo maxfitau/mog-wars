@@ -33,14 +33,30 @@ Train in the Training Arena to raise aura power. Each rank unlocks a new trainin
 
 Rules: older stations still work but give less aura. Stations unlock by rank only, never with Robux. Cosmetic station skins can be sold. Not built yet.
 
+## Number pop-ups
+Every tap, capture, mog-off win (the "kill" moment: the loser is knocked back) and box opening shows a floating number: +12, +1.2K, +4.7M. Bigger numbers get bigger text and colour tiers (white, gold, purple). Occasional CRITs give 2-5x. Chains of actions build combo multipliers. Numbers scale exponentially and use short suffixes (K, M, B, T, Qa). Each prestige multiplies gains so the climb gets faster. Not built yet.
+
+## Prestige
+The Prestige altar unlocks at Mog God and is optional. A confirm screen shows what resets (rank, Mog Points, aura, station unlocks) and what is kept (cosmetics, Legacy Points, faction, friends, streak, arena). Everyone in the server sees an "ascended" broadcast. Prestiged players get a mentor bonus for helping low-rank teammates capture. Not built yet.
+
+## Mog Arena (tycoon) - the FIRST UPDATE after launch, not version 1
+- Each player gets a plot in the training area.
+- Rank unlocks station types. Players buy, upgrade and place stations with Mog Points.
+- Prestige unlocks themes (P1 Neon Gym, P3 Volcano Dojo, P5 Space Summit) and special builds (throne, trophy wall, statue spot).
+- Recruits train in the arena while the player is offline. This replaces barracks.
+- Friends can train at your arena for a small owner bonus.
+- Weekly "Best Arena" vote.
+- The arena is kept through prestige.
+- Themes and decor can be sold; stations cannot. Not built yet.
+
 ## Version 1 scope
-One map per server, 8–12 territories, 2–4 factions auto-balanced (Jawline Legion, Mewing Order, Sigma Syndicate, Aura Cartel), 10–15 minute rounds that reset, join mid-round anytime. Boxes are earned only, never sold.
+One map per server, 8–12 territories, 2–4 factions auto-balanced (Jawline Legion, Mewing Order, Sigma Syndicate, Aura Cartel), 10–15 minute rounds that reset, join mid-round anytime. Boxes are earned only, never sold. Not in version 1: the Mog Arena (first update after launch).
 
 ## Retention
-Daily box with a 7-day streak, barracks earn points offline, weekly faction season, join a friend's faction, squad capture bonus.
+Daily box with a 7-day streak, barracks earn points offline (replaced by the Mog Arena's offline recruits when it ships), weekly faction season, join a friend's faction, squad capture bonus.
 
 ## Money (cosmetic only)
-Aura effects, faction banners, victory emotes, unit skins, box-opening animations, titles, private servers, cosmetic season pass, gifting.
+Aura effects, arena themes and decor, station skins, faction banners, victory emotes, unit skins, box-opening animations, titles, private servers, cosmetic season pass, gifting.
 
 ## Build order
 1. Map with territories; capture one by standing in it.

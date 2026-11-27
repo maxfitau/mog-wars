@@ -159,3 +159,15 @@ should show everything it gives before purchase.
   pressure children. The reward is a cosmetic title (never points, boxes, units, aura or training) that can never
   be bought. The shared totals use Roblox MemoryStore; if it fails the game keeps working and shows standings as zero.
 - **Needs a live test:** the MemoryStore part cannot be tested in the cloud or in Studio, only in a published place.
+
+## 12. Number pop-ups, prestige and the Mog Arena (planned, not built)
+
+- **Number pop-ups:** no flashing or strobing, a limit on how many show at once, and a way to turn them down. CRITs and
+  combos are not bought, so they are not paid random items. Keep every number honest: it must match what the server granted.
+- **Prestige:** time based only, never sold, and the confirm screen must show clearly what resets so no child loses progress
+  by accident. The "ascended" broadcast uses fixed wording with the player's Roblox display name and is rate limited, so it
+  cannot be used to spam or show other text.
+- **Mentor bonus:** needs limits so extra accounts cannot farm it (see `docs/design-reconciliation.md`, D4).
+- **Mog Arena:** themes and decor may be sold, stations never (design rule 1). A statue spot must show the player's own avatar,
+  never a real person. Plots hold no free text. The weekly vote needs limits against stuffing and must not become a popularity
+  contest that pressures young players. Check Roblox's current rules before selling anything bought by or for friends.

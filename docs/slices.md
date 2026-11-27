@@ -28,6 +28,9 @@ clients can only ask; the server decides.
 | 16 | Training stations by rank (planned, not built) | 15, 8 |
 | 17 | Battle pass, cosmetic only (planned, not built) | 12, 18 |
 | 18 | Seasons, friends and the squad bonus | 5, 12 |
+| 19 | Number pop-ups and big numbers (planned, not built) | 4, 9 |
+| 20 | Prestige (planned, not built) | 8, 19 |
+| 21 | Mog Arena tycoon (planned, FIRST UPDATE after launch, not built) | 16, 20 |
 
 ## 1. Capture one territory by standing in it
 
@@ -193,3 +196,37 @@ extra points; check the season panel counts points. Live (needs a published scra
 the same totals; change the clock or wait for a Monday to see the champion title.
 **Done when:** friends land together without unbalancing teams, the squad bonus never exceeds the cap, season
 points are counted once, and the champion title is granted once.
+
+## 19. Number pop-ups and big numbers (planned, not built)
+
+From `DESIGN.md`: a floating number on every tap, capture, mog-off win and box opening, with sizes and colours that
+grow with the number, occasional CRITs (2 to 5 times), combo multipliers for chains, short suffixes (K, M, B, T, Qa)
+and exponential growth. **Settle before building:** see `docs/economy.md`, "Big numbers plan". The server decides every
+amount, CRIT and combo; the client only shows what the server sent.
+**Test:** pure tests for the number formatter (including the 999.95K rollover), the tier colours, CRIT odds and the
+combo rules. In Studio: pop-ups stay readable on a phone, never more than a set number on screen, no flashing.
+**Done when:** every shown number matches what the server really granted.
+
+## 20. Prestige (planned, not built)
+
+From `DESIGN.md`: the altar unlocks at Mog God and is optional. A confirm screen lists what resets (rank, Mog Points,
+aura, station unlocks) and what is kept (cosmetics, Legacy Points, faction, friends, streak, arena). A server-wide
+"ascended" message. A mentor bonus for prestiged players who help low-rank teammates capture. Each prestige multiplies
+gains. **Settle before building:** what Legacy Points are for, how the mentor bonus is kept free of abuse by extra
+accounts, and the growth numbers (`docs/economy.md`).
+**Test:** pure tests for what resets and what is kept, the multiplier curve, and that a prestige is all or nothing.
+**Done when:** the reset is atomic on the server, the confirm screen matches what really happens, and nothing about
+prestige can be bought with Robux.
+
+## 21. Mog Arena tycoon (planned, FIRST UPDATE after launch, not built)
+
+From `DESIGN.md`: a plot for each player in the training area; rank unlocks station types; stations are bought, upgraded
+and placed with Mog Points; prestige unlocks themes (P1 Neon Gym, P3 Volcano Dojo, P5 Space Summit) and special builds
+(throne, trophy wall, statue spot); recruits train while the owner is offline (this replaces barracks); friends can train at
+your arena for a small owner bonus; a weekly "Best Arena" vote; the arena is kept through prestige; themes and decor can be
+sold, stations cannot. Not in version 1.
+**Settle before building:** where recruits come from and how they pay out; how placement and part counts are limited on the
+server (and saved); how friends visit and how the owner bonus works when the owner is away; how the vote stops friends and
+extra accounts from stuffing it; whether prestige-unlocked themes are also sold (see `docs/design-reconciliation.md`).
+**Done when:** a plot saves and reloads, every placement is validated on the server, stations can only be unlocked by rank
+and bought with Mog Points, and no station is for sale.

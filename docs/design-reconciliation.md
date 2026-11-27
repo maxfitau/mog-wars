@@ -28,6 +28,9 @@ change is. Sections A and rows 1 to 5 of B (ranks, boxes, the Training Arena, sp
 | 8 | Money list: gifting, private servers, cosmetic season pass | Shop built for trails, auras and titles (decisions 58 to 61); gifting, season pass, banners, emotes, skins and box animations not built | Check Roblox rules on gifting before building it (see compliance section 9) | Check first |
 | 10 | Training Arena section: a station per rank (Treadmill, Sigma Walk Runway, Spot Me Bench, Mewing Meditation, Stare-Down Dojo, Aura Summit), older ones give less aura, rank-only unlock | Only the treadmill exists, and it is walk-against-the-belt for every rank; rank does not unlock anything yet | Planned as slice 16 in `docs/slices.md`. Not built yet, as asked | Large |
 | 11 | Battle pass is mandatory at some point (the owner's note); `DESIGN.md` lists a cosmetic season pass | Not built | Planned as slice 17, cosmetic only | Large |
+| 12 | Number pop-ups: floating numbers, size and colour tiers, CRITs, combos, exponential growth, prestige multiplier | Not built; the economy is small numbers (see economy.md, Big numbers plan) | Planned as slice 19 | Large |
+| 13 | Prestige: altar at Mog God, confirm screen, resets and keeps, ascended broadcast, mentor bonus | Not built | Planned as slice 20 | Large |
+| 14 | Mog Arena tycoon, FIRST UPDATE after launch (replaces barracks, offline recruits, friends' bonus, weekly vote) | Not built; barracks stays for version 1 | Planned as slice 21 | Very large |
 | 9 | Build order puts the Training Arena before streak, barracks and the shop | Streak and barracks are built first | Fine to leave, but build the arena next | None |
 
 ## C. Already matches
@@ -47,3 +50,24 @@ change is. Sections A and rows 1 to 5 of B (ranks, boxes, the Training Arena, sp
 3. ~~Training Arena (B3)~~ done.
 4. Cosmetic shop (slice 12), after checking gifting (B8).
 5. Seasons, friends and weekly events (B7).
+
+## D. Questions the new plans leave open
+
+These are not decided; nothing was built for them. Say what you want and I will write it into `DESIGN.md`.
+
+1. **"Kill":** the game has no kills, only mog-offs where the loser is knocked back. I wrote the pop-up for a mog-off win.
+2. **Legacy Points:** they are kept through prestige, but nothing says what they are or what they buy. Suggestion: earned on each
+   prestige, spent only on cosmetics or arena decor, never for sale and never power.
+3. **When prestige ships:** casual players reach Mog God around day 45, so prestige is a post-launch feature in practice.
+   Suggestion: ship prestige in a version 1.x update before the Mog Arena.
+4. **Mentor bonus:** prestiged players get a bonus for helping low-rank teammates capture. An extra account could farm it.
+   Suggestion: only for teammates who are real friends or who stay in the server for a minimum time, with a daily cap.
+5. **Recruits:** "recruits train while you are offline, replacing barracks" does not say where recruits come from. Suggestion:
+   recruits are earned from boxes and the daily streak (never sold), each trains one station.
+6. **Selling themes:** themes unlock with prestige and "can be sold". Selling a prestige-unlocked theme gives a shortcut to a
+   prestige reward (cosmetic only, so it is allowed under rule 1). Suggestion: the prestige themes stay prestige-only; extra
+   theme variants and decor are the sold items.
+7. **Weekly "Best Arena" vote:** friends and extra accounts can stuff a vote. Suggestion: one vote per player per week, only players
+   who visited the arena, fixed categories, and a cosmetic prize.
+8. **Friends training at your arena for an owner bonus:** says nothing about when the owner is offline. Suggestion: the bonus builds
+   up while the owner is away, capped like the barracks.

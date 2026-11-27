@@ -1,7 +1,9 @@
 --!strict
 -- Sends floating-number pop-ups to a player's screen ("+1,000 aura"). Server only. The client draws them
 -- (PopupController); it never decides a number. Only a short fixed set of kinds is allowed: "points" and
--- "aura" carry an amount, "box" carries a count and a box tier id as `detail`.
+-- "aura" carry an amount, "box" carries a count and a box tier id as `detail`. "mogged" is the big MOGGED! pop-up,
+-- "announce" a streak banner (the text is `detail`), "combo" the combo multiplier, "rush" AURA RUSH, "knockout" the
+-- REDUCED TO NPC banner, "capture" a flag captured (screen punch) and "pickup" a pickup collected (name in `detail`).
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -9,7 +11,7 @@ local PopupSystem = {}
 
 local remote: RemoteEvent? = nil
 
-local KINDS = { points = true, aura = true, box = true, splat = true, announce = true }
+local KINDS = { points = true, aura = true, box = true, mogged = true, announce = true, combo = true, rush = true, knockout = true, capture = true, pickup = true }
 
 -- Show a pop-up to one player. Bad kinds and non-positive or non-finite amounts are ignored.
 function PopupSystem.send(player: Player, kind: string, amount: number, detail: string)

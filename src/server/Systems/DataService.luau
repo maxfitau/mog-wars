@@ -5,6 +5,7 @@
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
 
 local ProfileStore = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("ProfileStore"))
 local RankRules = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("RankRules"))
@@ -19,6 +20,7 @@ local Features = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("
 local RevealRules = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("RevealRules"))
 local PlayerData = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("PlayerData"))
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("EconomyConfig"))
+local Pace = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Pace"))
 
 local store = nil :: ProfileStore.Store?
 local profiles: { [Player]: ProfileStore.Profile } = {}
@@ -354,24 +356,46 @@ end
 -- Add aura points (10 aura = one second on a treadmill). Used for territory rewards and the aura trickle: it
 -- goes straight into the player's aura level and is NOT limited by the daily treadmill time. Returns the aura
 -- actually added (0 if the player is already at the top aura level or data is not loaded).
+-- The multiplier on every aura gain right now: overtime (all aura x2) and Main Character Mode (x2 for a while).
+function DataService.auraMultiplier(player: Player): number
+	local multiplier = 1
+	if Workspace:GetAttribute("Overtime") == true then
+		multiplier *= Pace.overtime.auraMultiplier
+	end
+	local until_ = player:GetAttribute("MainCharacterUntil")
+	if type(until_) == "number" and until_ > Workspace:GetServerTimeNow() then
+		multiplier *= Pace.pickups.mainCharacterAuraMultiplier
+	end
+	return multiplier
+end
+
+-- Small aura gains (the +1 ticks) are collected here until they add up to a whole treadmill stride.
+local auraRemainder: { [Player]: number } = setmetatable({}, { __mode = "k" }) :: any
+
+-- Add aura (aura points; 10 aura = one second on a treadmill). Used for captures, hits, mogs, the +1 ticks and the
+-- territory trickle: it goes straight into the aura level and is NOT limited by the daily treadmill time.
+-- Overtime and Main Character Mode multiply it. Returns the aura shown to the player (after the multiplier), or 0
+-- if data is not loaded. At the top aura level the number still pops up but there is nothing left to fill.
 function DataService.addAura(player: Player, aura: number): number
 	local data = DataService.get(player)
 	if not data or aura ~= aura or aura <= 0 or aura == math.huge then
 		return 0
 	end
+	local shown = math.floor(aura * DataService.auraMultiplier(player) + 0.5)
 	local settings = Config.training
 	if data.trainingLevel >= settings.maxLevel then
-		return 0
+		return shown
 	end
-	local strides = math.floor(aura / settings.auraPerStride)
-	if strides < 1 then
-		return 0
+	local total = (auraRemainder[player] or 0) + shown
+	local strides = math.floor(total / settings.auraPerStride)
+	auraRemainder[player] = total - strides * settings.auraPerStride
+	if strides >= 1 then
+		local level, progress = TrainingRules.addStrides(data.trainingLevel, data.trainingProgress, strides, settings)
+		data.trainingLevel = level
+		data.trainingProgress = progress
+		syncTraining(player, data)
 	end
-	local level, progress = TrainingRules.addStrides(data.trainingLevel, data.trainingProgress, strides, settings)
-	data.trainingLevel = level
-	data.trainingProgress = progress
-	syncTraining(player, data)
-	return strides * settings.auraPerStride
+	return shown
 end
 
 -- Wait (up to `seconds`) for a player's data to finish loading. Returns the data or nil.

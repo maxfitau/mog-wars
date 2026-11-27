@@ -1,5 +1,5 @@
 --!strict
--- Pure paintball combat rules. No Roblox calls, so they can be tested anywhere. The server uses them to check
+-- Pure Mog combat rules (aura blasts, ego, mogging). No Roblox calls, so they can be tested anywhere. The server uses them to check
 -- every shot; the client only ever sends "I fired toward this direction".
 
 export type Weapon = { damage: number, pellets: number, spreadDeg: number, range: number, fireInterval: number, magazine: number, unlockRank: number }
@@ -19,8 +19,11 @@ export type Settings = {
 	assistMinDamage: number,
 	assistFraction: number,
 	botRewardFactor: number,
-	splatAura: number,
-	splatPoints: number,
+	hitAura: number,
+	mogAura: number,
+	mogPoints: number,
+	comboWindowSeconds: number,
+	comboMax: number,
 	streaks: { [number]: string },
 }
 
@@ -65,7 +68,7 @@ function CombatRules.canFire(state: ShooterState, now: number, weapon: Weapon): 
 	return true, nil
 end
 
--- Take damage. Returns the new health (never below 0) and whether the target is splatted.
+-- Take damage. Returns the new ego (never below 0) and whether the target is mogged (reduced to NPC).
 function CombatRules.applyDamage(health: number, damage: number): (number, boolean)
 	if not finite(health) or not finite(damage) or damage <= 0 then
 		return health, false
@@ -105,7 +108,7 @@ function CombatRules.pelletDirections(dx: number, dy: number, dz: number, pellet
 	return result
 end
 
--- Who gets an assist for a splat? `log` maps attacker id to { time, amount }. The killer is excluded; attackers
+-- Who gets an assist for a mog? `log` maps attacker id to { time, amount }. The killer is excluded; attackers
 -- need to have done enough damage recently. Returns the ids in a stable order.
 function CombatRules.assisters(log: { [number]: { time: number, amount: number } }, killerId: number, now: number, settings: Settings): { number }
 	local ids = {}
@@ -118,18 +121,34 @@ function CombatRules.assisters(log: { [number]: { time: number, amount: number }
 	return ids
 end
 
--- Aura and Mog Points for a splat or an assist. A bot victim pays `botRewardFactor` of it.
+-- Aura and Mog Points for a mog or an assist. A bot victim pays `botRewardFactor` of it.
 function CombatRules.reward(isAssist: boolean, victimIsBot: boolean, settings: Settings): (number, number)
 	local factor = if isAssist then settings.assistFraction else 1
 	if victimIsBot then
 		factor *= settings.botRewardFactor
 	end
-	return math.floor(settings.splatAura * factor + 0.5), math.floor(settings.splatPoints * factor + 0.5)
+	return math.floor(settings.mogAura * factor + 0.5), math.floor(settings.mogPoints * factor + 0.5)
 end
 
--- The streak announcement for a number of splats in a row, or nil.
+-- The streak announcement for a number of mogs in a row, or nil.
 function CombatRules.streakMessage(count: number, settings: Settings): string?
 	return settings.streaks[count]
+end
+
+-- The combo: hits closer together than the window build x2, x3, x4 ... up to the cap. Returns the new hit count and
+-- the multiplier to use now (1 for the first hit).
+function CombatRules.comboNext(count: number, lastHitAt: number, now: number, settings: Settings): (number, number)
+	local nextCount = if now - lastHitAt <= settings.comboWindowSeconds and count >= 1 then count + 1 else 1
+	return nextCount, math.min(nextCount, settings.comboMax)
+end
+
+-- Aura for one hit, with the combo multiplier. A bot victim pays botRewardFactor (never less than 1).
+function CombatRules.hitAura(victimIsBot: boolean, multiplier: number, settings: Settings & { botRewardFactor: number }): number
+	local base = settings.hitAura * multiplier
+	if victimIsBot then
+		base *= settings.botRewardFactor
+	end
+	return math.max(1, math.floor(base + 0.5))
 end
 
 -- Is this weapon unlocked for a player of `rank` who owns the weapons in `owned`?

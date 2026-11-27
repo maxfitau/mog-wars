@@ -167,5 +167,5 @@ its members get an aura trickle every minute (Gold 10, Diamond 20, Ultra 50). Wi
 capture pays more than the old nine zones, so the rank costs were raised (table above) to keep casual pacing at Chad on day 6 and Mog
 God on day 41. Aura rewards are not in the pacing simulation; they speed up reaching the top aura level.
 
-## Combat rewards (built, not in the pacing simulation)
-A splat pays 10 aura and 5 Mog Points (half against a bots), an assist half of that, plus 5 aura for defending your own zone. The same victim pays the same killer once per 20 seconds, and the daily reward halving applies. Splat points are small next to captures; if they feel too strong, lower `splatPoints` in `src/shared/Weapons.luau`.
+## Combat and pace rewards (built, not in the pacing simulation)
+Every hit pays +2 aura, a mog +10 aura and 5 Mog Points, an assist +5 aura, a flag captured +25 aura, and standing on a flag you are capturing +1 aura a second. Bots pay half. Hits close together build a combo that multiplies aura (up to x5); overtime and Main Character Mode double it. The same victim pays the same player a mog reward once per 20 seconds, and the daily reward halving applies to Mog Points. Wars are now 6 minutes with a 5-second gap, so there are about twice as many captures per hour: re-run `python3 tools/pacing.py --ranks` and expect ranks to arrive faster (raise rank costs in `EconomyConfig.ranks` if it is too quick). Aura only fills training levels, which are capped, so the extra aura changes nothing about power.

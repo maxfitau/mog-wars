@@ -26,8 +26,9 @@ function PointsHud.init()
 	gui.Parent = player:WaitForChild("PlayerGui")
 
 	local panel = Instance.new("Frame")
-	panel.Position = UDim2.new(0, 16, 0, 16)
-	panel.Size = UDim2.new(0, 250, 0, 52)
+	panel.AnchorPoint = Vector2.new(1, 0)
+	panel.Position = UDim2.new(1, -16, 0, 8) -- top right
+	panel.Size = UDim2.new(0, 230, 0, 46)
 	panel.BackgroundColor3 = UiTheme.panel
 	panel.Parent = gui
 	UiTheme.round(panel, UDim.new(0, 26))

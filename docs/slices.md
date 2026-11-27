@@ -325,12 +325,17 @@ nearest 1-flag territory. Studio-only `AssetCheck` hunts the "ContentId 20378549
 **Test:** pure tests in `tests/Territories.test.luau` and `tests/NumberFormat.test.luau`; see `docs/PLAYTEST.md`, "Territories".
 **Done when:** holding 2 of 3 flags pays nothing, holding all 3 pays once, and every shown number matches what the server granted.
 
-## Slice 26: Paintball combat
-Three blasters (Splatter, Splash Cannon, Long Shot), health 100, 25 damage hits, splat = 3s respawn at the faction corner with a 2s shield. Server-side shots (`CombatSystem`): rate limit, direction check, ammo, fire interval, server raycast. Splat pays 10 aura + a few Mog Points (half for bots), assists, streak announcements, kill feed, defend bonus. Contested flags hold still. Mog-off duels are off in wars (`Features.mogOffsInWar`). Bots shoot, strafe and take cover. Weapons unlock by rank or from Gold/Diamond boxes (save version 10).
+## Slice 26: Mog combat
+Three blasters (Mogter, Splash Cannon, Long Shot), health 100, 25 damage hits, mog = 3s respawn at the faction corner with a 2s shield. Server-side shots (`CombatSystem`): rate limit, direction check, ammo, fire interval, server raycast. Mog pays 10 aura + a few Mog Points (half for bots), assists, streak announcements, kill feed, defend bonus. Contested flags hold still. Mog-off duels are off in wars (`Features.mogOffsInWar`). Bots shoot, strafe and take cover. Weapons unlock by rank or from Gold/Diamond boxes (save version 10).
 **Test:** `tests/CombatRules.test.luau`, `tests/PlayerData.test.luau`, `tests/BoxRoll.test.luau`; see `docs/PLAYTEST.md`, "Combat".
-**Done when:** you can splat a bot in 4 hits, a splat pays once per 20 seconds per victim, shielded players cannot be hurt or shoot, and a contested flag does not move.
+**Done when:** you can mog a bot in 3 hits, a mog pays once per 20 seconds per victim, shielded players cannot be hurt or shoot, and a contested flag does not move.
 
 ## Slice 27: Visual polish for War Island
-Terrain island (sand rim, grass, hills, dirt paths, water), bright lighting, real materials, paintball cover, round capture circles with a growing fill, flag poles with cloth flags, thin beams only when neutral or contested, floating tier-coloured name signs, castle walls and houses, a rotating lighthouse beam, and the restyled HUD (coin counter with bounce, faction boxes with territories held, capture bar with % and CONTESTED).
+Terrain island (sand rim, grass, hills, dirt paths, water), bright lighting, real materials, Mog combat cover, round capture circles with a growing fill, flag poles with cloth flags, thin beams only when neutral or contested, floating tier-coloured name signs, castle walls and houses, a rotating lighthouse beam, and the restyled HUD (coin counter with bounce, faction boxes with territories held, capture bar with % and CONTESTED).
 **Test:** Studio only (nothing here is pure logic); see `docs/PLAYTEST.md`, "Visual polish".
 **Done when:** every item in the polish checklist looks right on PC and on a phone emulator.
+
+## Slice 28: Fast pace and the Mog retheme
+Speed 22/55 on War Island, speed pads, dash, launch pads, AURA RUSH; 6-minute wars with overtime (all aura x2), flag capture in 4/6/8 seconds with a team bonus; free pickups (Protein Shake, Aura Refill, Main Character Mode); +1/+2/+10/+5/+25 aura pop-ups with a combo, streak banners, coins to the counter, screen punch; a 5-second results screen with MVPs. Combat renamed and restyled: aura blasts, Flex Blast cone, Side-Eye beam, ego and aura charge, REDUCED TO NPC.
+**Test:** `tests/Pace.test.luau`, `tests/CombatRules.test.luau`; see `docs/PLAYTEST.md`, "Combat and pace".
+**Done when:** a Gold flag takes about 4 seconds, the last minute is OVERTIME, no pop-up covers the crosshair, and nothing in the game says paint or splat.

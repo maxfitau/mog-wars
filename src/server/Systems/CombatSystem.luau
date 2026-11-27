@@ -1,9 +1,10 @@
 --!strict
--- Paintball combat. The server decides EVERYTHING: the client only says "I fired toward this direction".
+-- Mog combat (aura blasts, ego, mogging). The server decides EVERYTHING: the client only says "I fired toward this direction".
 -- Every shot is checked in this order: rate limit, types, war running, alive and not on Training Island, weapon
 -- unlocked, then CombatRules.canFire (shield, reload, ammo, fire interval). The server keeps the ammo, makes the
--- ray(s) itself from the shooter's head, and applies damage. Bots use the same health, shield and splat code.
--- A splat pays aura and Mog Points (half for a bot), assists, streaks, the kill feed and a defend bonus.
+-- ray(s) itself from the shooter's head, and applies damage. Bots use the same ego, shield and mog code.
+-- Every hit pays a little aura (with a combo); a mog pays aura and Mog Points (half for a bot), assists, streaks,
+-- the kill feed, AURA RUSH (a short speed boost) and a defend bonus. A mogged player turns grey: REDUCED TO NPC.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -18,6 +19,9 @@ local BotService = require(script.Parent:WaitForChild("BotService"))
 local CaptureSystem = require(script.Parent:WaitForChild("CaptureSystem"))
 local DataService = require(script.Parent:WaitForChild("DataService"))
 local PopupSystem = require(script.Parent:WaitForChild("PopupSystem"))
+local MovementSystem = require(script.Parent:WaitForChild("MovementSystem"))
+local Pace = require(Shared:WaitForChild("Pace"))
+local Stats = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("Stats"))
 
 local CombatSystem = {}
 
@@ -30,8 +34,10 @@ type Combatant = {
 	health: number,
 	shieldUntil: number,
 	streak: number,
+	combo: number, -- hits in a row, each within the combo window of the last
+	lastHitAt: number,
 	log: { [number]: { time: number, amount: number } }, -- who hurt me lately
-	lastPaid: { [number]: number }, -- victim id -> time I was last paid for splatting them
+	lastPaid: { [number]: number }, -- victim id -> time I was last paid for mogging them
 	weapon: string,
 	ammo: { [string]: number },
 	reloadingUntil: number,
@@ -57,9 +63,11 @@ local function fresh(id: number, player: Player?, bot: BotService.Bot?): Combata
 		health = combat.health,
 		shieldUntil = 0,
 		streak = 0,
+		combo = 0,
+		lastHitAt = -1000,
 		log = {},
 		lastPaid = {},
-		weapon = "splatter",
+		weapon = "aurablaster",
 		ammo = ammo,
 		reloadingUntil = 0,
 		reloadToken = 0,
@@ -174,10 +182,10 @@ local function isUnlocked(player: Player, id: string): boolean
 	return false
 end
 
-local function fx(kind: string, a: any, b: any, c: any)
+local function fx(kind: string, a: any, b: any, c: any, d: any?)
 	local remote = remotes.CombatFx
 	if remote then
-		remote:FireAllClients(kind, a, b, c)
+		remote:FireAllClients(kind, a, b, c, d)
 	end
 end
 
@@ -223,7 +231,83 @@ local function damageFor(state: Combatant, weaponId: string): number
 	return CombatRules.damage(Weapons.list[weaponId].damage, rank, combat)
 end
 
-local function splat(victim: Combatant, killer: Combatant)
+-- The combo multiplier a player has right now (1 when the last hit was too long ago).
+local function comboMultiplier(state: Combatant, t: number): number
+	if t - state.lastHitAt <= combat.comboWindowSeconds and state.combo >= 1 then
+		return math.min(state.combo, combat.comboMax)
+	end
+	return 1
+end
+
+local GREY = Color3.fromRGB(150, 150, 158)
+
+-- REDUCED TO NPC: the body turns grey, the face goes blank and a "..." bubble floats over the head. Returns a
+-- function that puts everything back (bots use it when they pop back at their base).
+local function knockoutLook(character: Model): () -> ()
+	local undo: { () -> () } = {}
+	for _, item in character:GetDescendants() do
+		if item:IsA("BasePart") and item.Name ~= "HumanoidRootPart" then
+			local part = item
+			local color = part.Color
+			part.Color = GREY
+			table.insert(undo, function()
+				part.Color = color
+			end)
+		elseif item:IsA("Decal") and item.Parent and item.Parent.Name == "Head" then
+			local decal = item
+			local transparency = decal.Transparency
+			decal.Transparency = 1 -- a blank NPC face
+			table.insert(undo, function()
+				decal.Transparency = transparency
+			end)
+		elseif item:IsA("Shirt") or item:IsA("Pants") then
+			local clothing: any = item
+			local template = if item:IsA("Shirt") then clothing.ShirtTemplate else clothing.PantsTemplate
+			if item:IsA("Shirt") then
+				clothing.ShirtTemplate = ""
+			else
+				clothing.PantsTemplate = ""
+			end
+			table.insert(undo, function()
+				if item:IsA("Shirt") then
+					clothing.ShirtTemplate = template
+				else
+					clothing.PantsTemplate = template
+				end
+			end)
+		end
+	end
+	local head = character:FindFirstChild("Head")
+	if head and head:IsA("BasePart") then
+		local gui = Instance.new("BillboardGui")
+		gui.Name = "NpcBubble"
+		gui.Size = UDim2.new(0, 90, 0, 50)
+		gui.StudsOffset = Vector3.new(0, 3, 0)
+		gui.Adornee = head
+		gui.Parent = head
+		local label = Instance.new("TextLabel")
+		label.Size = UDim2.new(1, 0, 1, 0)
+		label.BackgroundColor3 = Color3.new(1, 1, 1)
+		label.Font = Enum.Font.FredokaOne
+		label.TextScaled = true
+		label.TextColor3 = Color3.fromRGB(35, 25, 60)
+		label.Text = "..."
+		label.Parent = gui
+		local corner = Instance.new("UICorner")
+		corner.CornerRadius = UDim.new(0, 14)
+		corner.Parent = label
+		table.insert(undo, function()
+			gui:Destroy()
+		end)
+	end
+	return function()
+		for _, step in undo do
+			step()
+		end
+	end
+end
+
+local function mog(victim: Combatant, killer: Combatant)
 	local t = now()
 	local victimRoot = rootOf(victim)
 	local position = if victimRoot then victimRoot.Position else Vector3.zero
@@ -231,13 +315,14 @@ local function splat(victim: Combatant, killer: Combatant)
 	local killerFaction = factionOf(killer)
 	victim.health = 0
 	victim.streak = 0
+	victim.combo = 0
 
 	fx("poof", position, factionColor(victimFaction), nil)
 	if remotes.KillFeed then
 		remotes.KillFeed:FireAllClients(nameOf(killer), killerFaction, nameOf(victim), victimFaction)
 	end
 
-	-- rewards: real players only, never for hurting your own side, and the same victim pays the same killer once per cooldown
+	-- rewards: real players only, never for hurting your own side, and the same victim pays the same player once per cooldown
 	local assisters = CombatRules.assisters(victim.log, killer.id, t, combat)
 	local function pay(who: Combatant, isAssist: boolean)
 		local player = who.player
@@ -254,14 +339,19 @@ local function splat(victim: Combatant, killer: Combatant)
 			if root and CaptureSystem.ownerAt(root.Position) == factionOf(who) then
 				aura += combat.defendBonusAura -- defending your own zone
 			end
+			aura *= comboMultiplier(who, t)
 		end
 		points = math.floor(points * DataService.rewardMultiplier(player) + 0.5)
-		local gained = DataService.addAura(player, aura)
+		local shown = DataService.addAura(player, aura)
 		DataService.addPoints(player, points)
-		if not isAssist then
-			PopupSystem.send(player, "splat", 1, "")
+		Stats.add(player, "aura", shown)
+		if isAssist then
+			Stats.add(player, "assists", 1)
+		else
+			Stats.add(player, "mogs", 1)
+			PopupSystem.send(player, "mogged", 1, "")
 		end
-		PopupSystem.send(player, "aura", if gained > 0 then gained else aura, "")
+		PopupSystem.send(player, "aura", shown, "")
 		PopupSystem.send(player, "points", points, "")
 	end
 
@@ -272,6 +362,8 @@ local function splat(victim: Combatant, killer: Combatant)
 		if message then
 			PopupSystem.send(killer.player, "announce", killer.streak, message)
 		end
+		MovementSystem.boost(killer.player, "rush", Pace.speed.rush.boost, Pace.speed.rush.seconds) -- AURA RUSH
+		PopupSystem.send(killer.player, "rush", Pace.speed.rush.seconds, "")
 		if remotes.CombatFeedback then
 			remotes.CombatFeedback:FireClient(killer.player, "hit", true)
 		end
@@ -286,29 +378,27 @@ local function splat(victim: Combatant, killer: Combatant)
 	end
 	victim.log = {}
 
-	-- the victim: a cartoon poof, then respawn at the faction corner
+	-- the victim is reduced to NPC for the respawn time, then respawns at the faction corner
 	if victim.player then
 		local player = victim.player
-		player:SetAttribute("SplatRespawn", true)
+		player:SetAttribute("KnockoutRespawn", true)
 		player:SetAttribute("RespawnAt", t + combat.respawnSeconds)
 		local character = player.Character
 		if character then
-			for _, part in character:GetDescendants() do
-				if part:IsA("BasePart") or part:IsA("Decal") then
-					local visual: any = part
-					visual.Transparency = 1
-				end
-			end
+			knockoutLook(character)
 			local humanoid = character:FindFirstChildOfClass("Humanoid")
 			if humanoid then
 				humanoid.Health = 0
 			end
 		end
+		PopupSystem.send(player, "knockout", 1, "")
 		mirror(victim)
 	elseif victim.bot then
 		local bot = victim.bot
+		local restore = knockoutLook(bot.model)
 		task.delay(combat.respawnSeconds, function()
 			if BotService.isAlive(bot) then
+				restore()
 				victim.health = combat.health
 				BotService.respawn(bot, 0.1)
 				giveShield(victim, combat.shieldSeconds)
@@ -323,7 +413,7 @@ local function hurt(victim: Combatant, shooter: Combatant, amount: number): bool
 	if not aliveInWar(victim) or victim.shieldUntil > t or factionOf(victim) == factionOf(shooter) or victim == shooter then
 		return false
 	end
-	local newHealth, splatted = CombatRules.applyDamage(victim.health, amount)
+	local newHealth, knockedOut = CombatRules.applyDamage(victim.health, amount)
 	victim.health = newHealth
 	local entry = victim.log[shooter.id]
 	victim.log[shooter.id] = { time = t, amount = (if entry and t - entry.time <= combat.assistWindowSeconds then entry.amount else 0) + amount }
@@ -332,11 +422,21 @@ local function hurt(victim: Combatant, shooter: Combatant, amount: number): bool
 		local from = if root then root.Position else Vector3.zero
 		remotes.CombatFeedback:FireClient(victim.player, "damage", from, amount)
 	end
-	if shooter.player and remotes.CombatFeedback and not splatted then
-		remotes.CombatFeedback:FireClient(shooter.player, "hit", false)
+	-- every hit pays a little aura, and hits close together build the combo (x2, x3 ...)
+	local shooterPlayer = shooter.player
+	if shooterPlayer then
+		local count, multiplier = CombatRules.comboNext(shooter.combo, shooter.lastHitAt, t, combat)
+		shooter.combo, shooter.lastHitAt = count, t
+		local shown = DataService.addAura(shooterPlayer, CombatRules.hitAura(victim.bot ~= nil, multiplier, combat))
+		Stats.add(shooterPlayer, "aura", shown)
+		PopupSystem.send(shooterPlayer, "aura", shown, "")
+		PopupSystem.send(shooterPlayer, "combo", multiplier, "")
+		if remotes.CombatFeedback and not knockedOut then
+			remotes.CombatFeedback:FireClient(shooterPlayer, "hit", false)
+		end
 	end
-	if splatted then
-		splat(victim, shooter)
+	if knockedOut then
+		mog(victim, shooter)
 	else
 		mirror(victim)
 	end
@@ -398,22 +498,19 @@ local function shoot(state: Combatant, direction: Vector3, spreadOverride: numbe
 	end
 	local damage = damageFor(state, weapon.id)
 	local pellets = CombatRules.pelletDirections(direction.X, direction.Y, direction.Z, weapon.pellets, spreadOverride or weapon.spreadDeg)
-	local hitSomeone = false
+	if weapon.style == "cone" then
+		fx("flex", origin, direction, factionColor(factionOf(state)), weapon.range) -- the flex shockwave
+	end
 	for _, pellet in pellets do
 		local pelletDirection = Vector3.new(pellet[1], pellet[2], pellet[3])
 		local endPoint, part, normal = cast(origin, pelletDirection, weapon.range, character)
 		local victim = if part then combatantFromPart(part) else nil
-		fx("shot", origin, endPoint, factionColor(factionOf(state)))
+		fx("shot", origin, endPoint, factionColor(factionOf(state)), weapon.style)
 		if victim then
-			if hurt(victim, state, damage) then
-				hitSomeone = true
-			end
+			hurt(victim, state, damage)
 		elseif part then
-			fx("splat", endPoint, normal, factionColor(factionOf(state)))
+			fx("mark", endPoint, normal, factionColor(factionOf(state)))
 		end
-	end
-	if hitSomeone and state.player and remotes.CombatFeedback then
-		remotes.CombatFeedback:FireClient(state.player, "hit", false)
 	end
 end
 
@@ -518,7 +615,7 @@ local function botThink(bot: BotService.Bot)
 		BotService.moveTo(bot, position + side * 7, 0.8)
 		if t >= state.botFireAt and state.shieldUntil <= t then
 			state.botFireAt = t + combat.botFireIntervalMin + rng:NextNumber() * (combat.botFireIntervalMax - combat.botFireIntervalMin)
-			state.weapon = "splatter"
+			state.weapon = "aurablaster"
 			shoot(state, direction, combat.botSpreadDeg)
 		end
 	end
@@ -526,7 +623,14 @@ end
 
 local function onPlayer(player: Player)
 	local state = stateOfPlayer(player)
-	player.CharacterAdded:Connect(function()
+	player.CharacterAdded:Connect(function(character)
+		task.spawn(function()
+			local humanoid = character:WaitForChild("Humanoid", 5)
+			if humanoid and humanoid:IsA("Humanoid") then
+				humanoid.BreakJointsOnDeath = false -- a mogged player stands there, grey, instead of falling apart
+			end
+		end)
+		state.combo = 0
 		state.health = combat.health
 		state.streak = 0
 		state.log = {}
@@ -535,13 +639,25 @@ local function onPlayer(player: Player)
 		for weaponId, weapon in Weapons.list do
 			state.ammo[weaponId] = weapon.magazine
 		end
-		player:SetAttribute("SplatRespawn", nil)
+		player:SetAttribute("KnockoutRespawn", nil)
 		giveShield(state, combat.shieldSeconds)
 		task.defer(function()
 			player:SetAttribute("WeaponsOwned", ownedString(player))
 		end)
 	end)
 	player:SetAttribute("WeaponsOwned", ownedString(player))
+	mirror(state)
+end
+
+-- Aura Refill: full aura charge and full ego, reload cancelled.
+function CombatSystem.refill(player: Player)
+	local state = stateOfPlayer(player)
+	state.reloadToken += 1
+	state.reloadingUntil = 0
+	state.health = combat.health
+	for weaponId, weapon in Weapons.list do
+		state.ammo[weaponId] = weapon.magazine
+	end
 	mirror(state)
 end
 

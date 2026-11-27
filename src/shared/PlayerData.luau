@@ -22,7 +22,7 @@ export type Data = {
 	trainingToday: number, -- strides counted on trainingDay (daily cap)
 	equipped: { [string]: string }, -- cosmetic slot to the cosmetic id worn there
 	receipts: { [string]: number }, -- Robux purchase ids already applied, with when (never grant twice)
-	weapons: { [string]: boolean }, -- blasters unlocked from boxes (rank unlocks need no entry)
+	weapons: { [string]: boolean }, -- weapons unlocked from boxes (rank unlocks need no entry)
 	lifetimeWars: number, -- wars the player took part in (used to reveal screens gradually)
 	lifetimeCaptures: number, -- zone captures the player was paid for
 	season: { week: number, points: { [string]: number }, prevWeek: number, prevPoints: { [string]: number }, claimed: number },
@@ -210,7 +210,7 @@ function PlayerData.takeUnit(data: Data, unit: string): boolean
 	return true
 end
 
--- Unlock a blaster. Returns false if the id is bad or it is already unlocked.
+-- Unlock a weapon. Returns false if the id is bad or it is already unlocked.
 function PlayerData.unlockWeapon(data: Data, id: string): boolean
 	if type(id) ~= "string" or id == "" or data.weapons[id] then
 		return false

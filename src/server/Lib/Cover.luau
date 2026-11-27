@@ -1,5 +1,5 @@
 --!strict
--- Paintball cover: crates, walls, barrels and bushes, scattered around each flag and along the paths. Every piece is
+-- Cover for Mog fights: crates, walls, barrels and bushes, scattered around each flag and along the paths. Every piece is
 -- solid, anchored, and tagged "Cover" (bots hide behind tagged pieces). Placement uses a fixed seed so the map is
 -- the same every time. Few parts, no meshes: phone-friendly.
 

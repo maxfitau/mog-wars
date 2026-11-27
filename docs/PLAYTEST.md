@@ -95,22 +95,23 @@ Then check the flags are ON the landmarks and reachable:
 - Each flag is a glowing zone with a light pillar at: both tower bases and the top of the Gate's head; each cliff; the lighthouse base and top; the statue's head; the top of the brain; the yolk.
 - A bot should climb each ramp on its own to reach the raised flags. FAIL if bots stand at the bottom of a ramp forever.
 
-## Combat (paintball): what you are looking for
-Needs a Studio playtest (cloud tests cover only the rules). Start a War Island session (bots fill it).
-1. **Shoot**: click (PC) or press FIRE (phone). A coloured ball flies and leaves a paint splat. Crosshair in the screen centre, ammo "Splatter 12/12" bottom right, health bar bottom middle. FAIL: nothing fires, or ammo never goes down.
-2. **Reload**: empty the magazine; it says "Reloading..." for about 1.5 s, then refills. R reloads early. FAIL: you can keep firing while empty or reloading.
-3. **Hit a bot**: hitmarker flashes, 4 hits = "SPLAT!" pop-up, +10 aura / a few points pop-ups, a cartoon poof and a kill-feed line top right in faction colours. FAIL: no reward, or the same bot pays again within 20 s.
-4. **Get hit**: red screen flash and an arrow toward the shooter. 4 hits = poof, "Splatted! Back in 3", respawn at your faction corner (not the front line) with a shield glow for 2 s. FAIL: you respawn at the front line or can shoot while shielded.
-5. **Streaks**: splat 3 different bots in a row without dying: "MOGGING x3!"; 5: "UNSTOPPABLE x5!".
-6. **Contested flag**: stand in a flag with an enemy bot also inside: the HUD says CONTESTED and the bar does not move. Splat it, then the bar fills. FAIL: the bar moves while contested.
-7. **Defend bonus**: splat an enemy while standing in a zone your faction owns: aura is 15 instead of 10 (5 for a bot).
-8. **Weapons**: 1/2/3 switch (a locked one is greyed out). At Rookie Splash Cannon unlocks (3 balls, short range); at Sigma Long Shot (zoom, one 50 hit). FAIL: you can equip a locked weapon.
-9. **Phone**: FIRE button bottom right, SWAP cycles blasters, shots drift slightly toward an enemy near the crosshair.
-10. **Bots**: they shoot at you in range, strafe, hide behind props when hurt, and miss a fair amount. FAIL: they never shoot, or kill you in under 2 s.
-11. **Mog-offs**: no duel prompt should appear during a war.
-12. **Training Island**: you cannot shoot or be shot there.
+## Combat and pace (Mog combat): what you are looking for
+Needs a Studio playtest (cloud tests cover only the rules and numbers). Start a War Island session (bots fill it). On PC press Q any time to free the mouse for buttons, T to go to Training Island and back.
+1. **Speed**: you run clearly faster than before and jump higher (22 and 55). On Training Island you are slower. FAIL: the same speed everywhere, or stuck at 16.
+2. **Speed pads**: cyan pads on the paths from each base. Run over one: a light trail and you speed up for about 3 seconds. FAIL: no change in speed.
+3. **Dash**: double-tap W, A, S or D (phone: DASH button): a quick burst. A second dash within 4 seconds does nothing. FAIL: dash works every time, or never.
+4. **Launch pad**: when you respawn you land on the pink pad by your base and are thrown toward the middle.
+5. **Fire**: click (PC) or FIRE (phone). A glowing aura blast in your faction colour, nothing stays on the walls (just a short sparkle). HUD says "Aura charge 12/12" and a bar labelled EGO. FAIL: any old wording from before the Mog retheme anywhere on screen.
+6. **Weapons**: 1/2/3 = Aura Blaster, Flex Blast (a cone shockwave, 3 blasts, close range), Side-Eye Sniper (a thin stare beam, zoom). Locked ones are greyed out.
+7. **Mog a bot**: 3 hits. Banner MOGGED!, "+2" per hit, "+10", "+5 Mog Points", coins fly to the points counter, the kill feed says "X mogged Y". A fast second hit shows COMBO x2 right of the crosshair. Two mogs in a row: DOUBLE MOG; three: TRIPLE MOG; five: MOG GOD STREAK. After each mog you get AURA RUSH (a quick speed-up). FAIL: no pop-ups, or any pop-up covers the crosshair.
+8. **Get mogged**: you turn grey with a blank face and a "..." bubble, banner REDUCED TO NPC, back in 2 seconds on the launch pad. Bots do the same and come back.
+9. **Flags**: a Gold flag fills in about 4 seconds with one player; stand there and watch "+1" every second; "+25" and FLAG CAPTURED! with a small screen punch when it flips. Two teammates on a flag fill it faster. With an enemy alive inside: CONTESTED and the bar holds.
+10. **Pickups**: about every 30 seconds a glowing orb appears (Protein Shake, Aura Refill, Main Character Mode). Touch it: banner with its name; Main Character Mode gives a golden glow, a spotlight, and doubled aura numbers for 15 seconds.
+11. **Overtime**: in the last 60 seconds the timer pulses red and says OVERTIME x2; all aura numbers double.
+12. **Results**: when the war ends a 5-second panel shows your totals and each faction's MVP, then the next war starts straight away.
+13. **HUD**: scoreboard top left (to the right of Roblox's buttons), capture bar top centre below it, Mog Points top right. Nothing sits under the chat.
 ## What to tune first
-`src/shared/Weapons.luau`: `botSpreadDeg` (bot accuracy), `botFireIntervalMin/Max`, `damage`, `fireInterval`, `splatPoints`, `splatAura`, `shieldSeconds`, `respawnSeconds`, `aimAssistDegrees`, `farmCooldownSeconds`. Re-run `python3 tools/pacing.py` after changing rewards.
+Speed, dash, capture times, overtime, pickups, +1 values and the results screen: `src/shared/Pace.luau`. Damage, fire rates, ego, respawn time, hit and mog aura, combo and bot accuracy: `src/shared/Weapons.luau`. War length and the gap between wars: `EconomyConfig.war`.
 
 ## Visual polish: what to look for (needs Studio)
 First, once: Lighting > Technology = Future (a script can't set it). Then play on War Island.

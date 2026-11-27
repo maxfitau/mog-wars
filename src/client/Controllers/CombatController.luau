@@ -1,7 +1,7 @@
 --!strict
--- Paintball combat on the client: input, crosshair, ammo, hit feedback and paint effects. The client only
+-- Mog combat on the client: input, crosshair, aura charge, ego, hit feedback and aura blast effects. The client only
 -- ASKS ("I fired toward this direction") and DISPLAYS; the server owns health, ammo, hits and rewards.
---  PC: over-the-shoulder camera while armed, click to shoot, 1/2/3 to switch blaster, R to reload.
+--  PC: over-the-shoulder camera while armed, click to shoot, 1/2/3 to switch weapon, R to reload.
 --  Mobile: big FIRE button bottom-right, a weapon button, and a light aim assist toward enemies near the crosshair.
 
 local Players = game:GetService("Players")
@@ -25,7 +25,7 @@ local combat = Weapons.combat
 local isMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
 
 local MAX_TRACERS = 24
-local MAX_SPLATS = 40
+local MAX_MARKS = 30
 
 local gui: ScreenGui
 local crosshair: Frame
@@ -40,8 +40,9 @@ local fireButton: TextButton? = nil
 local shakeUntil = 0
 local remotes: Folder
 local tracers = 0
-local splats: { Part } = {}
-local firing = false
+local marks = 0
+local lastTap: { [Enum.KeyCode]: number } = {}
+local cursorFree = false -- press Q (or hold Left Alt) to get the mouse back for buttons
 
 local function attr(name: string, default: any): any
 	local value = player:GetAttribute(name)
@@ -59,7 +60,7 @@ local function armed(): boolean
 end
 
 local function owned(id: string): boolean
-	for _, value in string.split(attr("WeaponsOwned", "splatter"), ",") do
+	for _, value in string.split(attr("WeaponsOwned", "aurablaster"), ",") do
 		if value == id then
 			return true
 		end
@@ -117,7 +118,7 @@ local function aimDirection(): Vector3?
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
 	params.FilterDescendantsInstances = { character :: Instance }
-	local weapon = Weapons.list[attr("Weapon", "splatter")] or Weapons.list.splatter
+	local weapon = Weapons.list[attr("Weapon", "aurablaster")] or Weapons.list.aurablaster
 	local result = Workspace:Raycast(ray.Origin, direction * 400, params)
 	local target = if result then result.Position else ray.Origin + direction * math.max(weapon.range, 60)
 	local toTarget = target - head.Position
@@ -152,7 +153,7 @@ local function equip(id: string)
 end
 
 local function cycleWeapon()
-	local current = attr("Weapon", "splatter")
+	local current = attr("Weapon", "aurablaster")
 	local index = table.find(Weapons.order, current) or 1
 	for step = 1, #Weapons.order do
 		local id = Weapons.order[(index - 1 + step) % #Weapons.order + 1]
@@ -250,6 +251,8 @@ local function buildHud()
 	healthFill.BorderSizePixel = 0
 	healthFill.Parent = barBack
 	UiTheme.round(healthFill, UDim.new(0, 11))
+	local egoLabel = makeLabel(barBack, "EGO", UDim2.new(1, 0, 1, 0), UDim2.new(0, 0, 0, 0), Vector2.new(0, 0))
+	egoLabel.ZIndex = 3
 
 	-- ammo near the fire button (bottom-right)
 	ammoLabel = makeLabel(gui, "", UDim2.new(0, 150, 0, 34), UDim2.new(1, -20, 1, if isMobile then -170 else -70), Vector2.new(1, 1))
@@ -269,8 +272,18 @@ local function buildHud()
 			button.Font = UiTheme.font
 			button.TextScaled = true
 			button.TextColor3 = Color3.new(1, 1, 1)
-			button.Text = ("%d  %s"):format(index, weapon.name)
+			button.Text = ("       %d  %s"):format(index, weapon.name)
 			button.Parent = gui
+			local badge = Instance.new("TextLabel") -- the weapon icon: a round badge with its letter
+			badge.Size = UDim2.new(0, 30, 0, 30)
+			badge.Position = UDim2.new(0, 6, 0.5, -15)
+			badge.BackgroundColor3 = Color3.new(1, 1, 1)
+			badge.TextColor3 = Color3.fromRGB(35, 25, 60)
+			badge.Font = UiTheme.font
+			badge.TextScaled = true
+			badge.Text = weapon.icon
+			badge.Parent = button
+			UiTheme.round(badge, UDim.new(1, 0))
 			UiTheme.round(button, UDim.new(0, 14))
 			UiTheme.outlineBox(button)
 			button.Activated:Connect(function()
@@ -309,12 +322,38 @@ local function buildHud()
 		UiTheme.round(swap, UDim.new(1, 0))
 		UiTheme.outlineBox(swap)
 		swap.Activated:Connect(cycleWeapon)
+
+		local dashBtn = Instance.new("TextButton")
+		dashBtn.AnchorPoint = Vector2.new(1, 1)
+		dashBtn.Size = UDim2.new(0, 76, 0, 76)
+		dashBtn.Position = UDim2.new(1, -248, 1, -34)
+		dashBtn.BackgroundColor3 = UiTheme.colors.green
+		dashBtn.Font = UiTheme.font
+		dashBtn.TextScaled = true
+		dashBtn.TextColor3 = Color3.new(1, 1, 1)
+		dashBtn.Text = "DASH"
+		dashBtn.Parent = gui
+		UiTheme.round(dashBtn, UDim.new(1, 0))
+		UiTheme.outlineBox(dashBtn)
+		dashBtn.Activated:Connect(function()
+			local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+			local look = Workspace.CurrentCamera and Workspace.CurrentCamera.CFrame.LookVector or Vector3.zAxis
+			local move = if humanoid and humanoid.MoveDirection.Magnitude > 0.1 then humanoid.MoveDirection else Vector3.new(look.X, 0, look.Z)
+			local flat = Vector3.new(move.X, 0, move.Z)
+			if flat.Magnitude > 0.1 then
+				local unit = flat.Unit
+				local dash = remotes:FindFirstChild("DashRequest") :: RemoteEvent?
+				if dash then
+					dash:FireServer(unit.X, unit.Z)
+				end
+			end
+		end)
 	end
 end
 
-local function showHit(splatted: boolean)
+local function showHit(mogged: boolean)
 	hitmarker.Visible = true
-	hitmarker.Size = UDim2.new(0, if splatted then 54 else 36, 0, if splatted then 54 else 36)
+	hitmarker.Size = UDim2.new(0, if mogged then 54 else 36, 0, if mogged then 54 else 36)
 	playSound(combat.sounds.hit, 0.6)
 	task.delay(0.12, function()
 		hitmarker.Visible = false
@@ -341,27 +380,50 @@ local function showDamage(from: Vector3)
 	end
 end
 
-local function drawShot(origin: Vector3, endPoint: Vector3, color: Color3)
+local function newGlow(shape: Enum.PartType, size: Vector3, color: Color3): Part
+	local part = Instance.new("Part")
+	part.Shape = shape
+	part.Size = size
+	part.Color = color
+	part.Material = Enum.Material.Neon -- a glowing aura blast
+	part.Anchored = true
+	part.CanCollide = false
+	part.CanQuery = false
+	part.CanTouch = false
+	return part
+end
+
+-- One aura blast in the shooter's faction colour. "blast" is a glowing ball, "cone" a smaller ball (the flex shockwave
+-- is drawn separately), "beam" a thin stare line that fades.
+local function drawShot(origin: Vector3, endPoint: Vector3, color: Color3, style: string)
 	if tracers >= MAX_TRACERS then
 		return
 	end
-	tracers += 1
 	local length = (endPoint - origin).Magnitude
 	if length < 1 then
-		tracers -= 1
 		return
 	end
-	local ball = Instance.new("Part")
-	ball.Shape = Enum.PartType.Ball
-	ball.Size = Vector3.new(0.9, 0.9, 0.9)
-	ball.Color = color
-	ball.Material = Enum.Material.SmoothPlastic
-	ball.Anchored = true
-	ball.CanCollide = false
-	ball.CanQuery = false
-	ball.CanTouch = false
+	tracers += 1
+	if style == "beam" then
+		local beam = newGlow(Enum.PartType.Block, Vector3.new(0.35, 0.35, length), color)
+		beam.CFrame = CFrame.lookAt((origin + endPoint) / 2, endPoint)
+		beam.Parent = Workspace
+		local tween = TweenService:Create(beam, TweenInfo.new(0.2), { Transparency = 1, Size = Vector3.new(0.05, 0.05, length) })
+		tween.Completed:Connect(function()
+			tracers -= 1
+			beam:Destroy()
+		end)
+		tween:Play()
+		return
+	end
+	local diameter = if style == "cone" then 0.7 else 1.1
+	local ball = newGlow(Enum.PartType.Ball, Vector3.new(diameter, diameter, diameter), color)
 	ball.CFrame = CFrame.new(origin)
 	ball.Parent = Workspace
+	local light = Instance.new("PointLight")
+	light.Color = color
+	light.Range = 8
+	light.Parent = ball
 	local travel = math.clamp(length / 220, 0.05, 0.6)
 	local tween = TweenService:Create(ball, TweenInfo.new(travel, Enum.EasingStyle.Linear), { Position = endPoint })
 	tween.Completed:Connect(function()
@@ -371,28 +433,53 @@ local function drawShot(origin: Vector3, endPoint: Vector3, color: Color3)
 	tween:Play()
 end
 
-local function drawSplat(position: Vector3, normal: Vector3, color: Color3)
-	while #splats >= MAX_SPLATS do
-		local oldest = table.remove(splats, 1)
-		if oldest then
-			oldest:Destroy()
-		end
+-- The Flex Blast shockwave: a glowing dome that rushes out in a cone and fades.
+local function drawFlex(origin: Vector3, direction: Vector3, color: Color3, range: number)
+	local wave = newGlow(Enum.PartType.Ball, Vector3.new(3, 3, 3), color)
+	wave.Transparency = 0.35
+	wave.CFrame = CFrame.lookAt(origin + direction * 2, origin + direction * 10)
+	wave.Parent = Workspace
+	local reach = math.min(range, 40)
+	local tween = TweenService:Create(wave, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		Size = Vector3.new(reach * 0.5, reach * 0.35, reach * 0.2),
+		Transparency = 1,
+		CFrame = CFrame.lookAt(origin + direction * (reach * 0.5), origin + direction * (reach * 0.5 + 10)),
+	})
+	tween.Completed:Connect(function()
+		wave:Destroy()
+	end)
+	tween:Play()
+end
+
+-- Where a blast landed: a short-lived aura sparkle (nothing stays on the walls).
+local function drawMark(position: Vector3, normal: Vector3, color: Color3)
+	if marks >= MAX_MARKS then
+		return
 	end
-	local size = 2.5 + math.random() * 2
-	local blob = Instance.new("Part")
-	blob.Shape = Enum.PartType.Cylinder
-	blob.Size = Vector3.new(0.1, size, size)
-	blob.Color = color
-	blob.Material = Enum.Material.SmoothPlastic
-	blob.Anchored = true
-	blob.CanCollide = false
-	blob.CanQuery = false
-	blob.CanTouch = false
-	-- a cylinder's flat face points along X, so turn X onto the surface normal
-	blob.CFrame = CFrame.lookAt(position + normal * 0.06, position + normal) * CFrame.Angles(0, math.rad(90), 0)
-	blob.Parent = Workspace
-	table.insert(splats, blob)
-	Debris:AddItem(blob, 10)
+	marks += 1
+	local anchor = Instance.new("Part")
+	anchor.Anchored = true
+	anchor.CanCollide = false
+	anchor.CanQuery = false
+	anchor.CanTouch = false
+	anchor.Transparency = 1
+	anchor.Size = Vector3.one
+	anchor.CFrame = CFrame.lookAt(position + normal * 0.2, position + normal)
+	anchor.Parent = Workspace
+	local sparkle = Instance.new("ParticleEmitter")
+	sparkle.Color = ColorSequence.new(color, Color3.new(1, 1, 1))
+	sparkle.LightEmission = 1
+	sparkle.Size = NumberSequence.new(0.9, 0)
+	sparkle.Lifetime = NumberRange.new(0.4, 0.8)
+	sparkle.Speed = NumberRange.new(4, 9)
+	sparkle.SpreadAngle = Vector2.new(70, 70)
+	sparkle.Rate = 0
+	sparkle.Parent = anchor
+	sparkle:Emit(6)
+	Debris:AddItem(anchor, 1.2)
+	task.delay(1.2, function()
+		marks -= 1
+	end)
 end
 
 local function drawPoof(position: Vector3, color: Color3)
@@ -420,13 +507,13 @@ local function refresh()
 	local on = armed()
 	crosshair.Visible = on
 	ammoLabel.Visible = on
-	local weaponId = attr("Weapon", "splatter")
+	local weaponId = attr("Weapon", "aurablaster")
 	local ammo = attr("Ammo", 0)
 	local mag = attr("MagSize", 0)
 	local reloadUntil = attr("ReloadUntil", 0)
 	local serverNow = Workspace:GetServerTimeNow()
-	local weaponName = (Weapons.list[weaponId] or Weapons.list.splatter).name
-	ammoLabel.Text = if reloadUntil > serverNow then "Reloading..." else ("%s  %d/%d"):format(weaponName, ammo, mag)
+	local weaponName = (Weapons.list[weaponId] or Weapons.list.aurablaster).name
+	ammoLabel.Text = if reloadUntil > serverNow then "Recharging..." else ("%s  Aura charge %d/%d"):format(weaponName, ammo, mag)
 	local health = attr("CombatHealth", combat.health)
 	healthFill.Size = UDim2.new(math.clamp(health / combat.health, 0, 1), 0, 1, 0)
 	healthFill.BackgroundColor3 = if health > 50 then UiTheme.colors.green elseif health > 25 then UiTheme.colors.orange else UiTheme.colors.red
@@ -438,11 +525,11 @@ local function refresh()
 	local respawnAt = attr("RespawnAt", 0)
 	if respawnAt > serverNow and health <= 0 then
 		respawnLabel.Visible = true
-		respawnLabel.Text = ("Splatted! Back in %d"):format(math.ceil(respawnAt - serverNow))
+		respawnLabel.Text = ("REDUCED TO NPC... back in %d"):format(math.ceil(respawnAt - serverNow))
 	else
 		respawnLabel.Visible = false
 	end
-	-- small zoom for the Long Shot
+	-- small zoom for the Side-Eye Sniper
 	local camera = Workspace.CurrentCamera
 	if camera then
 		local weapon = Weapons.list[weaponId]
@@ -460,7 +547,8 @@ local function shoulder()
 	if not humanoid or not root or not root:IsA("BasePart") or not camera then
 		return
 	end
-	if armed() and not isMobile then
+	local free = cursorFree or UserInputService:IsKeyDown(Enum.KeyCode.LeftAlt)
+	if armed() and not isMobile and not free then
 		humanoid.CameraOffset = humanoid.CameraOffset:Lerp(Vector3.new(2.2, 0.8, 0), 0.2)
 		UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
 		humanoid.AutoRotate = false
@@ -469,6 +557,9 @@ local function shoulder()
 	else
 		humanoid.CameraOffset = humanoid.CameraOffset:Lerp(Vector3.zero, 0.2)
 		humanoid.AutoRotate = true
+		if not isMobile and UserInputService.MouseBehavior == Enum.MouseBehavior.LockCenter then
+			UserInputService.MouseBehavior = Enum.MouseBehavior.Default -- the mouse is yours again
+		end
 	end
 end
 
@@ -487,21 +578,72 @@ function CombatController.start()
 		end
 	end)
 	local fx = remotes:WaitForChild("CombatFx") :: RemoteEvent
-	fx.OnClientEvent:Connect(function(kind: any, a: any, b: any, c: any)
+	fx.OnClientEvent:Connect(function(kind: any, a: any, b: any, c: any, d: any)
 		if kind == "shot" and typeof(a) == "Vector3" and typeof(b) == "Vector3" and typeof(c) == "Color3" then
-			drawShot(a, b, c)
+			drawShot(a, b, c, if type(d) == "string" then d else "blast")
 			playSound(combat.sounds.fire, 0.4)
-		elseif kind == "splat" and typeof(a) == "Vector3" and typeof(b) == "Vector3" and typeof(c) == "Color3" then
-			drawSplat(a, b, c)
+		elseif kind == "flex" and typeof(a) == "Vector3" and typeof(b) == "Vector3" and typeof(c) == "Color3" and type(d) == "number" then
+			drawFlex(a, b, c, d)
+		elseif kind == "mark" and typeof(a) == "Vector3" and typeof(b) == "Vector3" and typeof(c) == "Color3" then
+			drawMark(a, b, c)
 		elseif kind == "poof" and typeof(a) == "Vector3" and typeof(b) == "Color3" then
 			drawPoof(a, b)
-			playSound(combat.sounds.splat, 0.7)
+			playSound(combat.sounds.mog, 0.7)
 		end
 	end)
+
+	-- world launches (jump pads, launch pads) and the dash: the server decides, this client applies it
+	local function rootPart(): BasePart?
+		local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+		return if root and root:IsA("BasePart") then root else nil
+	end
+	local launch = remotes:WaitForChild("WorldLaunch") :: RemoteEvent
+	launch.OnClientEvent:Connect(function(velocity: any)
+		local root = rootPart()
+		if root and typeof(velocity) == "Vector3" and velocity.Magnitude < 400 then
+			root.AssemblyLinearVelocity = velocity
+		end
+	end)
+	local dashGo = remotes:WaitForChild("DashGo") :: RemoteEvent
+	dashGo.OnClientEvent:Connect(function(dx: any, dz: any, speed: any, seconds: any)
+		if type(dx) ~= "number" or type(dz) ~= "number" or type(speed) ~= "number" or type(seconds) ~= "number" then
+			return
+		end
+		local untilTime = os.clock() + math.clamp(seconds, 0.05, 0.5)
+		local connection: RBXScriptConnection? = nil
+		connection = RunService.Heartbeat:Connect(function()
+			local root = rootPart()
+			if not root or os.clock() > untilTime then
+				if connection then
+					connection:Disconnect()
+				end
+				return
+			end
+			root.AssemblyLinearVelocity = Vector3.new(dx * speed, root.AssemblyLinearVelocity.Y, dz * speed)
+		end)
+	end)
+	local tapKeys = { [Enum.KeyCode.W] = 1, [Enum.KeyCode.A] = 2, [Enum.KeyCode.S] = 3, [Enum.KeyCode.D] = 4 }
 
 	UserInputService.InputBegan:Connect(function(input, processed)
 		if processed then
 			return
+		end
+		local tap = tapKeys[input.KeyCode]
+		if tap then
+			-- double-tap a direction to dash that way
+			local last = lastTap[input.KeyCode]
+			lastTap[input.KeyCode] = os.clock()
+			local camera = Workspace.CurrentCamera
+			if last and os.clock() - last < 0.3 and camera and armed() then
+				local look = Vector3.new(camera.CFrame.LookVector.X, 0, camera.CFrame.LookVector.Z).Unit
+				local right = Vector3.new(camera.CFrame.RightVector.X, 0, camera.CFrame.RightVector.Z).Unit
+				local direction = if tap == 1 then look elseif tap == 3 then -look elseif tap == 2 then -right else right
+				local dash = remotes:FindFirstChild("DashRequest") :: RemoteEvent?
+				if dash then
+					dash:FireServer(direction.X, direction.Z)
+				end
+				lastTap[input.KeyCode] = nil
+			end
 		end
 		if input.UserInputType == Enum.UserInputType.MouseButton1 then
 			fire()
@@ -511,6 +653,13 @@ function CombatController.start()
 			equip(Weapons.order[2])
 		elseif input.KeyCode == Enum.KeyCode.Three then
 			equip(Weapons.order[3])
+		elseif input.KeyCode == Enum.KeyCode.Q then
+			cursorFree = not cursorFree -- toggle: free mouse for clicking buttons, or locked for aiming
+		elseif input.KeyCode == Enum.KeyCode.T then
+			local travel = remotes:FindFirstChild("TravelRequest") :: RemoteEvent?
+			if travel then
+				travel:FireServer(if attr("Island", "war") == "training" then "war" else "training") -- T: train / back to war
+			end
 		elseif input.KeyCode == Enum.KeyCode.R then
 			local remote = remotes:FindFirstChild("ReloadRequest") :: RemoteEvent?
 			if remote then

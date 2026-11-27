@@ -17,6 +17,7 @@ local ContributionScoring = require(Shared:WaitForChild("ContributionScoring"))
 local TrainingRules = require(Shared:WaitForChild("TrainingRules"))
 local SpawnRules = require(Shared:WaitForChild("SpawnRules"))
 local Features = require(Shared:WaitForChild("Features"))
+local Pace = require(Shared:WaitForChild("Pace"))
 local SquadRules = require(Shared:WaitForChild("SquadRules"))
 local ShoveRules = require(Shared:WaitForChild("ShoveRules"))
 local UnitRules = require(Shared:WaitForChild("UnitRules"))
@@ -30,6 +31,7 @@ local DataService = require(script.Parent:WaitForChild("DataService"))
 local FriendService = require(script.Parent:WaitForChild("FriendService"))
 local PopupSystem = require(script.Parent:WaitForChild("PopupSystem"))
 local SeasonService = require(script.Parent:WaitForChild("SeasonService"))
+local Stats = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("Stats"))
 
 local HEADROOM = 8 -- studs above the zone that still count as standing in it
 local UNOWNED_COLOR = Color3.fromRGB(0, 235, 255) -- bright glowing cyan: nobody owns it yet
@@ -68,6 +70,9 @@ local accumulator = 0
 local active = true -- zones only move during a war
 local warUnits: { [number]: number } = {} -- contribution per user id this war
 local warCaptures: { [number]: number } = {} -- captures per faction this war
+
+local tickClock = 0 -- counts up to one second for the "+1" aura ticks
+local tierParams: { [string]: CaptureBar.Params } = {}
 
 local params: CaptureBar.Params = {
 	secondsForOneAura = Config.capture.secondsForOneAura,
@@ -197,7 +202,7 @@ local WHITE = Color3.new(1, 1, 1)
 
 -- The look of one flag: white ring when neutral, faction ring when owned, a fill that grows from the middle in the
 -- capturing faction's colour, a cloth flag in the owner's colour, and a thin beam only while neutral or contested.
-local function paint(record: ZoneRecord)
+local function restyle(record: ZoneRecord)
 	local state = record.state
 	local ownerTint = if state.owner ~= 0 then ownerColor(state.owner) else WHITE
 	if record.ring then
@@ -232,7 +237,7 @@ end
 
 local function show(record: ZoneRecord)
 	local state = record.state
-	paint(record)
+	restyle(record)
 	-- Round so attributes only replicate when the bar visibly moves.
 	local rounded = math.floor(state.progress * 100 + 0.5) / 100
 	if rounded ~= record.shownProgress then
@@ -306,6 +311,7 @@ local function payOut(territory: TerritoryState, winner: number, factorOwner: nu
 		PopupSystem.send(player, "points", points, "")
 		local aura = DataService.addAura(player, tier.aura)
 		if aura > 0 then
+			Stats.add(player, "aura", aura)
 			PopupSystem.send(player, "aura", aura, "")
 		end
 		if DataService.earnBox(player, tier.box) then -- every paid contributor also earns a box, up to the daily cap
@@ -335,12 +341,49 @@ local function refreshTerritory(territory: TerritoryState): number
 	return before
 end
 
+-- Aura for a player, shown as a pop-up and counted for the results screen.
+local function giveAura(player: Player, amount: number)
+	local shown = DataService.addAura(player, amount)
+	if shown > 0 then
+		Stats.add(player, "aura", shown)
+		PopupSystem.send(player, "aura", shown, "")
+	end
+end
+
+-- Capture speed for a tier: Gold 4 seconds, Diamond 6, Ultra 8 for one player (see Pace.capture).
+local function paramsFor(tier: string): CaptureBar.Params
+	local cached = tierParams[tier]
+	if not cached then
+		cached = { secondsForOneAura = Pace.capture.secondsPerFlag[tier] or params.secondsForOneAura, decayPerSecond = params.decayPerSecond }
+		tierParams[tier] = cached
+	end
+	return cached
+end
+
 local function tick(dt: number)
 	if not active then
 		return
 	end
+	tickClock += dt
+	local secondTick = tickClock >= 1
+	if secondTick then
+		tickClock -= 1
+	end
 	for _, record in zones do
-		local powers, members = powersInZone(record.part)
+		local powers, members, botsHere = powersInZone(record.part)
+		-- More teammates on a flag capture it faster: each extra one adds +25 percent, up to double speed. A faction's
+		-- push is its average aura power times that team bonus.
+		local counts: { [number]: number } = {}
+		for faction, list in members do
+			counts[faction] = (counts[faction] or 0) + #list
+		end
+		for _, bot in botsHere do
+			counts[bot.faction] = (counts[bot.faction] or 0) + 1
+		end
+		for faction, power in powers do
+			local count = math.max(1, counts[faction] or 1)
+			powers[faction] = power / count * math.min(Pace.capture.maxMultiplier, 1 + Pace.capture.extraPlayerBonus * (count - 1))
+		end
 		local previousOwner = record.state.owner
 		for faction, multiplier in record.boosts do
 			if powers[faction] then
@@ -364,7 +407,7 @@ local function tick(dt: number)
 		end
 
 		-- A flag cannot be captured while an enemy is alive inside it: with two or more factions present it is
-		-- CONTESTED and the bar holds still until the others are splatted or leave.
+		-- CONTESTED and the bar holds still until the others are mogged or leave.
 		local present = 0
 		for _, power in powers do
 			if power > 0 then
@@ -375,9 +418,20 @@ local function tick(dt: number)
 		if record.part:GetAttribute("Contested") ~= contested then
 			record.part:SetAttribute("Contested", contested)
 		end
-		local result = if contested then { state = record.state, captured = false, newOwner = 0 } else CaptureBar.step(record.state, powers, dt, params)
+		local result = if contested then { state = record.state, captured = false, newOwner = 0 } else CaptureBar.step(record.state, powers, dt, paramsFor(record.territory.tier))
 		record.state = result.state
+		-- +1 aura every second you stand on a flag you are capturing
+		if secondTick and not contested and not result.captured and result.state.capturer ~= 0 and result.state.owner ~= result.state.capturer then
+			for _, player in members[result.state.capturer] or {} do
+				giveAura(player, Pace.rewards.flagTickAura)
+			end
+		end
 		if result.captured then
+			for _, player in members[result.newOwner] or {} do
+				giveAura(player, Pace.rewards.flagCapturedAura) -- +25 for everyone helping when a flag flips
+				Stats.add(player, "flags", 1)
+				PopupSystem.send(player, "capture", 1, "")
+			end
 			-- One flag changed hands. The territory changes hands only if one faction now holds ALL its flags.
 			local territory = record.territory
 			local ownerBefore = refreshTerritory(territory)

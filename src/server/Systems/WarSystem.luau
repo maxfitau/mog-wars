@@ -11,6 +11,8 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("EconomyConfig"))
 local FactionRules = require(Shared:WaitForChild("FactionRules"))
 local WarRules = require(Shared:WaitForChild("WarRules"))
+local Pace = require(Shared:WaitForChild("Pace"))
+local Stats = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("Stats"))
 local BotService = require(script.Parent:WaitForChild("BotService"))
 local CaptureSystem = require(script.Parent:WaitForChild("CaptureSystem"))
 local DataService = require(script.Parent:WaitForChild("DataService"))
@@ -19,6 +21,7 @@ local SeasonService = require(script.Parent:WaitForChild("SeasonService"))
 local WarSystem = {}
 
 local warNumber = 0
+local resultsRemote: RemoteEvent? = nil
 local phase = "Intermission"
 local endsAt = 0
 
@@ -70,13 +73,42 @@ local function finishWar()
 	end
 
 	Workspace:SetAttribute("WarWinner", winner)
+	Workspace:SetAttribute("Overtime", false)
 	publishScores()
+	-- the 5-second results screen: your totals, and the MVP of every faction (real players only)
+	local factionResults: { { mvp: string, mogs: number, flags: number, aura: number } } = {}
+	for id = 1, FactionRules.count() do
+		local entry = { mvp = "-", mogs = 0, flags = 0, aura = 0 }
+		local bestScore = -1
+		for _, player in Players:GetPlayers() do
+			if player:GetAttribute("Faction") == id then
+				local tally = Stats.get(player)
+				entry.mogs += tally.mogs
+				entry.flags += tally.flags
+				entry.aura += tally.aura
+				local score = tally.mogs * Pace.results.mvpPerMog + tally.flags * Pace.results.mvpPerFlag + tally.assists * Pace.results.mvpPerAssist
+				if score > bestScore then
+					bestScore = score
+					entry.mvp = player.DisplayName
+				end
+			end
+		end
+		factionResults[id] = entry
+	end
+	if resultsRemote then
+		for _, player in Players:GetPlayers() do
+			local tally = Stats.get(player)
+			resultsRemote:FireClient(player, factionResults, { aura = tally.aura, mogs = tally.mogs, assists = tally.assists, flags = tally.flags }, winner, Pace.results.seconds)
+		end
+	end
 	local winnerFaction = FactionRules.byId(winner)
 	print(("[mog-wars] war %d over. Winner: %s"):format(warNumber, if winnerFaction then winnerFaction.name else "draw"))
 end
 
 local function startWar()
 	warNumber += 1
+	Stats.reset()
+	Workspace:SetAttribute("Overtime", false)
 	CaptureSystem.resetWar()
 	BotService.onWarStart()
 	Workspace:SetAttribute("WarWinner", 0)
@@ -96,7 +128,18 @@ local function startWar()
 	setPhase("War")
 end
 
-function WarSystem.init() end
+function WarSystem.init()
+	local folder = ReplicatedStorage:FindFirstChild("Remotes")
+	if not folder then
+		folder = Instance.new("Folder")
+		folder.Name = "Remotes"
+		folder.Parent = ReplicatedStorage
+	end
+	local remote = Instance.new("RemoteEvent")
+	remote.Name = "WarResults"
+	remote.Parent = folder
+	resultsRemote = remote
+end
 
 function WarSystem.start()
 	Workspace:SetAttribute("WarWinner", 0)
@@ -107,6 +150,10 @@ function WarSystem.start()
 			task.wait(0.5)
 			if phase == "War" then
 				publishScores()
+				local overtime = endsAt - Workspace:GetServerTimeNow() <= Pace.overtime.seconds -- the last 60 seconds: all aura x2
+				if Workspace:GetAttribute("Overtime") ~= overtime then
+					Workspace:SetAttribute("Overtime", overtime)
+				end
 			end
 			if Workspace:GetServerTimeNow() >= endsAt then
 				if phase == "War" then

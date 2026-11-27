@@ -83,7 +83,7 @@ local function update()
 	title.Text = ("%s: %d/%d flag%s"):format(name, held, total, if total == 1 then "" else "s")
 	local flagLabel = if type(flagName) == "string" and total > 1 then flagName .. ". " else ""
 	if zone:GetAttribute("Contested") == true then
-		subtitle.Text = flagLabel .. "CONTESTED! Splat the enemy"
+		subtitle.Text = flagLabel .. "CONTESTED! Mog the enemy"
 		subtitle.TextColor3 = Color3.fromRGB(255, 150, 20)
 		fill.BackgroundColor3 = Color3.fromRGB(255, 150, 20)
 		return
@@ -104,7 +104,7 @@ function CaptureHud.init()
 
 	frame = Instance.new("Frame")
 	frame.AnchorPoint = Vector2.new(0.5, 0)
-	frame.Position = UDim2.new(0.5, 0, 0, 16)
+	frame.Position = UDim2.new(0.5, 0, 0, 66) -- top centre, below the scoreboard row
 	frame.Size = UDim2.new(0.4, 0, 0, 76)
 	frame.BackgroundColor3 = UiTheme.panel
 	frame.BackgroundTransparency = 0.05

@@ -30,9 +30,16 @@ local function baseOf(faction: number): (number, number)
 end
 
 local function place(player: Player, character: Model)
-	if player:GetAttribute("SplatRespawn") == true then
-		player:SetAttribute("SplatRespawn", nil)
-		return -- after a splat you respawn at your faction's corner spawn
+	if player:GetAttribute("KnockoutRespawn") == true then
+		player:SetAttribute("KnockoutRespawn", nil)
+		-- after being reduced to NPC you respawn at your faction's corner, on the launch pad that throws you toward the action
+		local faction = player:GetAttribute("Faction")
+		local pad = Workspace:FindFirstChild("LaunchPad_" .. tostring(faction))
+		local root = character:WaitForChild("HumanoidRootPart", 5)
+		if pad and pad:IsA("BasePart") and root and root:IsA("BasePart") and character.Parent then
+			character:PivotTo(CFrame.new(pad.Position + Vector3.new(0, 4, 0)))
+		end
+		return
 	end
 	local faction = player:GetAttribute("Faction")
 	if type(faction) ~= "number" or Workspace:GetAttribute("WarPhase") ~= "War" then

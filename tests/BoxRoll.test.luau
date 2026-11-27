@@ -79,7 +79,7 @@ end
 check("sweep matches weights", close)
 
 check("a weapon drop without a weapon id is rejected", not (BoxRoll.validate({ displayName = "x", drops = { { weight = 100, kind = "weapon" } } })))
-check("a weapon drop with an id is accepted", (BoxRoll.validate({ displayName = "x", drops = { { weight = 100, kind = "weapon", weapon = "longshot" } } })))
+check("a weapon drop with an id is accepted", (BoxRoll.validate({ displayName = "x", drops = { { weight = 100, kind = "weapon", weapon = "sideeye" } } })))
 
 if failures > 0 then
 	error(failures .. " test(s) failed")

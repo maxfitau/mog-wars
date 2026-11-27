@@ -86,7 +86,7 @@ end
 
 -- A war lasts between 10 and 15 minutes (DESIGN.md). A configured value outside that, or not a number, is
 -- brought back into range so a bad config edit cannot make a war last seconds or hours.
-WarRules.MIN_WAR_SECONDS = 600
+WarRules.MIN_WAR_SECONDS = 180
 WarRules.MAX_WAR_SECONDS = 900
 
 function WarRules.clampWarSeconds(configured: number): number

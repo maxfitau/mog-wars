@@ -116,12 +116,12 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 109 | Each territory has one giant landmark built from blocks, balls and ramps, and the flags are on it; raised flags (statue head, brain top, yolk, head top, lighthouse top) are reached by long ramps, and bots follow ramp routes | The owner's request (screenshot not visible to me, so shapes follow the written description) |
 | 110 | NPC Village moved west to x -55 so the Gate's head ramp from the north does not cross it; Gate flags are now both tower bases plus the head top (the old gate flag is gone); "flags on both towers" is at the tower bases, not their tops | Layout needed room for the head ramp; tower tops would need two more ramps. Say if you want tower-top flags |
 | 111 | From now on every playtest instruction says what you are looking for and what counts as a failure | The owner's request |
-| 112 | Combat numbers (damage, ranges, fire rates, rewards, bot accuracy) all live in `src/shared/Weapons.luau`; rules in `CombatRules.luau` | One place to tune, testable without Studio |
+| 112 | Combat numbers (damage, ranges, fire rates, rewards, bot accuracy, combo) all live in `src/shared/Weapons.luau`; rules in `CombatRules.luau` | One place to tune, testable without Studio |
 | 113 | Shots are rays from the shooter's head decided by the server; the client sends only a direction, and ammo/reload are server state | A cheater cannot fire faster, farther or with more ammo |
 | 114 | The same victim pays the same killer only once every 20 seconds | Stops two friends (or a bot) being farmed for aura |
 | 115 | Rank damage bonus is 1.5% per rank, capped at +10% | The owner's cap; rank stays status, not power |
-| 116 | A splatted bot is moved back to its base and stunned instead of dying | Keeps the war full without destroying and rebuilding bodies |
-| 117 | Weapons: Splash Cannon at Rookie or 2% of Gold boxes; Long Shot at Sigma or 3% of Diamond boxes; never sold | Earned only; box odds still add to 100 and are shown |
+| 116 | A mogted bot is moved back to its base and stunned instead of dying | Keeps the war full without destroying and rebuilding bodies |
+| 117 | Weapons: Flex Blast at Rookie or 2% of Gold boxes; Side-Eye Sniper at Sigma or 3% of Diamond boxes; never sold | Earned only; box odds still add to 100 and are shown |
 | 118 | Mog-off duels switched off in wars with `Features.mogOffsInWar = false` (code kept) | Combat replaces them; an event can bring them back |
 | 119 | A flag with two or more factions alive inside is CONTESTED and its bar holds still | The owner's rule: kill the defenders to capture |
 | 120 | Shot rays pass through parts you cannot walk through (CanCollide off) | Signs, zones and steam never block a shot |
@@ -132,3 +132,11 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 125 | The circle "fills like a pie" as a disc growing from the middle in the capturing faction's colour | A true pie slice needs a mesh or image; a growing disc is cheap and reads the same |
 | 126 | Faction icons are round badges with the faction's first letter | No licensed or uploaded art needed yet |
 | 127 | Floating name signs are BillboardGuis at the landmark (they replaced the post-and-board signs) | The owner's request; one sign per territory |
+| 128 | All speed, dash, capture-time, overtime, pickup and tick numbers live in `src/shared/Pace.luau` (war length and the gap between wars stay in `EconomyConfig.war`) | The owner wants to tune them in one place |
+| 129 | Capture push is a faction's average aura power times the team bonus (+25% per extra player, max 2x) | The owner's rule; training still helps a little, numbers of players help more |
+| 130 | Weapon ids are `aurablaster`, `flexblast`, `sideeye` (renamed from the paintball ids; no saves existed yet) | Mog retheme; the rename needs no migration |
+| 131 | Combo multiplies aura only, never Mog Points, capped at x5 | Keeps Mog Points (the rank currency) paced by `docs/economy.md` |
+| 132 | Aura gains below 10 are collected until they make a whole treadmill stride | The +1 ticks would otherwise round to nothing |
+| 133 | Mogged players keep their joints (grey, standing) for the 2 second respawn | A cartoon "reduced to NPC" instead of falling apart |
+| 134 | Q frees the mouse on PC (T = Train / back to war); the mouse is otherwise locked to the crosshair while armed | The owner could not click the Train button on Mac |
+| 135 | Overtime music, pickup, whoosh, dash and combo sounds are empty ids until licensed ones are added | No licensed audio yet |

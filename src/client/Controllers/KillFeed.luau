@@ -1,5 +1,5 @@
 --!strict
--- Kill feed, top right: "Kodo splatted Nova" with each name in its faction colour. The server sends the names
+-- Kill feed, top right: "Kodo mogged Nova" with each name in its faction colour. The server sends the names
 -- and faction ids; this only draws them. At most 5 lines, each fades after a few seconds.
 
 local Players = game:GetService("Players")
@@ -48,7 +48,7 @@ local function add(killer: any, killerFaction: any, victim: any, victimFaction: 
 	label.TextSize = 18
 	label.TextColor3 = Color3.new(1, 1, 1)
 	label.TextXAlignment = Enum.TextXAlignment.Right
-	label.Text = ("%s splatted %s "):format(colored(string.sub(killer, 1, 20), killerFaction), colored(string.sub(victim, 1, 20), victimFaction))
+	label.Text = ("%s mogged %s "):format(colored(string.sub(killer, 1, 20), killerFaction), colored(string.sub(victim, 1, 20), victimFaction))
 	label.LayoutOrder = os.clock() * 1000
 	label.Parent = list
 	UiTheme.round(label, UDim.new(0, 8))

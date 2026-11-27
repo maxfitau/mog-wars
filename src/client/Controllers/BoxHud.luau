@@ -11,6 +11,7 @@ local Workspace = game:GetService("Workspace")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local BoxRoll = require(Shared:WaitForChild("BoxRoll"))
 local Config = require(Shared:WaitForChild("EconomyConfig"))
+local Weapons = require(Shared:WaitForChild("Weapons"))
 
 local BoxHud = {}
 
@@ -35,7 +36,7 @@ local function describe(drop: BoxRoll.Drop): string
 		return ("%s unit"):format((drop.unit or "?"):sub(1, 1):upper() .. (drop.unit or "?"):sub(2))
 	end
 	if drop.kind == "weapon" then
-		return "Blaster: " .. (drop.weapon or "?")
+		return "Weapon: " .. (Weapons.list[drop.weapon or ""] and Weapons.list[drop.weapon or ""].name or "?")
 	end
 	return "Cosmetic: " .. (drop.cosmetic or "?")
 end
@@ -196,7 +197,7 @@ function BoxHud.init()
 			if kind == "points" then
 				toast.Text = ("You got %d Mog Points!"):format(if type(amount) == "number" then amount else 0)
 			elseif kind == "weapon" then
-				toast.Text = ("New blaster unlocked: %s!"):format(tostring(id))
+				toast.Text = ("New weapon unlocked: %s!"):format(if type(id) == "string" and Weapons.list[id] then Weapons.list[id].name else tostring(id))
 			elseif kind == "unit" then
 				toast.Text = ("You got a %s unit!"):format(tostring(id))
 			else

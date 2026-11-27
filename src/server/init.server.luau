@@ -5,7 +5,7 @@
 local Systems = script:WaitForChild("Systems")
 
 -- Order matters: factions create the Teams first, then the map builds matching spawns, then captures start.
-local order = { "DataService", "PopupSystem", "FriendService", "FactionSystem", "PlaceholderMap", "BotService", "CaptureSystem", "SpawnSystem", "ShoveSystem", "MogOffSystem", "CombatSystem", "RankSystem", "BoxSystem", "UnitSystem", "RewardsSystem", "SeasonService", "TrainingSystem", "ShopSystem", "TravelSystem", "TerritorySystem", "AssetCheckSystem", "WarSystem" }
+local order = { "DataService", "PopupSystem", "FriendService", "FactionSystem", "PlaceholderMap", "BotService", "CaptureSystem", "SpawnSystem", "ShoveSystem", "MogOffSystem", "MovementSystem", "CombatSystem", "PickupSystem", "RankSystem", "BoxSystem", "UnitSystem", "RewardsSystem", "SeasonService", "TrainingSystem", "ShopSystem", "TravelSystem", "TerritorySystem", "AssetCheckSystem", "WarSystem" }
 
 type System = { init: () -> (), start: () -> () }
 

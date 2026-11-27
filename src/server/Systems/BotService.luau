@@ -388,7 +388,7 @@ function BotService.weaken(bot: Bot, untilTime: number)
 	bot.penaltyUntil = math.max(bot.penaltyUntil, untilTime)
 end
 
--- A splatted bot pops back at its base (its body is never destroyed, so the war stays full).
+-- A mogged bot pops back at its base (its body is never destroyed, so the war stays full).
 function BotService.respawn(bot: Bot, seconds: number)
 	if not BotService.isAlive(bot) then
 		return

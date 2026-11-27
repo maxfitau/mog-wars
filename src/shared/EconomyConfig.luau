@@ -10,7 +10,7 @@ export type Drop = {
 	kind: string, -- "points", "unit" or "cosmetic"
 	amount: number?, -- for "points"
 	unit: string?, -- for "unit": "tank" or "horse"
-	weapon: string?, -- for "weapon": a blaster id
+	weapon: string?, -- for "weapon": a weapon id (aurablaster, flexblast, sideeye)
 	cosmetic: string?, -- for "cosmetic": a cosmetic id, never anything that changes power
 }
 
@@ -125,8 +125,8 @@ export type Config = {
 
 local config: Config = {
 	war = {
-		durationSeconds = 720, -- 12 minutes; WarRules keeps it between 10 and 15 minutes (DESIGN.md)
-		intermissionSeconds = 20, -- break between wars while the map resets and winners are shown
+		durationSeconds = 360, -- 6 minutes; fast wars (WarRules keeps it between 3 and 15 minutes)
+		intermissionSeconds = 5, -- the results screen, then straight into the next war
 		playersPerServer = 16,
 		winnerBonusPoints = 60,
 		participantBonusPoints = 20,
@@ -220,7 +220,7 @@ local config: Config = {
 				displayName = "Gold Box",
 				drops = {
 					{ weight = 48, kind = "points", amount = 20 },
-					{ weight = 2, kind = "weapon", weapon = "splashcannon" },
+					{ weight = 2, kind = "weapon", weapon = "flexblast" },
 					{ weight = 25, kind = "points", amount = 40 },
 					{ weight = 8, kind = "points", amount = 80 },
 					{ weight = 5, kind = "unit", unit = "horse" },
@@ -232,7 +232,7 @@ local config: Config = {
 				displayName = "Diamond Box",
 				drops = {
 					{ weight = 27, kind = "points", amount = 80 },
-					{ weight = 3, kind = "weapon", weapon = "longshot" },
+					{ weight = 3, kind = "weapon", weapon = "sideeye" },
 					{ weight = 25, kind = "points", amount = 150 },
 					{ weight = 12, kind = "points", amount = 300 },
 					{ weight = 10, kind = "unit", unit = "horse" },

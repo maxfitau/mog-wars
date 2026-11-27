@@ -109,6 +109,29 @@ function PlaceholderMap.start()
 		spawn.Parent = Workspace
 	end
 
+	-- Fast movement: a launch pad in front of each base (throws you toward the middle) and speed pads on the path
+	-- from each base to the middle (+50 percent speed for 3 seconds). MovementSystem makes them work.
+	local Pace = require(Shared:WaitForChild("Pace"))
+	for index, base in MapLayout.bases do
+		local length = math.sqrt(base.x * base.x + base.z * base.z)
+		local dirX, dirZ = -base.x / length, -base.z / length
+		local launch = makePart("LaunchPad_" .. index, Vector3.new(9, 1, 9), Vector3.new(base.x + dirX * 14, 0.5, base.z + dirZ * 14), Color3.fromRGB(255, 120, 200))
+		launch.Material = Enum.Material.Neon
+		launch.CanCollide = false
+		launch.CanQuery = false
+		launch:SetAttribute("Launch", Vector3.new(dirX * Pace.speed.launchPad.horizontal, Pace.speed.launchPad.vertical, dirZ * Pace.speed.launchPad.horizontal))
+		CollectionService:AddTag(launch, "LaunchPad")
+		for _, t in { 0.3, 0.55, 0.78 } do
+			local pad = makePart("SpeedPad", Vector3.new(7, 0.6, 12), Vector3.new(base.x * (1 - t), 0.3, base.z * (1 - t)), Color3.fromRGB(70, 220, 255))
+			pad.CFrame = CFrame.lookAt(pad.Position, Vector3.new(0, 0.3, 0))
+			pad.Material = Enum.Material.Neon
+			pad.CanCollide = false
+			pad.CanQuery = false
+			pad.Transparency = 0.15
+			CollectionService:AddTag(pad, "SpeedPad")
+		end
+	end
+
 	-- The flags: one glowing zone per flag, tagged "Zone". CaptureSystem runs one capture bar per flag and groups
 	-- them into territories by the "Territory" attribute. Each flag also gets a tall see-through pillar of light
 	-- ("Beacon") and a point light so a child can spot it from across the map; CaptureSystem recolours them.
@@ -117,7 +140,7 @@ function PlaceholderMap.start()
 		local glow = Color3.fromRGB(0, 235, 255) -- bright cyan until someone owns it
 		local zone = makePart(Territories.partName(territory, entry.index), Vector3.new(flag.size, 1, flag.size), Vector3.new(flag.x, flag.y + 0.5, flag.z), glow)
 		zone.CanCollide = false -- players walk straight onto it
-		zone.CanQuery = false -- paintballs pass through
+		zone.CanQuery = false -- aura blasts pass through
 		zone.Transparency = 1 -- the zone part is only the invisible capture area; the circle below is what you see
 		zone:SetAttribute("Value", Territories.tiers[territory.tier].value)
 		zone:SetAttribute("Territory", territory.id)
@@ -164,7 +187,7 @@ function PlaceholderMap.start()
 		CollectionService:AddTag(zone, "Zone")
 	end
 
-	-- The six territories' scenery and floating name signs, and paintball cover.
+	-- The six territories' scenery and floating name signs, and cover for Mog fights.
 	TerritoryScenery.build()
 	Cover.build()
 

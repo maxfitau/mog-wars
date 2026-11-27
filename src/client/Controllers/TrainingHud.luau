@@ -51,7 +51,8 @@ function TrainingHud.init()
 	gui.Parent = player:WaitForChild("PlayerGui")
 
 	local frame = Instance.new("Frame")
-	frame.Position = UDim2.new(0, 16, 0, 176) -- under the war panel, top left
+	frame.AnchorPoint = Vector2.new(1, 0)
+	frame.Position = UDim2.new(1, -16, 0, 62) -- right side, under Mog Points
 	frame.Size = UDim2.new(0, 230, 0, 70)
 	frame.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
 	frame.BackgroundTransparency = 0.25

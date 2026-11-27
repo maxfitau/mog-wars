@@ -20,7 +20,6 @@ local CaptureSystem = require(script.Parent:WaitForChild("CaptureSystem"))
 local DataService = require(script.Parent:WaitForChild("DataService"))
 
 local MIN_INTERVAL = 0.5 -- seconds between requests from one player
-local BASE_WALK_SPEED = 16
 
 local UnitSystem = {}
 
@@ -47,7 +46,7 @@ end
 local function applyHorse(player: Player)
 	local humanoid = humanoidOf(player)
 	if humanoid then
-		humanoid.WalkSpeed = UnitRules.walkSpeed(BASE_WALK_SPEED, true, Config.units.horse.speedMultiplier)
+		player:SetAttribute("HorseMultiplier", UnitRules.walkSpeed(1, true, Config.units.horse.speedMultiplier)) -- MovementSystem applies it on top of the base speed
 	end
 end
 
@@ -61,10 +60,7 @@ local function clearAll()
 	tanks = {}
 	CaptureSystem.clearBoosts()
 	for player in riders do
-		local humanoid = humanoidOf(player)
-		if humanoid then
-			humanoid.WalkSpeed = BASE_WALK_SPEED
-		end
+		player:SetAttribute("HorseMultiplier", nil)
 	end
 	riders = {}
 end

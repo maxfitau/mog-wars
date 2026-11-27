@@ -16,14 +16,14 @@ local function check(name: string, condition: boolean)
 end
 
 local combat = Weapons.combat
-local splatter = Weapons.list.splatter
+local blaster = Weapons.list.aurablaster
 
 -- damage and the 10 percent cap
 check("rank 1 does base damage", CombatRules.damage(25, 1, combat) == 25)
 check("high rank bonus is capped at +10 percent", CombatRules.damage(100, 7, combat) == 109 or CombatRules.damage(100, 7, combat) <= 110)
 check("absurd rank never passes +10 percent", CombatRules.damage(100, 9999, combat) == 110)
 check("nan rank gives base damage", CombatRules.damage(25, 0 / 0, combat) == 25)
-check("four hits splat a 100 health player", select(2, CombatRules.applyDamage(75, 25)) == true and select(2, CombatRules.applyDamage(100, 25)) == false)
+check("three hits mog a 100 ego player", select(2, CombatRules.applyDamage(66, 34)) == true and select(2, CombatRules.applyDamage(100, 34)) == false and 3 * blaster.damage >= combat.health and 2 * blaster.damage < combat.health)
 check("health never below 0", (CombatRules.applyDamage(10, 50)) == 0)
 check("bad damage is ignored", (CombatRules.applyDamage(100, -5)) == 100 and (CombatRules.applyDamage(100, 0 / 0)) == 100)
 
@@ -40,7 +40,7 @@ local function reason(changes: { [string]: any }): string
 	for key, value in changes do
 		state[key] = value
 	end
-	local ok, why = CombatRules.canFire(state, 10, splatter)
+	local ok, why = CombatRules.canFire(state, 10, blaster)
 	return if ok then "ok" else tostring(why)
 end
 check("ready can fire", reason({}) == "ok")
@@ -69,22 +69,23 @@ local log = { [1] = { time = 9, amount = 50 }, [2] = { time = 9, amount = 5 }, [
 local helpers = CombatRules.assisters(log, 4, 10, combat)
 check("assist needs recent damage and enough of it, and excludes the killer", #helpers == 1 and helpers[1] == 1)
 local aura, points = CombatRules.reward(false, false, combat)
-check("a splat pays 10 aura and some points", aura == 10 and points == combat.splatPoints)
+check("a mog pays 10 aura and some points", aura == 10 and points == combat.mogPoints)
 local botAura = CombatRules.reward(false, true, combat)
-check("a bot splat pays half", botAura == 5)
+check("a bot mog pays half", botAura == 5)
 local assistAura = CombatRules.reward(true, false, combat)
 check("an assist pays half", assistAura == 5)
-check("streak 3 is MOGGING", CombatRules.streakMessage(3, combat) == "MOGGING")
-check("streak 5 is UNSTOPPABLE", CombatRules.streakMessage(5, combat) == "UNSTOPPABLE")
+check("streak 2 is DOUBLE MOG", CombatRules.streakMessage(2, combat) == "DOUBLE MOG")
+check("streak 3 is TRIPLE MOG", CombatRules.streakMessage(3, combat) == "TRIPLE MOG")
+check("streak 5 is MOG GOD STREAK", CombatRules.streakMessage(5, combat) == "MOG GOD STREAK")
 check("streak 4 has no announcement", CombatRules.streakMessage(4, combat) == nil)
 
 -- unlocks
-local cannon = Weapons.list.splashcannon
-local longshot = Weapons.list.longshot
-check("starter is always unlocked", CombatRules.unlocked(splatter, "splatter", 1, {}))
-check("Splash Cannon needs Rookie", not CombatRules.unlocked(cannon, "splashcannon", 1, {}) and CombatRules.unlocked(cannon, "splashcannon", 2, {}))
-check("Long Shot needs Sigma", not CombatRules.unlocked(longshot, "longshot", 2, {}) and CombatRules.unlocked(longshot, "longshot", 3, {}))
-check("a box drop unlocks early", CombatRules.unlocked(longshot, "longshot", 1, { longshot = true }))
+local flex = Weapons.list.flexblast
+local sniper = Weapons.list.sideeye
+check("starter is always unlocked", CombatRules.unlocked(blaster, "blaster", 1, {}))
+check("Flex Blast needs Rookie", not CombatRules.unlocked(flex, "flexblast", 1, {}) and CombatRules.unlocked(flex, "flexblast", 2, {}))
+check("Side-Eye Sniper needs Sigma", not CombatRules.unlocked(sniper, "sideeye", 2, {}) and CombatRules.unlocked(sniper, "sideeye", 3, {}))
+check("a box drop unlocks early", CombatRules.unlocked(sniper, "sideeye", 1, { sideeye = true }))
 
 -- aim assist
 local ax, ay, az = CombatRules.aimAssist(0, 0, 1, { { 0.05, 0, 1 } }, 6)
@@ -92,14 +93,28 @@ check("aim assist pulls toward a close enemy", ax > 0 and ax < 0.06 and az > 0.9
 local bx, _, bz = CombatRules.aimAssist(0, 0, 1, { { 1, 0, 1 } }, 6)
 check("aim assist ignores a far-off enemy", bx == 0 and bz == 1)
 
--- balance: each weapon is best in its own band (time to splat in seconds, perfect aim, one target)
+-- balance: each weapon is best in its own band (time to mog in seconds, perfect aim, one target)
 local function ttk(w: Weapons.Weapon, hits: number): number
-	local shots = math.ceil(100 / (w.damage * hits))
+	local shots = math.ceil(combat.health / (w.damage * hits))
 	return (shots - 1) * w.fireInterval
 end
-check("Splash Cannon splats fastest up close (all pellets hit)", ttk(cannon, 3) < ttk(splatter, 1) and ttk(cannon, 3) < ttk(longshot, 1))
-check("Splatter beats the others at range it can hit but the cannon cannot", cannon.range < splatter.range and splatter.range < longshot.range)
-check("every weapon has a reason to use it: damage per second differs", ttk(longshot, 1) ~= ttk(splatter, 1))
+check("Flex Blast mogs fastest up close (all three blasts hit)", ttk(flex, 3) < ttk(blaster, 1) and ttk(flex, 3) < ttk(sniper, 1))
+check("Aura Blaster reaches further than Flex Blast and Side-Eye Sniper further still", flex.range < blaster.range and blaster.range < sniper.range)
+check("every weapon has a reason to use it: damage per second differs", ttk(sniper, 1) ~= ttk(blaster, 1))
+
+-- combo and hit aura
+local count, mult = CombatRules.comboNext(0, -100, 10, combat)
+check("the first hit is x1", count == 1 and mult == 1)
+count, mult = CombatRules.comboNext(count, 10, 11.5, combat)
+check("a hit within 3 seconds is x2", count == 2 and mult == 2)
+count, mult = CombatRules.comboNext(count, 11.5, 20, combat)
+check("a slow hit restarts the combo", count == 1 and mult == 1)
+count, mult = CombatRules.comboNext(9, 20, 21, combat)
+check("the combo multiplier is capped", count == 10 and mult == combat.comboMax)
+check("a hit pays +2 aura", CombatRules.hitAura(false, 1, combat) == 2)
+check("a hit on a bot pays half but never zero", CombatRules.hitAura(true, 1, combat) == 1)
+check("the combo multiplies hit aura", CombatRules.hitAura(false, 3, combat) == 6)
+check("weapon names: weapons are Aura Blaster, Flex Blast and Side-Eye Sniper", Weapons.list.aurablaster.name == "Aura Blaster" and Weapons.list.flexblast.name == "Flex Blast" and Weapons.list.sideeye.name == "Side-Eye Sniper")
 
 if failures > 0 then
 	error(failures .. " test(s) failed")

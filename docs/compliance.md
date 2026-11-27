@@ -1,6 +1,6 @@
 # Compliance review: theme, ranks, boxes, shop
 
-> Written overnight by Claude without `DESIGN.md` and without reading Roblox's full pages. This is a risk
+> Written by Claude before `DESIGN.md` was available (see `docs/design-reconciliation.md`) and without reading Roblox's full pages. This is a concerns
 > review, **not legal or policy advice and not a promise of approval, a rating or visibility.** Facts marked
 > "confirmed" came from search results of Roblox's own documentation on 2026-11-26 (summaries, not the full
 > text). Rules change: before launch, read each linked page in its current form. The maturity questionnaire
@@ -11,9 +11,9 @@ Pages to read: [Community Standards](https://about.roblox.com/community-standard
 [IP guidelines](https://create.roblox.com/docs/production/publishing/ip-guidelines) ·
 [Content maturity](https://create.roblox.com/docs/production/promotion/content-maturity)
 
-## Summary of risks
+## Summary of concerns
 
-| # | Area | Risk | Level | Fix |
+| # | Area | Concern | Level | Fix |
 |---|---|---|---|---|
 | 1 | Theme: "mogging" | The word means out-ranking others on looks. Could read as appearance-based bullying or harassment | **High** | Make the game about aura, confidence and teamwork; never rate real looks; see below |
 | 2 | Faction "Aura Cartel" | "Cartel" suggests drug crime | **Medium** | Rename (suggest **Aura Collective**) |
@@ -29,7 +29,7 @@ Pages to read: [Community Standards](https://about.roblox.com/community-standard
 
 ## 1. Theme: "mogging"
 
-The idea is the risk, more than the word. If the game asks players to judge each other's faces, bodies or
+The idea is the concern, more than the word. If the game asks players to judge each other's faces, bodies or
 avatars, or lets one player be labelled "mogged" (beaten on looks), it can look like appearance-based bullying
 and could break harassment rules in the Community Standards. Safer design:
 
@@ -47,7 +47,7 @@ and could break harassment rules in the Community Standards. Safer design:
 ## 2. Faction and rank names
 
 - Rename **Aura Cartel** (suggest **Aura Collective**, or Aura Clan). Update `docs/decisions.md` if you accept.
-- All ten ranks are positive (Rookie to Mog God). Keep it that way. Do not add ranks like "Beta" or "Incel", and do
+- All ten ranks are positive (Rookie to Mog God). Keep it that way. Do not add ranks that put anyone down, and do
   not use appearance words as rank insults.
 - Do not use another game's, show's or brand's names. Run the launch scan's brand-word check before publishing.
 

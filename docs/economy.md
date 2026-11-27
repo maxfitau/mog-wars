@@ -23,7 +23,7 @@ change, run `python3 tools/pacing.py --ranks` (it reads the config file directly
 | War bonus | 60 for the winning faction, 20 for anyone who contributed at least 5 units |
 | Rank-up box | A box on each rank-up (tier rises with rank) |
 | War box | One box per war for every contributor: Veteran for the winning faction, Recruit for the rest (max 12 a day) |
-| Daily streak | 30, 40, 50, 60, 80, 100, 150 (7-day cycle, then repeats) |
+| Daily box (7-day streak) | Recruit on days 1 to 3, Veteran on days 4 to 6, Elite on day 7, then the cycle repeats. Skipping a day restarts at day 1 |
 | Barracks | 6 per hour plus 2 per rank, filling up to 8 hours |
 | Selling units | Tank 150, horse 100 |
 
@@ -79,7 +79,7 @@ Target met: a casual player reaches Chad in about a week (day 6) and Mog God in 
 44), inside the one to two month goal. A light player takes about three months, a deliberate choice: they still
 progress every session, and no tier is gated by money.
 
-## Risks and what to tune first
+## Concerns and what to tune first
 
 - **Hardcore speed.** 9 days to Mog God is fast. If real data shows this, raise Titan and Mog God costs rather
   than cutting rewards.

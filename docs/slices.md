@@ -106,7 +106,7 @@ war, and sell units for Mog Points.
 
 ## 11. Daily streak and barracks
 
-**Build:** the 7-day streak and offline barracks income, both on the server clock.
+**Build (code written, not yet playtested):** the 7-day daily box streak and offline barracks income, both on the server clock.
 **Test:** pure tests for streak days, resets and the barracks cap. In Studio: change the saved time to simulate days.
 **Done when:** a double claim is impossible and income never exceeds the cap.
 

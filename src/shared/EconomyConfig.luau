@@ -80,7 +80,7 @@ export type Config = {
 		horse: { sellValue: number, speedMultiplier: number },
 	},
 	dailyStreak: {
-		rewards: { number },
+		rewards: { string }, -- box tier for streak day 1 to 7
 	},
 	barracks: {
 		baseRatePerHour: number,
@@ -201,7 +201,7 @@ local config: Config = {
 		horse = { sellValue = 100, speedMultiplier = 1.3 }, -- 30 percent faster movement for one player
 	},
 	dailyStreak = {
-		rewards = { 30, 40, 50, 60, 80, 100, 150 }, -- Mog Points for streak day 1 to 7, then the cycle repeats
+		rewards = { "recruit", "recruit", "recruit", "veteran", "veteran", "veteran", "elite" }, -- the daily box, day 1 to 7, then the cycle repeats
 	},
 	barracks = {
 		baseRatePerHour = 6,

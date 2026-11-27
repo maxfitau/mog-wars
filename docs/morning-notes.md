@@ -3,6 +3,9 @@
 Good morning. Short version: all eight written tasks are done and committed (nothing pushed), but **slice 1 was
 not built or playtested** because I could not reach your PC, Studio or `DESIGN.md`.
 
+> **Update:** `DESIGN.md` is now in the repo and slices 1 to 11 are written. Read `docs/design-reconciliation.md`
+> for what differs from the brief. The notes below are from the first night and are kept for history.
+
 ## Read this first: where things are
 - The project lives in the **cloud container** at `/home/user/mog-wars`, a git repo with 8 commits on `main`.
   It is **not** in `C:\dev\mog-wars` and **not on GitHub**. I delivered a zip of it to you in chat.
@@ -20,7 +23,7 @@ not built or playtested** because I could not reach your PC, Studio or `DESIGN.m
    regular 21, hardcore 9.
 5. Pure-logic modules in `src/shared`: `CaptureBar`, `ContributionScoring`, `BoxRoll`, `RankRules`, each with a
    test in `tests/`.
-6. `docs/compliance.md`: risk review with fixes.
+6. `docs/compliance.md`: concerns review with fixes.
 7. `docs/store-page.md`: 5 titles, 3 icons, 3 thumbnails, description.
 8. `docs/decisions.md`: 16 decisions with reasons.
 
@@ -43,8 +46,8 @@ a day then half; barracks capped at 8 hours.
 
 ## Needs your input
 1. Copy `DESIGN.md` in and reconcile (above).
-2. Rename "Aura Cartel" (suggest "Aura Collective") or accept the risk.
-3. Decide how to handle the "mogging" theme risk: read `docs/compliance.md` section 1.
+2. Rename "Aura Cartel" (suggest "Aura Collective") or accept the concern.
+3. Decide how to handle the "mogging" theme concern: read `docs/compliance.md` section 1.
 4. Pick a title (`docs/store-page.md`).
 5. Approve installs (Rokit, Rojo, StyLua, Selene, Luau) and connect Studio MCP.
 6. Pacing: are about 6 days to Chad and about 6 weeks to Mog God right?

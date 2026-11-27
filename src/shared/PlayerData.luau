@@ -13,17 +13,20 @@ export type Data = {
 	cosmetics: { [string]: boolean }, -- owned cosmetic ids
 	boxDay: number, -- UTC day number the boxesToday count belongs to
 	boxesToday: number, -- boxes earned from wars on boxDay (daily cap)
+	streakDay: number, -- 0 = never claimed, else 1 to 7: the day of the last daily claim
+	lastClaimDay: number, -- UTC day number of the last daily claim, 0 = never
+	barracksSince: number, -- unix seconds when barracks income started building, 0 = not started
 }
 
 local PlayerData = {}
 
-PlayerData.CURRENT_VERSION = 4
+PlayerData.CURRENT_VERSION = 5
 PlayerData.MAX_UNITS = 1000
 PlayerData.MAX_BOXES_PER_TIER = 1000
 PlayerData.MAX_POINTS = 1_000_000_000 -- far above anything reachable; stops runaway or overflowing values
 
 function PlayerData.template(): Data
-	return { version = PlayerData.CURRENT_VERSION, points = 0, rank = 1, warsToday = 0, lastWarDay = 0, boxes = {}, units = {}, cosmetics = {}, boxDay = 0, boxesToday = 0 }
+	return { version = PlayerData.CURRENT_VERSION, points = 0, rank = 1, warsToday = 0, lastWarDay = 0, boxes = {}, units = {}, cosmetics = {}, boxDay = 0, boxesToday = 0, streakDay = 0, lastClaimDay = 0, barracksSince = 0 }
 end
 
 local function isWholeNumber(value: any): boolean
@@ -172,6 +175,12 @@ function PlayerData.migrate(data: any): boolean
 		data.boxesToday = 0
 		data.version = 4
 	end
+	if data.version == 4 then
+		data.streakDay = 0
+		data.lastClaimDay = 0
+		data.barracksSince = 0
+		data.version = 5
+	end
 	return true
 end
 
@@ -219,6 +228,13 @@ function PlayerData.isValid(data: any): boolean
 		and data.boxDay >= 0
 		and isWholeNumber(data.boxesToday)
 		and data.boxesToday >= 0
+		and isWholeNumber(data.streakDay)
+		and data.streakDay >= 0
+		and data.streakDay <= 7
+		and isWholeNumber(data.lastClaimDay)
+		and data.lastClaimDay >= 0
+		and isWholeNumber(data.barracksSince)
+		and data.barracksSince >= 0
 end
 
 -- Add points to a save table. Returns true if it changed. Rejects bad amounts and never exceeds the cap.

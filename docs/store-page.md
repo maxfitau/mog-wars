@@ -1,6 +1,6 @@
 # Store page draft
 
-> A draft written without `DESIGN.md`, before the game is built. **Only advertise what is built and tested at
+> A draft written before `DESIGN.md` was available and before the game is built (see `docs/design-reconciliation.md`). **Only advertise what is built and tested at
 > launch**: trim the description to match. Everything must be honest (no promises of free items or Robux, no
 > "like <game>"). Images must be your own work or properly licensed; I can only write briefs, not make images.
 > Specs (confirmed 2026-11-26 from Roblox docs): icon is square, at least 512 x 512; thumbnails are 16:9,
@@ -16,7 +16,7 @@
 | 4 | **Rise of the Aura Legions** | Epic tone, rank climb implied | Check the name is original |
 | 5 | **Zone Rush Wars** | Fast, action-first, no slang | Generic; weaker identity |
 
-Recommendation: **Aura Wars: Zone Clash** for lowest risk, or **Mog Wars** if you accept the slang risk after
+Recommendation: **Aura Wars: Zone Clash** for the lowest chance of trouble, or **Mog Wars** if you accept the slang concern after
 reading the compliance notes. Search the catalogue for clashes before committing to any.
 
 ## 3 icon concepts

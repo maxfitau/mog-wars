@@ -12,9 +12,9 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 6 | A war lasts 10 minutes, 16 players, 4 factions auto-balanced | A short round suits casual sessions; DESIGN.md may set different numbers |
 | 7 | Map: four safe home bases plus five contested zones (centre worth double) | Gives each faction a near target and one shared prize without a complicated layout |
 | 8 | Mog-off outcome is decided by tap count only, ties go to the defender, ranks give no advantage | Keeps the signature moment skill-based and clear of any power-for-pay or power-for-grind advantage |
-| 9 | Boxes are earned in play and never sold for Robux | Avoids the paid random item rules and any pay-to-win risk |
+| 9 | Boxes are earned in play and never sold for Robux | Avoids the paid random item rules and any pay-to-win problem |
 | 10 | Rank-ups are paid for with Mog Points (a sink), not decided by lifetime points | The brief lists "rank-up costs", which reads as a price; it also keeps points useful at every level |
-| 11 | Rank names beyond Chad and Mog God are placeholders and all positive: Rookie, Grunt, Fighter, Veteran, Captain, Warlord, Chad, Alpha, Titan, Mog God | Avoids ranks that demean low-ranked players, which would clash with the appearance-bullying risk in docs/compliance.md |
+| 11 | Rank names beyond Chad and Mog God are placeholders and all positive: Rookie, Grunt, Fighter, Veteran, Captain, Warlord, Chad, Alpha, Titan, Mog God | Avoids ranks that demean low-ranked players, which would clash with the appearance-bullying concern in docs/compliance.md |
 | 12 | Aura power rises about 10 percent per rank (Mog God about 1.9x a Rookie) | Rewards progress without letting a veteran carry a team alone |
 | 13 | Single currency Mog Points; all numbers in `src/shared/EconomyConfig.luau` | One source of truth keeps the sim, code and docs in sync |
 | 14 | Full rewards for 8 wars a day, half after; barracks capped at 8 hours | Healthy play for young players, no grind pressure |
@@ -48,3 +48,7 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 42 | A tank boosts the whole faction's push in the zone where it is deployed, one tank per faction per zone, 50 percent boost | Gives teams a reason to defend a zone together; the limit stops stacking |
 | 43 | Every unit boost must be between 1x and 2x (checked in UnitRules and a test on the real config) | A bad config edit cannot create an unbeatable unit |
 | 44 | The horse sets walk speed 30 percent higher and is re-applied after respawn until the war ends; a mog-off stun still stops movement | Speed is a convenience, not a way to dodge the duel rule |
+| 45 | The daily streak reward is a box (Recruit days 1 to 3, Veteran 4 to 6, Elite 7), not points | `DESIGN.md` says "Daily box with a 7-day streak" and boxes are earned only; pacing re-checked (casual Chad day 6, Mog God day 43) |
+| 46 | The claim day and the box are saved in the same step; the server clock (UTC day) decides; a saved day in the future is refused | A double claim or clock trick cannot pay twice |
+| 47 | Barracks starts building on a player's first visit and pays 6 points an hour plus 2 per rank, capped at 8 hours, collected by button | Matches "barracks earn points offline"; small next to active play |
+| 48 | `DESIGN.md` is the authority; every difference is listed in docs/design-reconciliation.md and large changes wait for the owner's yes | The brief arrived after slices 1 to 11 were built, so changing ranks and boxes needs the owner's approval of the new numbers |

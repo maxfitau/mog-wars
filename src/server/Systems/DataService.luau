@@ -9,6 +9,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ProfileStore = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("ProfileStore"))
 local RankRules = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("RankRules"))
 local BoxRoll = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("BoxRoll"))
+local BarracksRules = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("BarracksRules"))
+local StreakRules = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("StreakRules"))
 local PlayerData = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("PlayerData"))
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("EconomyConfig"))
 
@@ -25,6 +27,16 @@ local function syncInventory(player: Player, data: PlayerData.Data)
 	for unitId in Config.units do
 		player:SetAttribute("Units_" .. unitId, data.units[unitId] or 0)
 	end
+end
+
+-- Mirror the daily-claim and barracks state to attributes for the client to display (read only):
+-- DailyReady (bool), DailyDay (the streak day the next claim would be), BarracksPending (points waiting).
+local function syncRewards(player: Player, data: PlayerData.Data)
+	local now = os.time()
+	local ready, day = StreakRules.preview(data.streakDay, data.lastClaimDay, PlayerData.dayNumber(now), #Config.dailyStreak.rewards)
+	player:SetAttribute("DailyReady", ready)
+	player:SetAttribute("DailyDay", day)
+	player:SetAttribute("BarracksPending", BarracksRules.pending(now, data.barracksSince, data.rank, Config.barracks))
 end
 
 local function load(player: Player)
@@ -61,6 +73,10 @@ local function load(player: Player)
 	player:SetAttribute("Points", profile.Data.points)
 	player:SetAttribute("Rank", profile.Data.rank)
 	syncInventory(player, profile.Data :: any)
+	if profile.Data.barracksSince == 0 then
+		profile.Data.barracksSince = os.time() -- the barracks starts building from the first visit
+	end
+	syncRewards(player, profile.Data :: any)
 end
 
 -- The live save table for a player, or nil while loading or after they leave.
@@ -243,6 +259,56 @@ function DataService.openBox(player: Player, tierId: any, random: () -> number):
 	end
 	syncInventory(player, data)
 	return result
+end
+
+-- Refresh the rewards attributes (called on a timer so the numbers stay current).
+function DataService.syncRewards(player: Player)
+	local data = DataService.get(player)
+	if data then
+		syncRewards(player, data)
+	end
+end
+
+-- Claim today's daily box. All or nothing: the box is added and the streak advances together.
+-- Returns ok, a stable reason, the box tier and the streak day claimed.
+function DataService.claimDaily(player: Player): (boolean, string, string, number)
+	local data = DataService.get(player)
+	if not data then
+		return false, "not_loaded", "", 0
+	end
+	local today = PlayerData.dayNumber(os.time())
+	local ok, reason, day = StreakRules.claim(data.streakDay, data.lastClaimDay, today, #Config.dailyStreak.rewards)
+	if not ok then
+		return false, reason or "bad_input", "", 0
+	end
+	local tier = Config.dailyStreak.rewards[day]
+	if tier == nil or Config.boxes.tiers[tier] == nil or not PlayerData.addBox(data, tier) then
+		return false, "boxes_full", "", 0 -- nothing has changed yet, so the claim is still available
+	end
+	data.streakDay = day
+	data.lastClaimDay = today
+	syncInventory(player, data)
+	syncRewards(player, data)
+	return true, "", tier, day
+end
+
+-- Collect the barracks income. All or nothing. Returns ok, a stable reason and the points paid.
+function DataService.collectBarracks(player: Player): (boolean, string, number)
+	local data = DataService.get(player)
+	if not data then
+		return false, "not_loaded", 0
+	end
+	local now = os.time()
+	local amount = BarracksRules.pending(now, data.barracksSince, data.rank, Config.barracks)
+	if amount <= 0 then
+		data.barracksSince = BarracksRules.normalize(now, data.barracksSince) -- repair a start time in the future
+		return false, "nothing_to_collect", 0
+	end
+	PlayerData.addPoints(data, amount)
+	data.barracksSince = now
+	player:SetAttribute("Points", data.points)
+	syncRewards(player, data)
+	return true, "", amount
 end
 
 function DataService.init()

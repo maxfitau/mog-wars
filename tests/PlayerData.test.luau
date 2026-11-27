@@ -95,6 +95,10 @@ PlayerData.addUnit(owner, "tank")
 check("adding a cosmetic works once", PlayerData.addCosmetic(owner, "trail_spark") and not PlayerData.addCosmetic(owner, "trail_spark"))
 check("invalid unit counts are rejected", not PlayerData.isValid(save({ units = { tank = -1 } })))
 check("a cosmetic marked false is invalid", not PlayerData.isValid(save({ cosmetics = { trail_spark = false } })))
+check("streak day above 7 is invalid", not PlayerData.isValid(save({ streakDay = 8 })))
+check("negative barracks time is invalid", not PlayerData.isValid(save({ barracksSince = -1 })))
+local v4: any = { version = 4, points = 9, rank = 2, warsToday = 0, lastWarDay = 0, boxes = {}, units = {}, cosmetics = {}, boxDay = 0, boxesToday = 0 }
+check("migrate upgrades version 4", PlayerData.migrate(v4) and PlayerData.isValid(v4) and v4.streakDay == 0)
 local v3: any = { version = 3, points = 1, rank = 1, warsToday = 0, lastWarDay = 0, boxes = { recruit = 2 } }
 check("migrate upgrades version 3 and keeps boxes", PlayerData.migrate(v3) and PlayerData.isValid(v3) and v3.boxes.recruit == 2)
 

@@ -1,9 +1,8 @@
 # Mog Wars: product brief
 
-> Written overnight WITHOUT access to `DESIGN.md` (it was not readable from the cloud session). It is built
-> from the owner's message and the defaults recorded in `docs/decisions.md`. **Where this file and
-> `DESIGN.md` disagree, `DESIGN.md` wins**, including its 5 design rules and theme guardrails. Check this
-> brief against them before building anything.
+> Written before `DESIGN.md` was available, from the owner's defaults. `DESIGN.md` is now in the repo root and
+> **wins where they disagree**, including its 5 design rules and theme guardrails. The differences are listed
+> in `docs/design-reconciliation.md`.
 
 ## One line
 

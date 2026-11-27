@@ -71,7 +71,7 @@ def load():
     cfg["boxEV"] = {t: sum(w * v for w, v in drops) / sum(w for w, _ in drops) for t, drops in tiers.items()}
     cfg["boxWeightSums"] = {t: sum(w for w, _ in drops) for t, drops in tiers.items()}
     streak = block(text, "dailyStreak")
-    cfg["streak"] = [float(x) for x in re.findall(r"[0-9.]+", block(streak, "rewards"))]
+    cfg["streak"] = [cfg["boxEV"][t] for t in re.findall(r'"([^"]+)"', block(streak, "rewards"))]  # the daily box, valued at its expected points
     bar = block(text, "barracks")
     cfg["barracks"] = {k: number(bar, k) for k in ("baseRatePerHour", "perRankRatePerHour", "maxStoredHours")}
     return cfg

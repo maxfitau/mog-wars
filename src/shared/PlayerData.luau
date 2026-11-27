@@ -22,18 +22,19 @@ export type Data = {
 	trainingToday: number, -- strides counted on trainingDay (daily cap)
 	equipped: { [string]: string }, -- cosmetic slot to the cosmetic id worn there
 	receipts: { [string]: number }, -- Robux purchase ids already applied, with when (never grant twice)
+	season: { week: number, points: { [string]: number }, prevWeek: number, prevPoints: { [string]: number }, claimed: number },
 }
 
 local PlayerData = {}
 
-PlayerData.CURRENT_VERSION = 7
+PlayerData.CURRENT_VERSION = 8
 PlayerData.MAX_RECEIPT_ENTRIES = 400
 PlayerData.MAX_UNITS = 1000
 PlayerData.MAX_BOXES_PER_TIER = 1000
 PlayerData.MAX_POINTS = 1_000_000_000 -- far above anything reachable; stops runaway or overflowing values
 
 function PlayerData.template(): Data
-	return { version = PlayerData.CURRENT_VERSION, points = 0, rank = 1, warsToday = 0, lastWarDay = 0, boxes = {}, units = {}, cosmetics = {}, boxDay = 0, boxesToday = 0, streakDay = 0, lastClaimDay = 0, barracksSince = 0, trainingLevel = 0, trainingProgress = 0, trainingDay = 0, trainingToday = 0, equipped = {}, receipts = {} }
+	return { version = PlayerData.CURRENT_VERSION, points = 0, rank = 1, warsToday = 0, lastWarDay = 0, boxes = {}, units = {}, cosmetics = {}, boxDay = 0, boxesToday = 0, streakDay = 0, lastClaimDay = 0, barracksSince = 0, trainingLevel = 0, trainingProgress = 0, trainingDay = 0, trainingToday = 0, equipped = {}, receipts = {}, season = { week = 0, points = {}, prevWeek = 0, prevPoints = {}, claimed = 0 } }
 end
 
 local function isWholeNumber(value: any): boolean
@@ -108,6 +109,33 @@ function PlayerData.receiptsValid(receipts: any): boolean
 		end
 	end
 	return true
+end
+
+local function pointMapValid(points: any): boolean
+	if type(points) ~= "table" then
+		return false
+	end
+	local count = 0
+	for key, value in points do
+		count += 1
+		if type(key) ~= "string" or key == "" or #key > 4 or not isWholeNumber(value) or value < 0 or value > 1e9 or count > 8 then
+			return false
+		end
+	end
+	return true
+end
+
+-- True when the season record has the right shape and sane whole numbers.
+function PlayerData.seasonValid(season: any): boolean
+	return type(season) == "table"
+		and isWholeNumber(season.week)
+		and season.week >= 0
+		and isWholeNumber(season.prevWeek)
+		and season.prevWeek >= 0
+		and isWholeNumber(season.claimed)
+		and season.claimed >= 0
+		and pointMapValid(season.points)
+		and pointMapValid(season.prevPoints)
 end
 
 -- Give the player one unopened box of a tier. Returns false for an empty tier name or a full stack.
@@ -228,6 +256,10 @@ function PlayerData.migrate(data: any): boolean
 		data.receipts = {}
 		data.version = 7
 	end
+	if data.version == 7 then
+		data.season = { week = 0, points = {}, prevWeek = 0, prevPoints = {}, claimed = 0 }
+		data.version = 8
+	end
 	return true
 end
 
@@ -294,6 +326,7 @@ function PlayerData.isValid(data: any): boolean
 		and data.trainingToday <= 86400
 		and PlayerData.equippedValid(data.equipped)
 		and PlayerData.receiptsValid(data.receipts)
+		and PlayerData.seasonValid(data.season)
 end
 
 -- Add points to a save table. Returns true if it changed. Rejects bad amounts and never exceeds the cap.

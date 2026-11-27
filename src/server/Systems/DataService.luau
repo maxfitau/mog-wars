@@ -14,6 +14,7 @@ local StreakRules = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChil
 local TrainingRules = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("TrainingRules"))
 local CosmeticCatalog = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("CosmeticCatalog"))
 local CosmeticRules = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("CosmeticRules"))
+local SeasonRules = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("SeasonRules"))
 local PlayerData = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("PlayerData"))
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("EconomyConfig"))
 
@@ -68,6 +69,11 @@ local function syncCosmetics(player: Player, data: PlayerData.Data)
 	end
 end
 
+-- Mirror this week's season points (all factions together) to the "SeasonPoints" attribute.
+local function syncSeason(player: Player, data: PlayerData.Data)
+	player:SetAttribute("SeasonPoints", SeasonRules.total(data.season.points))
+end
+
 local function load(player: Player)
 	if profiles[player] or not store then
 		return
@@ -113,9 +119,11 @@ local function load(player: Player)
 		profile.Data.barracksSince = os.time() -- the barracks starts building from the first visit
 	end
 	syncRewards(player, profile.Data :: any)
+	SeasonRules.roll(profile.Data.season :: any, SeasonRules.weekIndex(os.time())) -- a new week starts fresh
 	CosmeticRules.cleanEquipped(profile.Data :: any, CosmeticCatalog :: any) -- drop anything not owned or no longer valid
 	syncTraining(player, profile.Data :: any)
 	syncCosmetics(player, profile.Data :: any)
+	syncSeason(player, profile.Data :: any)
 end
 
 -- The live save table for a player, or nil while loading or after they leave.
@@ -373,6 +381,45 @@ function DataService.equipCosmetic(player: Player, slot: any, id: any): (boolean
 	end
 	syncCosmetics(player, data)
 	return true, ""
+end
+
+-- Add season points earned for a faction. Rolls the season forward if the week changed. Returns true if added.
+function DataService.addSeasonPoints(player: Player, faction: number, amount: number, week: number): boolean
+	local data = DataService.get(player)
+	if not data or not SeasonRules.addPoints(data.season :: any, faction, amount, week) then
+		return false
+	end
+	syncSeason(player, data)
+	return true
+end
+
+-- Bring a player's season up to `week` (so last week becomes "previous"). Returns the season record or nil.
+function DataService.rollSeason(player: Player, week: number): SeasonRules.Season?
+	local data = DataService.get(player)
+	if not data then
+		return nil
+	end
+	SeasonRules.roll(data.season :: any, week)
+	syncSeason(player, data)
+	return data.season :: any
+end
+
+-- Mark the previous week's reward as resolved (whether or not it was earned).
+function DataService.markSeasonClaimed(player: Player)
+	local data = DataService.get(player)
+	if data and data.season.prevWeek > data.season.claimed then
+		data.season.claimed = data.season.prevWeek
+	end
+end
+
+-- Give a cosmetic the player does not own yet (season reward). Returns true if it was added.
+function DataService.grantCosmetic(player: Player, id: string): boolean
+	local data = DataService.get(player)
+	if not data or CosmeticCatalog.byId[id] == nil or not PlayerData.addCosmetic(data, id) then
+		return false
+	end
+	syncCosmetics(player, data)
+	return true
 end
 
 -- Refresh the rewards attributes (called on a timer so the numbers stay current).

@@ -86,6 +86,7 @@ for _, item in CosmeticCatalog.items do
 	end
 end
 check("the shop has items", shopItems >= 5)
+check("the season champion title exists and is not sold", CosmeticCatalog.byId.title_season_champion ~= nil and (CosmeticCatalog.byId.title_season_champion :: any).source == "season" and (CosmeticCatalog.byId.title_season_champion :: any).productId == 0)
 
 -- equipping
 local function newData(): CosmeticRules.Data

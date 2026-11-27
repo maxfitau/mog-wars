@@ -33,7 +33,7 @@ shoving rivals, winning tapping duels called mog-offs, and spending the Mog Poin
 
 | System | What it does | Rules that matter |
 |---|---|---|
-| Factions | Four placeholder factions: Jawline Legion, Mewing Order, Sigma Syndicate, Aura Cartel (names may change, see `docs/compliance.md`) | Server assigns and balances; a player cannot switch mid-war |
+| Factions | Four placeholder factions: Jawline Legion, Mewing Order, Sigma Syndicate, Aura Cartel (names may change, see `docs/compliance.md`) | Server assigns and balances; a joining player is placed with a friend when that keeps teams within a couple of players; a player cannot switch mid-war |
 | Map | Four home bases (safe, cannot be captured) and nine contested zones (eight worth 1, the centre worth double). Layout is data in `src/shared/MapLayout.luau` | Zones are tagged parts; the server finds them by tag |
 | Capture bar | Per zone; stronger faction presence pushes progress; enemies push it back | Pure math in `src/shared`, server runs it every tick (`docs/economy.md` has the numbers) |
 | Aura power | Each player's push strength in the capture bar, raised by training in the Training Arena | Capped at about 1.9x; 10 minutes of training count per day; never for sale |
@@ -43,6 +43,8 @@ shoving rivals, winning tapping duels called mog-offs, and spending the Mog Poin
 | Mog Points | The one currency. Earned from captures by contribution, boxes, streaks, barracks; spent on rank-ups | Granted by the server only |
 | Ranks | Seven ranks: NPC, Rookie, Sigma, Chadlite, Chad, Gigachad, Mog God | Cost curve in `docs/economy.md` |
 | Boxes | Earned on captures by territory value (Gold, Diamond, Ultra) and from the daily streak, never bought. Published odds | Odds shown to players, no pity or boosts |
+| Squad bonus | Capturing with friends on your faction gives each of you a little extra | +10 percent per friend, at most +30 percent, never taken from others |
+| Weekly season | Factions compete for a week; members of the winning faction who took part earn a cosmetic title | Standings show factions only; no power rewards |
 | Daily box | A 7-day streak, one box a day | Server clock, UTC day |
 | Barracks | Offline income that fills while away, up to a cap, collected on return | Server clock, capped, tiny next to active play |
 

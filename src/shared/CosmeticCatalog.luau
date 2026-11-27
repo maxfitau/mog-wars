@@ -4,6 +4,7 @@
 -- tests/CosmeticCatalog.test.luau fails if an item ever gains a gameplay field.
 --
 -- source "box"  = found in boxes only (the ids box drops use, see EconomyConfig); never sold.
+-- source "season" = awarded for winning a weekly faction season; never sold.
 -- source "shop" = sold for Robux as a developer product. productId 0 means "not set up yet": create the
 --                 product on the Creator Dashboard, then paste its id here. Unset items show "Not on sale yet".
 -- slot: "trail" (behind you), "aura" (around you) or "title" (small text above your head).
@@ -31,6 +32,8 @@ CosmeticCatalog.items = {
 	{ id = "trail_spark", name = "Spark Trail", slot = "trail", source = "box", productId = 0, rgb = { 255, 235, 150 } },
 	{ id = "aura_frost", name = "Frost Aura", slot = "aura", source = "box", productId = 0, rgb = { 150, 220, 255 } },
 	{ id = "aura_gold", name = "Gold Aura", slot = "aura", source = "box", productId = 0, rgb = { 255, 205, 60 } },
+	-- awarded by weekly seasons
+	{ id = "title_season_champion", name = "Title: Season Champion", slot = "title", source = "season", productId = 0, text = "Season Champion" },
 	-- sold in the shop
 	{ id = "trail_neon_blue", name = "Neon Blue Trail", slot = "trail", source = "shop", productId = 0, rgb = { 60, 140, 255 } },
 	{ id = "trail_neon_pink", name = "Neon Pink Trail", slot = "trail", source = "shop", productId = 0, rgb = { 255, 90, 190 } },
@@ -50,7 +53,7 @@ end
 for _, item in CosmeticCatalog.items do
 	assert(byId[item.id] == nil, "duplicate cosmetic id: " .. item.id)
 	assert(slotSet[item.slot], "bad slot for " .. item.id)
-	assert(item.source == "box" or item.source == "shop", "bad source for " .. item.id)
+	assert(item.source == "box" or item.source == "shop" or item.source == "season", "bad source for " .. item.id)
 	assert(item.productId >= 0 and item.productId == math.floor(item.productId), "bad product id for " .. item.id)
 	byId[item.id] = item
 	if item.productId ~= 0 then

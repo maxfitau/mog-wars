@@ -13,6 +13,7 @@ local FactionRules = require(Shared:WaitForChild("FactionRules"))
 local WarRules = require(Shared:WaitForChild("WarRules"))
 local CaptureSystem = require(script.Parent:WaitForChild("CaptureSystem"))
 local DataService = require(script.Parent:WaitForChild("DataService"))
+local SeasonService = require(script.Parent:WaitForChild("SeasonService"))
 
 local WarSystem = {}
 
@@ -60,6 +61,10 @@ local function finishWar()
 		if player then
 			DataService.addPoints(player, WarRules.applyMultiplier(amount, DataService.rewardMultiplier(player)))
 			DataService.recordWar(player) -- count it after paying, so the 9th war is the first reduced one
+			local result = results[userId]
+			if result and winner ~= 0 and result.faction == winner then
+				SeasonService.earn(player, "warWin", 1)
+			end
 		end
 	end
 
@@ -76,6 +81,9 @@ local function startWar()
 	publishScores()
 	for _, player in Players:GetPlayers() do
 		task.spawn(function()
+			if player:GetAttribute("Faction") == nil then
+				return -- still being placed on a faction; they spawn when that finishes
+			end
 			player:LoadCharacter() -- back to the faction base for a fresh start
 		end)
 	end

@@ -150,3 +150,12 @@ should show everything it gives before purchase.
 - **Friend spotting:** uses the friends list on the server and adds no new way to chat or contact.
 - **Battle pass:** cosmetic rewards only, everything it gives shown before purchase, no countdown pressure, and
   Roblox's current rules on paid passes read first. It must not be a path to points, boxes, units, aura or training.
+
+## 11. Seasons, friends and the squad bonus (built)
+
+- **Friends:** uses Roblox's friends list on the server to place friends together and to give the squad bonus. It adds
+  no new chat, no invites and no way to contact anyone. The bonus is capped at +30 percent and is never taken from others.
+- **Seasons:** standings show **factions only**, never individual players, and there is no player leaderboard to
+  pressure children. The reward is a cosmetic title (never points, boxes, units, aura or training) that can never
+  be bought. The shared totals use Roblox MemoryStore; if it fails the game keeps working and shows standings as zero.
+- **Needs a live test:** the MemoryStore part cannot be tested in the cloud or in Studio, only in a published place.

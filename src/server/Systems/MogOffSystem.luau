@@ -15,6 +15,7 @@ local Config = require(Shared:WaitForChild("EconomyConfig"))
 local MogOffRules = require(Shared:WaitForChild("MogOffRules"))
 local ShoveRules = require(Shared:WaitForChild("ShoveRules"))
 local CaptureSystem = require(script.Parent:WaitForChild("CaptureSystem"))
+local SeasonService = require(script.Parent:WaitForChild("SeasonService"))
 
 local LEAD_IN_SECONDS = 1 -- "get ready" time before taps count
 
@@ -90,6 +91,7 @@ local function endDuel(active: Active, cancelled: boolean)
 		knockbackRemote:FireClient(loser, dx, dz, Config.mogOff.knockbackStuds)
 	end
 	CaptureSystem.creditMogOffWin(winner, loser)
+	SeasonService.earn(winner, "mogOffWin", 1)
 end
 
 local function startDuel(a: Player, b: Player, zoneOwner: number)

@@ -26,7 +26,8 @@ clients can only ask; the server decides.
 | 14 | Launch prep | all |
 | 15 | Training Arena: treadmill (built) | 8 |
 | 16 | Training stations by rank (planned, not built) | 15, 8 |
-| 17 | Battle pass, cosmetic only (planned, not built) | 12 |
+| 17 | Battle pass, cosmetic only (planned, not built) | 12, 18 |
+| 18 | Seasons, friends and the squad bonus | 5, 12 |
 
 ## 1. Capture one territory by standing in it
 
@@ -170,6 +171,25 @@ the server.
 The owner says a battle pass is mandatory at some point. It is the "cosmetic season pass" already on the money list in
 `DESIGN.md`, so it follows design rule 1: **cosmetic rewards only** (trails, auras, titles, banners, emotes,
 station skins), never points, boxes, units, aura, training speed or anything that wins wars. Ideas to settle:
-a free track and a paid track; progress from season points (slice 11b) or wars played; every reward shown before
+a free track and a paid track; progress from season points (slice 18) or wars played; every reward shown before
 purchase; no countdown pressure; Roblox's current rules read first. Build after the cosmetic shop is tested with
 real purchases.
+
+## 18. Seasons, friends and the squad bonus
+
+**Build (code written, not yet playtested):**
+- **Friends:** `FriendService` caches which players are Roblox friends. A joining player is placed on a friend's
+  faction when that keeps the teams within a couple of players (`FactionRules.pickFaction`); otherwise on the
+  smallest faction. Characters now load only after the faction is chosen (the faction system also handles respawns).
+- **Squad bonus:** when a zone is captured, each paid player gets +10 percent of their points per friend (same
+  faction, also paid for that capture), up to +30 percent (`SquadRules`). It is extra, never taken from anyone.
+- **Weekly season:** one UTC week, Monday to Sunday. Players earn season points for their faction from captures
+  (per zone value), war wins and mog-off wins (`SeasonRules`). Servers add their points to shared faction
+  totals (`SeasonStore`, MemoryStore outside Studio). The winning faction's members who earned enough points get
+  the cosmetic "Season Champion" title once. A panel shows factions' scores, time left and your points.
+**Test:** pure tests (`tests/SquadSeasonRules.test.luau`, faction preference in `tests/FactionRules.test.luau`). In
+Studio: two accounts that are Roblox friends join and land on the same faction; capture together and see the
+extra points; check the season panel counts points. Live (needs a published scratch place): two servers add to
+the same totals; change the clock or wait for a Monday to see the champion title.
+**Done when:** friends land together without unbalancing teams, the squad bonus never exceeds the cap, season
+points are counted once, and the champion title is granted once.

@@ -17,11 +17,14 @@ local BoxRoll = require(Shared:WaitForChild("BoxRoll"))
 local ContributionScoring = require(Shared:WaitForChild("ContributionScoring"))
 local TrainingRules = require(Shared:WaitForChild("TrainingRules"))
 local SpawnRules = require(Shared:WaitForChild("SpawnRules"))
+local SquadRules = require(Shared:WaitForChild("SquadRules"))
 local ShoveRules = require(Shared:WaitForChild("ShoveRules"))
 local UnitRules = require(Shared:WaitForChild("UnitRules"))
 local WarRules = require(Shared:WaitForChild("WarRules"))
 local ZoneGeometry = require(Shared:WaitForChild("ZoneGeometry"))
 local DataService = require(script.Parent:WaitForChild("DataService"))
+local FriendService = require(script.Parent:WaitForChild("FriendService"))
+local SeasonService = require(script.Parent:WaitForChild("SeasonService"))
 
 local HEADROOM = 8 -- studs above the zone that still count as standing in it
 local UNOWNED_COLOR = Color3.fromRGB(200, 200, 200)
@@ -157,14 +160,30 @@ local function payOut(record: ZoneRecord, winner: number)
 		minContribution = Config.capture.minContribution,
 		minAward = Config.capture.minAward,
 	})
+	-- Work out each paid player's points first (the daily reward multiplier applies), then the squad bonus:
+	-- friends on the same faction who were paid for this capture each add a little to a player's own points.
+	local finalAmounts: { [number]: number } = {}
+	local present: { [number]: Player } = {}
+	local members: { SquadRules.Member } = {}
 	for userId, amount in payouts do
-		local player = Players:GetPlayerByUserId(userId)
+		local player = Players:GetPlayerByUserId(userId) -- a player who left before payout loses that share
 		if player then
-			DataService.addPoints(player, WarRules.applyMultiplier(amount, DataService.rewardMultiplier(player))) -- a player who left before payout loses that share
-			if boxTier then
-				DataService.earnBox(player, boxTier) -- every paid contributor also earns a box, up to the daily cap
-			end
+			present[userId] = player
+			finalAmounts[userId] = WarRules.applyMultiplier(amount, DataService.rewardMultiplier(player))
+			table.insert(members, { id = userId, faction = winner })
 		end
+	end
+	local friendCounts = SquadRules.friendCounts(members, function(a: number, b: number)
+		local playerA, playerB = present[a], present[b]
+		return playerA ~= nil and playerB ~= nil and FriendService.areFriends(playerA, playerB)
+	end)
+	for userId, player in present do
+		local bonus = SquadRules.bonusPoints(finalAmounts[userId], friendCounts[userId] or 0, Config.squad)
+		DataService.addPoints(player, finalAmounts[userId] + bonus)
+		if boxTier then
+			DataService.earnBox(player, boxTier) -- every paid contributor also earns a box, up to the daily cap
+		end
+		SeasonService.earn(player, "capture", zoneValue)
 	end
 	record.contribs = {}
 end

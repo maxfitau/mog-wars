@@ -29,7 +29,7 @@ end
 
 -- Pick the faction with the fewest players. Ties go to the lowest id, so the result is predictable.
 -- `counts` maps faction id to current player count; missing ids count as 0.
-function FactionRules.pickFaction(counts: { [number]: number }): number
+function FactionRules.pickFaction(counts: { [number]: number }, preferred: number?, tolerance: number?): number
 	local bestId, bestCount = 1, math.huge
 	for id = 1, #FactionRules.factions do
 		local count = counts[id] or 0
@@ -37,18 +37,22 @@ function FactionRules.pickFaction(counts: { [number]: number }): number
 			bestId, bestCount = id, count
 		end
 	end
+	-- A friend's faction wins if it is not too much bigger than the smallest one.
+	if preferred and FactionRules.factions[preferred] and (counts[preferred] or 0) <= bestCount + (tolerance or 0) then
+		return preferred
+	end
 	return bestId
 end
 
--- True when the biggest and smallest factions differ by at most one player.
-function FactionRules.isBalanced(counts: { [number]: number }): boolean
+-- True when the biggest and smallest factions differ by at most one player (plus `tolerance`, if given).
+function FactionRules.isBalanced(counts: { [number]: number }, tolerance: number?): boolean
 	local low, high = math.huge, 0
 	for id = 1, #FactionRules.factions do
 		local count = counts[id] or 0
 		low = math.min(low, count)
 		high = math.max(high, count)
 	end
-	return high - low <= 1
+	return high - low <= 1 + (tolerance or 0)
 end
 
 function FactionRules.color(faction: Faction): Color3

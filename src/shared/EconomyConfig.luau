@@ -73,6 +73,19 @@ export type Config = {
 		stunSeconds: number,
 		knockbackStuds: number,
 	},
+	squad: {
+		perFriendBonus: number,
+		maxFriends: number,
+		friendTolerance: number,
+	},
+	season: {
+		minPoints: number,
+		pointsPerZoneValue: number,
+		pointsWarWin: number,
+		pointsMogOffWin: number,
+		flushSeconds: number,
+		refreshSeconds: number,
+	},
 	ranks: { Rank },
 	boxes: {
 		dailyCap: number,
@@ -138,6 +151,19 @@ local config: Config = {
 		cooldownSeconds = 20, -- a player cannot be dragged into another duel for this long
 		stunSeconds = 1.5, -- the loser cannot move for this long
 		knockbackStuds = 18, -- the loser is pushed back this far
+	},
+	squad = {
+		perFriendBonus = 0.1, -- capture with a friend on your faction: +10 percent of your points per friend
+		maxFriends = 3, -- at most +30 percent
+		friendTolerance = 1, -- a joining player may pick a friend's faction if it is at most this many players bigger than the smallest
+	},
+	season = {
+		minPoints = 50, -- season points for the winning faction needed to earn the champion title
+		pointsPerZoneValue = 1, -- a capture gives this many season points per zone value
+		pointsWarWin = 3, -- for contributors on the faction that wins a war
+		pointsMogOffWin = 1,
+		flushSeconds = 30, -- how often a server adds its new season points to the shared faction totals
+		refreshSeconds = 60, -- how often a server reads the shared faction totals
 	},
 	ranks = {
 		{ name = "NPC", cost = 0 },

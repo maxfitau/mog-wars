@@ -56,6 +56,14 @@ paid also gets the zone's box.
 The ladder is gentle up to Chad (so the first week is fun and fast) then steep (so Gigachad and Mog God take
 weeks and mean something). Ranks measure aura earned by winning, never looks. Rank does not change aura power.
 
+## Squad bonus
+
+Capturing a zone with friends on your faction adds 10 percent of your own points per friend who was also paid for
+that capture, at most 30 percent. It is extra points on top of the pool, never taken from other players, and it
+only applies to friends (not strangers), so playing with friends is rewarded without making solo play weak. The
+pacing simulation assumes no squad, so a player who always plays with three friends earns up to about 30 percent
+more from captures and ranks a little faster.
+
 ## Training Arena
 
 A treadmill belt sits just outside each home base. The belt pushes you backward, so you walk against it. Each

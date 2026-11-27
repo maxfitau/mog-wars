@@ -90,7 +90,7 @@ function CosmeticRules.applyPurchase(data: Data, catalog: Catalog, itemId: any, 
 	end
 	local item = catalog.byId[itemId]
 	if not item or item.source ~= "shop" then
-		return "invalid_item" -- box cosmetics are never sold
+		return "invalid_item" -- box and season cosmetics are never sold
 	end
 	if data.receipts[purchaseId] ~= nil then
 		return "duplicate"

@@ -101,6 +101,10 @@ check("negative training level is invalid", not PlayerData.isValid(save({ traini
 check("a huge training count is invalid", not PlayerData.isValid(save({ trainingToday = 90000 })))
 check("an equipped entry with an empty id is invalid", not PlayerData.isValid(save({ equipped = { trail = "" } })))
 check("receipts with a bad time are invalid", not PlayerData.isValid(save({ receipts = { p1 = -4 } })))
+check("a season with negative points is invalid", not PlayerData.isValid(save({ season = { week = 5, points = { ["1"] = -3 }, prevWeek = 0, prevPoints = {}, claimed = 0 } })))
+check("a season that is not a table is invalid", not PlayerData.isValid(save({ season = 7 })))
+local v7: any = { version = 7, points = 3, rank = 2, warsToday = 0, lastWarDay = 0, boxes = {}, units = {}, cosmetics = {}, boxDay = 0, boxesToday = 0, streakDay = 0, lastClaimDay = 0, barracksSince = 1, trainingLevel = 1, trainingProgress = 2, trainingDay = 0, trainingToday = 0, equipped = { trail = "trail_spark" }, receipts = { p1 = 5 } }
+check("migrate upgrades version 7 and keeps equipped items", PlayerData.migrate(v7) and PlayerData.isValid(v7) and v7.equipped.trail == "trail_spark" and v7.season.week == 0)
 local v6: any = { version = 6, points = 3, rank = 2, warsToday = 0, lastWarDay = 0, boxes = {}, units = {}, cosmetics = { trail_spark = true }, boxDay = 0, boxesToday = 0, streakDay = 0, lastClaimDay = 0, barracksSince = 1, trainingLevel = 4, trainingProgress = 7, trainingDay = 0, trainingToday = 0 }
 check("migrate upgrades version 6 and keeps training and cosmetics", PlayerData.migrate(v6) and PlayerData.isValid(v6) and v6.trainingLevel == 4 and v6.cosmetics.trail_spark == true)
 local v5: any = { version = 5, points = 9, rank = 2, warsToday = 0, lastWarDay = 0, boxes = {}, units = {}, cosmetics = {}, boxDay = 0, boxesToday = 0, streakDay = 2, lastClaimDay = 5, barracksSince = 7 }

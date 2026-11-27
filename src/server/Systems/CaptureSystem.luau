@@ -7,12 +7,14 @@ local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local CaptureBar = require(Shared:WaitForChild("CaptureBar"))
 local Config = require(Shared:WaitForChild("EconomyConfig"))
 local FactionRules = require(Shared:WaitForChild("FactionRules"))
 local ContributionScoring = require(Shared:WaitForChild("ContributionScoring"))
+local ShoveRules = require(Shared:WaitForChild("ShoveRules"))
 local WarRules = require(Shared:WaitForChild("WarRules"))
 local ZoneGeometry = require(Shared:WaitForChild("ZoneGeometry"))
 local DataService = require(script.Parent:WaitForChild("DataService"))
@@ -87,7 +89,13 @@ local function powersInZone(zone: BasePart): ({ [number]: number }, { [number]: 
 					HEADROOM
 				)
 			then
-				powers[faction] = (powers[faction] or 0) + 1
+				local penaltyUntil = player:GetAttribute("PushPenaltyUntil")
+				local weight = ShoveRules.powerMultiplier(
+					Workspace:GetServerTimeNow(),
+					if type(penaltyUntil) == "number" then penaltyUntil else 0,
+					Config.shove
+				)
+				powers[faction] = (powers[faction] or 0) + weight
 				members[faction] = members[faction] or {}
 				table.insert(members[faction], player)
 			end
@@ -213,6 +221,36 @@ end
 -- Copies of this war's contribution per user id and captures per faction.
 function CaptureSystem.warTallies(): ({ [number]: number }, { [number]: number })
 	return table.clone(warUnits), table.clone(warCaptures)
+end
+
+local function playerInZone(player: Player, zone: BasePart): boolean
+	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+	if not root or not root:IsA("BasePart") then
+		return false
+	end
+	local offset = zone.CFrame:PointToObjectSpace(root.Position)
+	return ZoneGeometry.contains(offset.X, offset.Y, offset.Z, zone.Size.X, zone.Size.Y, zone.Size.Z, HEADROOM)
+end
+
+-- A shove inside a zone counts as a little contribution for the shover, but only while the shover is
+-- attacking (the zone is not already theirs).
+function CaptureSystem.creditShove(shover: Player, target: Player)
+	local faction = shover:GetAttribute("Faction")
+	if not active or type(faction) ~= "number" then
+		return
+	end
+	for _, record in zones do
+		if record.state.owner ~= faction and playerInZone(shover, record.part) and playerInZone(target, record.part) then
+			local entry = record.contribs[shover.UserId]
+			if not entry or entry.faction ~= faction then
+				entry = { faction = faction, units = 0 }
+				record.contribs[shover.UserId] = entry
+			end
+			entry.units += Config.capture.shoveAssist
+			warUnits[shover.UserId] = (warUnits[shover.UserId] or 0) + Config.capture.shoveAssist
+			return
+		end
+	end
 end
 
 function CaptureSystem.init()

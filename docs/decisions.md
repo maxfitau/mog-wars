@@ -31,3 +31,6 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 25 | War winner is the highest zone-value total; ties go to more captures; still tied is a draw with no winner bonus | Simple, explainable tie-break (WarRules.winner) |
 | 26 | Everyone who contributed at least 5 units gets 20 points; contributors on the winning faction get 60 more | Matches the economy numbers; idle players earn nothing |
 | 27 | After 8 finished wars in a UTC day, capture and war rewards are halved (PlayerData v2 adds warsToday and lastWarDay) | Healthy-play rule from the economy doc, enforced by the server |
+| 28 | The shove request carries no data; the server picks the nearest living enemy within 8 studs | The client cannot name a target, so it cannot shove across the map or hit teammates |
+| 29 | A shove that finds no target does not use the cooldown | Missing should not be punished; the 0.2s spam guard still applies |
+| 30 | Knockback is applied by the target's own client from a server message; the push penalty is server side | Character physics is client-owned; the penalty that matters for fairness stays on the server (needs playtest) |

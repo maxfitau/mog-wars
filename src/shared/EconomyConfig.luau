@@ -51,6 +51,14 @@ export type Config = {
 	aura: {
 		perRankBonus: number,
 	},
+	shove: {
+		cooldownSeconds: number,
+		range: number,
+		knockbackStuds: number,
+		penaltySeconds: number,
+		penaltyMultiplier: number,
+		minRequestInterval: number,
+	},
 	ranks: { Rank },
 	boxes: {
 		tiers: { [string]: Tier },
@@ -95,6 +103,14 @@ local config: Config = {
 	},
 	aura = {
 		perRankBonus = 0.1, -- each rank adds 10 percent aura power: Mog God is 1.9 times a Rookie
+	},
+	shove = {
+		cooldownSeconds = 6, -- time before the same player can shove again
+		range = 8, -- studs; the nearest enemy inside this range is the target
+		knockbackStuds = 14, -- how far the target is pushed back
+		penaltySeconds = 3, -- the target pushes at reduced strength for this long
+		penaltyMultiplier = 0.5, -- aura power while shoved (half)
+		minRequestInterval = 0.2, -- requests faster than this are ignored, whatever their result
 	},
 	ranks = {
 		{ name = "Rookie", cost = 0, rewardBox = "" },

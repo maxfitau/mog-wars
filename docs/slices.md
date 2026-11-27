@@ -68,7 +68,7 @@ check points saved (needs a scratch place with live stores).
 
 ## 6. Shove
 
-**Build:** a shove ability with a cooldown, validated on the server (range and cooldown), with knockback and a
+**Build (code written, not yet playtested):** a shove ability with a cooldown, validated on the server (range and cooldown), with knockback and a
 brief push penalty.
 **Test:** pure tests for cooldown and range checks. In Studio: shove an enemy; spam the button and confirm the
 cooldown holds.

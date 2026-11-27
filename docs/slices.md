@@ -99,7 +99,7 @@ box with Robux.
 
 ## 10. Units: tank and horse
 
-**Build:** units from boxes, deploy a tank (faster capture in its zone) or ride a horse (faster movement) for one
+**Build (code written, not yet playtested):** units from boxes, deploy a tank (faster capture in its zone) or ride a horse (faster movement) for one
 war, and sell units for Mog Points.
 **Test:** pure tests for the boosts and selling. In Studio: deploy, capture faster, sell.
 **Done when:** units expire at war end, selling is atomic, and boosts stay inside the limits in the economy file.

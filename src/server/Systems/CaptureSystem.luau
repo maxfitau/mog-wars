@@ -16,6 +16,7 @@ local FactionRules = require(Shared:WaitForChild("FactionRules"))
 local ContributionScoring = require(Shared:WaitForChild("ContributionScoring"))
 local RankRules = require(Shared:WaitForChild("RankRules"))
 local ShoveRules = require(Shared:WaitForChild("ShoveRules"))
+local UnitRules = require(Shared:WaitForChild("UnitRules"))
 local WarRules = require(Shared:WaitForChild("WarRules"))
 local ZoneGeometry = require(Shared:WaitForChild("ZoneGeometry"))
 local DataService = require(script.Parent:WaitForChild("DataService"))
@@ -29,6 +30,7 @@ type ZoneRecord = {
 	state: CaptureBar.State,
 	shownProgress: number,
 	contribs: { [number]: { faction: number, units: number } }, -- by user id, for the next payout
+	boosts: { [number]: number }, -- tank boost per faction in this zone (set by UnitSystem)
 }
 
 local zones: { [BasePart]: ZoneRecord } = {}
@@ -53,6 +55,7 @@ local function register(instance: Instance)
 		state = CaptureBar.newState(),
 		shownProgress = -1,
 		contribs = {},
+		boosts = {},
 	}
 	instance:SetAttribute("OwnerFaction", 0)
 	instance:SetAttribute("Progress", 0)
@@ -166,6 +169,11 @@ local function tick(dt: number)
 	end
 	for _, record in zones do
 		local powers, members = powersInZone(record.part)
+		for faction, multiplier in record.boosts do
+			if powers[faction] then
+				powers[faction] = UnitRules.boostedPower(powers[faction], multiplier)
+			end
+		end
 
 		-- Players on the pushing faction earn contribution while the zone is being attacked.
 		local leaderId = CaptureBar.leader(powers)
@@ -263,6 +271,30 @@ end
 
 function CaptureSystem.creditMogOffWin(winner: Player, loser: Player)
 	credit(winner, loser, Config.capture.mogOffWin)
+end
+
+-- The zone part this player is standing in, or nil.
+function CaptureSystem.zoneAt(player: Player): BasePart?
+	for _, record in zones do
+		if playerInZone(player, record.part) then
+			return record.part
+		end
+	end
+	return nil
+end
+
+-- Set (or clear, with nil) a faction's tank boost in one zone.
+function CaptureSystem.setBoost(zone: BasePart, faction: number, multiplier: number?)
+	local record = zones[zone]
+	if record then
+		record.boosts[faction] = multiplier
+	end
+end
+
+function CaptureSystem.clearBoosts()
+	for _, record in zones do
+		record.boosts = {}
+	end
 end
 
 export type Occupancy = { owner: number, players: { Player } }

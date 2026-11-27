@@ -44,3 +44,7 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 38 | Every war contributor earns one box: Veteran for the winning faction, Recruit for others, up to 12 a day | This is what the pacing simulation already assumed, so the pacing numbers still hold |
 | 39 | A duplicate cosmetic or a full unit stack pays Mog Points instead (50 for a cosmetic, the unit's sell value for a unit) | Nothing is wasted and no outcome is ever blocked |
 | 40 | The open-box request carries only a tier name, validated against the config; the roll happens after every check and the box is taken in the same step | The client cannot open boxes it does not own or pick an outcome |
+| 41 | Deploying a unit uses it up and it lasts until the war phase changes; selling pays the config sell value | Matches "each lasts for one war"; nothing carries over |
+| 42 | A tank boosts the whole faction's push in the zone where it is deployed, one tank per faction per zone, 50 percent boost | Gives teams a reason to defend a zone together; the limit stops stacking |
+| 43 | Every unit boost must be between 1x and 2x (checked in UnitRules and a test on the real config) | A bad config edit cannot create an unbeatable unit |
+| 44 | The horse sets walk speed 30 percent higher and is re-applied after respawn until the war ends; a mog-off stun still stops movement | Speed is a convenience, not a way to dodge the duel rule |

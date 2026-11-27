@@ -127,6 +127,20 @@ function PlayerData.addUnit(data: Data, unit: string): boolean
 	return true
 end
 
+-- Use up one owned unit. Returns false (changing nothing) if the player has none.
+function PlayerData.takeUnit(data: Data, unit: string): boolean
+	local current = data.units[unit]
+	if type(unit) ~= "string" or not current or current < 1 then
+		return false
+	end
+	if current == 1 then
+		data.units[unit] = nil
+	else
+		data.units[unit] = current - 1
+	end
+	return true
+end
+
 -- Add a cosmetic. Returns false if the id is bad or already owned.
 function PlayerData.addCosmetic(data: Data, id: string): boolean
 	if type(id) ~= "string" or id == "" or data.cosmetics[id] then

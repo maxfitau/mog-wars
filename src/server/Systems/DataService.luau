@@ -147,6 +147,45 @@ function DataService.earnBox(player: Player, tier: string): boolean
 	return true
 end
 
+-- Use up one unit when it is deployed. Returns true if the player had one.
+function DataService.takeUnit(player: Player, unit: string): boolean
+	local data = DataService.get(player)
+	if not data or not PlayerData.takeUnit(data, unit) then
+		return false
+	end
+	syncInventory(player, data)
+	return true
+end
+
+-- How many of a unit the player owns (0 if not loaded).
+function DataService.unitCount(player: Player, unit: string): number
+	local data = DataService.get(player)
+	return if data then (data.units[unit] or 0) else 0
+end
+
+-- Sell one unit for its Mog Points value. All or nothing, no yielding. Returns ok, reason, points paid.
+function DataService.sellUnit(player: Player, unitId: any): (boolean, string, number)
+	local data = DataService.get(player)
+	if not data then
+		return false, "not_loaded", 0
+	end
+	if type(unitId) ~= "string" then
+		return false, "bad_input", 0
+	end
+	local unitConfig = (Config.units :: any)[unitId]
+	if not unitConfig then
+		return false, "unknown_unit", 0
+	end
+	if (data.units[unitId] or 0) < 1 then
+		return false, "no_unit", 0
+	end
+	PlayerData.takeUnit(data, unitId)
+	PlayerData.addPoints(data, unitConfig.sellValue)
+	player:SetAttribute("Points", data.points)
+	syncInventory(player, data)
+	return true, "", unitConfig.sellValue
+end
+
 export type BoxResult = {
 	ok: boolean,
 	reason: string, -- stable reason when not ok, "" otherwise

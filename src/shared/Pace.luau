@@ -33,6 +33,11 @@ Pace.rewards = {
 	flagCapturedAura = 25, -- everyone helping when a flag flips
 }
 
+Pace.void = {
+	killY = -60, -- below this height you have fallen into the clouds
+	respawnSeconds = 2, -- WHOOSH, then back at your team island; no damage
+}
+
 Pace.pickups = {
 	everySeconds = 30,
 	maxActive = 5,

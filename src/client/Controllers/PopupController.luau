@@ -238,6 +238,8 @@ function PopupController.init()
 			-- the funny shove pop-up: BONK! for the shover (amount 1) or for whoever got bonked (amount 2)
 			showBanner(if amount >= 2 then "BONKED!" else "BONK!", Color3.fromRGB(255, 160, 40), 0.8)
 			punch()
+		elseif kind == "whoosh" then
+			showBanner("WHOOSH!", Color3.fromRGB(150, 220, 255), 1.2)
 		elseif kind == "rankup" then
 			showBanner(("RANK UP! %s"):format(if type(detail) == "string" then string.upper(detail) else ""), Color3.fromRGB(255, 215, 60), 2.4)
 			punch()

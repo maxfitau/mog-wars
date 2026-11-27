@@ -44,6 +44,10 @@ Territories.tiers = {
 	ultra = { label = "Ultra", value = 3, aura = 1000, trickle = 50, box = "ultra" },
 } :: { [string]: Tier }
 
+-- Gigachad Gate floats: its island top is this many studs above the sea of clouds / the main island
+Territories.gateHeight = 70
+local GATE = Territories.gateHeight
+
 Territories.list = {
 	{
 		id = "gigachad_gate",
@@ -55,9 +59,9 @@ Territories.list = {
 		-- (reached from the two spiral-staircase towers by covered corridors). One flag on top of each tower, one in the
 		-- throne room.
 		flags = {
-			{ name = "Left Tower", x = -75, z = 0, y = 60, size = 14, pole = 9, beam = 22, approach = { x = -75, z = 68 } },
-			{ name = "Right Tower", x = 75, z = 0, y = 60, size = 14, pole = 9, beam = 22, approach = { x = 75, z = 68 } },
-			{ name = "Throne Room", x = 0, z = 0, y = 26, size = 22, pole = 10, beam = 14, approach = { x = 0, z = 80 } },
+			{ name = "Left Tower", x = -75, z = 0, y = GATE + 60, size = 14, pole = 9, beam = 22, approach = { x = -75, z = 68 } },
+			{ name = "Right Tower", x = 75, z = 0, y = GATE + 60, size = 14, pole = 9, beam = 22, approach = { x = 75, z = 68 } },
+			{ name = "Throne Room", x = 0, z = 0, y = GATE + 26, size = 22, pole = 10, beam = 14, approach = { x = 0, z = 80 } },
 		},
 	},
 	{

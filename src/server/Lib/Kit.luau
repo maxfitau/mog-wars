@@ -72,41 +72,80 @@ function Kit:truss(name: string, x: number, yb: number, z: number, height: numbe
 	return truss
 end
 
--- Straight solid stairs from (x0, z0) to (x1, z1), rising `rise` studs (one-stud steps).
+-- An invisible, anchored slope that players actually walk on (the visible steps are not solid). It is a flat slab
+-- tilted to follow the stairs, so a character slides smoothly up instead of catching on every step edge.
+local function walkRamp(kit: any, name: string, from: Vector3, to: Vector3, width: number)
+	local middle = (from + to) / 2
+	local length = (to - from).Magnitude
+	local ramp = Instance.new("Part")
+	ramp.Name = name .. "Ramp"
+	ramp.Anchored = true
+	ramp.Size = Vector3.new(width, 0.8, length + 0.6)
+	local look = CFrame.lookAt(middle, to)
+	ramp.CFrame = look * CFrame.new(0, -0.4, 0) -- the top surface runs exactly through `from` and `to`
+	ramp.Transparency = 1
+	ramp.CanCollide = true
+	ramp.CanQuery = false
+	ramp.CanTouch = false
+	ramp.Parent = kit.folder
+	return ramp
+end
+
+-- Straight stairs from (x0, z0) to (x1, z1), rising `rise` studs in steps no taller than 1.5. The steps are for
+-- looks (CanCollide off); an invisible tilted ramp over the flight is what you walk on. `thin` treads leave the space
+-- underneath open (doors, tunnels).
 function Kit:stairs(name: string, x0: number, yb: number, z0: number, x1: number, z1: number, rise: number, width: number, color: Color3, material: Enum.Material?, thin: boolean?)
-	local steps = math.max(1, math.floor(rise))
+	local steps = math.max(1, math.ceil(rise / 1.0)) -- one-stud steps (never above 1.5)
+	if rise / steps > 1.5 then
+		warn(("[mog-wars] stairs %s: step %.2f studs is taller than 1.5"):format(name, rise / steps))
+	end
 	local dx, dz = x1 - x0, z1 - z0
 	local length = math.sqrt(dx * dx + dz * dz)
 	local run = length / steps
 	local direction = Vector3.new(dx, 0, dz).Unit
+	local stepHeight = rise / steps
 	for index = 1, steps do
 		local t = (index - 0.5) / steps
-		local height = index * (rise / steps)
-		local centre = Vector3.new(self.cx + x0 + dx * t, self.gy + yb + height / 2, self.cz + z0 + dz * t)
-		local thickness = if thin then 0.8 else height -- thin treads leave the space underneath open (doors, tunnels)
-		if thin then
-			centre = Vector3.new(centre.X, self.gy + yb + height - 0.4, centre.Z)
-		end
+		local height = index * stepHeight
+		local thickness = if thin then 0.8 else height
+		local centreY = if thin then self.gy + yb + height - 0.4 else self.gy + yb + height / 2
+		local centre = Vector3.new(self.cx + x0 + dx * t, centreY, self.cz + z0 + dz * t)
 		local part = Builder.part(name, Vector3.new(width, thickness, run + 0.05), centre, color, self.folder)
 		part.CFrame = CFrame.lookAt(centre, centre + direction)
-		finish(part, color, material, nil)
+		finish(part, color, material, { collide = false }) -- looks only; the ramp below is what you walk on
 	end
+	-- the ramp's surface runs through the middle of the step tops
+	local from = Vector3.new(self.cx + x0, self.gy + yb + 0.25, self.cz + z0)
+	local to = Vector3.new(self.cx + x1, self.gy + yb + rise + 0.25, self.cz + z1)
+	walkRamp(self, name, from, to, width)
 end
 
--- A spiral staircase of thin treads around (x, z), rising `rise` studs over `turns` turns. Treads run from rInner
--- to rOuter. `direction` is 1 (counter-clockwise from above) or -1.
+-- A spiral staircase of thin treads around (x, z), rising `rise` studs over `turns` turns, one-stud steps. Treads run
+-- from rInner to rOuter. `direction` is 1 (counter-clockwise from above) or -1. The treads are for looks; an invisible
+-- tilted ramp between each pair of treads is what you walk on.
 function Kit:spiral(name: string, x: number, z: number, rInner: number, rOuter: number, yb: number, rise: number, turns: number, startAngle: number, direction: number, color: Color3, material: Enum.Material?)
-	local steps = math.max(2, math.floor(rise))
+	local steps = math.max(2, math.ceil(rise))
+	if rise / steps > 1.5 then
+		warn(("[mog-wars] spiral %s: step is taller than 1.5"):format(name))
+	end
 	local middle = (rInner + rOuter) / 2
 	local angleStep = turns * 2 * math.pi / steps
-	for index = 0, steps - 1 do
+	local previous: Vector3? = nil
+	for index = 0, steps do
 		local angle = startAngle + direction * angleStep * index
-		local height = yb + index * (rise / steps) + 0.4
-		local position = Vector3.new(self.cx + x + math.cos(angle) * middle, self.gy + height, self.cz + z + math.sin(angle) * middle)
-		local length = math.max(2.5, middle * angleStep * 1.6)
-		local part = Builder.part(name, Vector3.new(rOuter - rInner, 0.8, length), position, color, self.folder)
-		part.CFrame = CFrame.lookAt(position, position + Vector3.new(-math.sin(angle) * direction, 0, math.cos(angle) * direction))
-		finish(part, color, material, nil)
+		local height = yb + index * (rise / steps)
+		local top = Vector3.new(self.cx + x + math.cos(angle) * middle, self.gy + height + 0.8, self.cz + z + math.sin(angle) * middle)
+		if index < steps then
+			local position = top - Vector3.new(0, 0.4, 0)
+			local length = math.max(2.5, middle * angleStep * 1.6)
+			local part = Builder.part(name, Vector3.new(rOuter - rInner, 0.8, length), position, color, self.folder)
+			part.CFrame = CFrame.lookAt(position, position + Vector3.new(-math.sin(angle) * direction, 0, math.cos(angle) * direction))
+			finish(part, color, material, { collide = false })
+		end
+		if previous then
+			walkRamp(self, name, previous, top, rOuter - rInner)
+		end
+		previous = top
 	end
 end
 

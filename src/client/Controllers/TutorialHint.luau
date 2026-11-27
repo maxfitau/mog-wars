@@ -1,112 +1,110 @@
 --!strict
--- The only tutorial: a big arrow that points at the nearest GOLD flag with "Stand here to capture!". It shows until the
--- player is standing on a flag (the capture bar takes over) and for good after their first capture. It disappears once they are standing
--- in a zone (the zone bar takes over) and for good after their first capture. Display only.
+-- The only tutorial: a small bobbing arrow and a short label ("Capture me!") floating above the nearest GOLD flag, in the
+-- world, not on the screen. It shows until you are standing on a flag and for good after your first capture. Display only.
 
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
-local Workspace = game:GetService("Workspace")
+local TweenService = game:GetService("TweenService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
-local HintRules = require(Shared:WaitForChild("HintRules"))
 local ZoneGeometry = require(Shared:WaitForChild("ZoneGeometry"))
 
 local TutorialHint = {}
 
 local player = Players.LocalPlayer
-local frame: Frame
+local marker: BillboardGui
 local arrow: TextLabel
+local target: BasePart? = nil
+
+local function hide()
+	marker.Enabled = false
+	marker.Adornee = nil
+	target = nil
+end
 
 local function update()
 	local stage = player:GetAttribute("RevealStage")
 	local character = player.Character
 	local root = character and character:FindFirstChild("HumanoidRootPart")
-	local camera = Workspace.CurrentCamera
-	if (type(stage) == "number" and stage >= 1) or not root or not root:IsA("BasePart") or not camera then
-		frame.Visible = false
+	if (type(stage) == "number" and stage >= 1) or not root or not root:IsA("BasePart") then
+		hide()
 		return
 	end
-
-	-- Point at the nearest territory with only ONE flag (the easiest) if there is one; otherwise any flag.
-	local zones = {}
-	local parts: { BasePart } = {}
-	local easyZones = {}
-	local easyParts: { BasePart } = {}
+	local mine = player:GetAttribute("Faction")
+	local nearest: BasePart? = nil
+	local nearestDistance = math.huge
 	for _, zone in CollectionService:GetTagged("Zone") do
 		if zone:IsA("BasePart") then
 			local offset = zone.CFrame:PointToObjectSpace(root.Position)
 			if ZoneGeometry.contains(offset.X, offset.Y, offset.Z, zone.Size.X, zone.Size.Y, zone.Size.Z, 8) then
-				frame.Visible = false -- already standing in one: the zone bar shows what to do
+				hide() -- already on a flag: the capture bar takes over
 				return
 			end
-			table.insert(zones, { x = zone.Position.X, z = zone.Position.Z })
-			table.insert(parts, zone)
-			if zone:GetAttribute("Value") == 1 and zone:GetAttribute("OwnerFaction") ~= player:GetAttribute("Faction") then -- a Gold flag that is not ours yet
-				table.insert(easyZones, { x = zone.Position.X, z = zone.Position.Z })
-				table.insert(easyParts, zone)
+			-- a Gold flag (value 1) that is not ours yet
+			if zone:GetAttribute("Value") == 1 and zone:GetAttribute("OwnerFaction") ~= mine then
+				local distance = (zone.Position - root.Position).Magnitude
+				if distance < nearestDistance then
+					nearest, nearestDistance = zone, distance
+				end
 			end
 		end
 	end
-	local useEasy = #easyZones > 0
-	local index = HintRules.nearest(root.Position.X, root.Position.Z, if useEasy then easyZones else zones)
-	if not index then
-		frame.Visible = false
-		return
+	if nearest ~= target then
+		target = nearest
+		marker.Adornee = nearest
 	end
-	local target = (if useEasy then easyParts[index] else parts[index]).Position
-	local look = camera.CFrame.LookVector
-	arrow.Rotation = HintRules.arrowAngle(target.X - root.Position.X, target.Z - root.Position.Z, look.X, look.Z)
-	frame.Visible = true
+	marker.Enabled = nearest ~= nil
 end
 
 function TutorialHint.init()
-	local gui = Instance.new("ScreenGui")
-	gui.Name = "TutorialHint" -- not in RevealRules, so it is never hidden by it
-	gui.ResetOnSpawn = false
-	gui.Parent = player:WaitForChild("PlayerGui")
+	marker = Instance.new("BillboardGui")
+	marker.Name = "TutorialHint" -- a world marker, not a screen banner
+	marker.Size = UDim2.new(0, 96, 0, 64)
+	marker.StudsOffset = Vector3.new(0, 16, 0) -- above the flag pole
+	marker.AlwaysOnTop = true
+	marker.MaxDistance = 1000
+	marker.Enabled = false
+	marker.ResetOnSpawn = false
+	marker.Parent = player:WaitForChild("PlayerGui")
 
-	frame = Instance.new("Frame")
-	frame.AnchorPoint = Vector2.new(0.5, 0)
-	frame.Position = UDim2.new(0.5, 0, 0, 70)
-	frame.Size = UDim2.new(0.6, 0, 0, 100)
-	frame.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
-	frame.BackgroundTransparency = 0.2
-	frame.Visible = false
-	frame.Parent = gui
-	local corner = Instance.new("UICorner")
-	corner.Parent = frame
-	local limit = Instance.new("UISizeConstraint")
-	limit.MinSize = Vector2.new(240, 100)
-	limit.MaxSize = Vector2.new(520, 100)
-	limit.Parent = frame
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.new(1, 0, 0.45, 0)
+	label.BackgroundTransparency = 1
+	label.Font = Enum.Font.FredokaOne
+	label.TextScaled = true
+	label.TextColor3 = Color3.fromRGB(255, 230, 90)
+	label.TextStrokeColor3 = Color3.fromRGB(35, 25, 60)
+	label.TextStrokeTransparency = 0
+	label.Text = "Capture me!"
+	label.Parent = marker
 
 	arrow = Instance.new("TextLabel")
+	arrow.Position = UDim2.new(0, 0, 0.45, 0)
+	arrow.Size = UDim2.new(1, 0, 0.55, 0)
 	arrow.BackgroundTransparency = 1
-	arrow.Position = UDim2.new(0, 10, 0, 10)
-	arrow.Size = UDim2.new(0, 84, 0, 84)
-	arrow.Text = "▲"
-	arrow.TextColor3 = Color3.fromRGB(255, 220, 90)
-	arrow.TextScaled = true
 	arrow.Font = Enum.Font.FredokaOne
-	arrow.Parent = frame
+	arrow.TextScaled = true
+	arrow.TextColor3 = Color3.fromRGB(255, 230, 90)
+	arrow.TextStrokeColor3 = Color3.fromRGB(35, 25, 60)
+	arrow.TextStrokeTransparency = 0
+	arrow.Text = "▼"
+	arrow.Parent = marker
 
-	local text = Instance.new("TextLabel")
-	text.BackgroundTransparency = 1
-	text.Position = UDim2.new(0, 92, 0, 8)
-	text.Size = UDim2.new(1, -102, 1, -16)
-	text.TextWrapped = true
-	text.TextXAlignment = Enum.TextXAlignment.Left
-	text.TextColor3 = Color3.new(1, 1, 1)
-	text.Font = Enum.Font.FredokaOne
-	text.TextScaled = true
-	text.Text = "Stand here to capture!"
-	text.Parent = frame
+	-- a gentle bob so it catches the eye
+	TweenService:Create(arrow, TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), { Position = UDim2.new(0, 0, 0.6, 0) }):Play()
 end
 
 function TutorialHint.start()
-	RunService.RenderStepped:Connect(update)
+	local clock = 0
+	RunService.Heartbeat:Connect(function(dt)
+		clock += dt
+		if clock >= 0.25 then
+			clock = 0
+			update()
+		end
+	end)
 end
 
 return TutorialHint

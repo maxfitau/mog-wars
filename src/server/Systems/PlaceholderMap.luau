@@ -17,6 +17,7 @@ local Features = require(Shared:WaitForChild("Features"))
 local Territories = require(Shared:WaitForChild("Territories"))
 local IslandTerrain = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("IslandTerrain"))
 local Cover = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("Cover"))
+local SkyKit = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("SkyKit"))
 local Builder = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("Builder"))
 local TerritoryScenery = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("TerritoryScenery"))
 
@@ -91,6 +92,7 @@ function PlaceholderMap.start()
 
 	IslandTerrain.lighting()
 	IslandTerrain.build() -- real terrain: grass, sand, water, hills and paths (the surface is at y = 0)
+	SkyKit.cloudSea() -- the endless cloud sea far below
 
 	-- One safe home base per faction. Spawn pads share the faction's team colour, so Roblox sends each player
 	-- to their own base first; SpawnSystem then moves them to the front line during a war.

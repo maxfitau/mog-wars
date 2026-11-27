@@ -65,12 +65,13 @@ function ShoveController.init()
 	local stroke = Instance.new("UIStroke")
 	stroke.Color = Color3.new(1, 1, 1)
 	stroke.Thickness = 5
+	stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border -- the ring round the button (the default would outline the LETTERS, which made the label a white blob)
 	stroke.Parent = button
 	local pad = Instance.new("UIPadding")
-	pad.PaddingLeft = UDim.new(0.14, 0)
-	pad.PaddingRight = UDim.new(0.14, 0)
-	pad.PaddingTop = UDim.new(0.3, 0)
-	pad.PaddingBottom = UDim.new(0.3, 0)
+	pad.PaddingLeft = UDim.new(0.12, 0)
+	pad.PaddingRight = UDim.new(0.12, 0)
+	pad.PaddingTop = UDim.new(0.28, 0)
+	pad.PaddingBottom = UDim.new(0.28, 0)
 	pad.Parent = button
 	shade = Instance.new("Frame") -- greys the button out while it recharges
 	shade.Size = UDim2.new(1, 0, 1, 0)

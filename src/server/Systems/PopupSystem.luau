@@ -13,7 +13,7 @@ local PopupSystem = {}
 
 local remote: RemoteEvent? = nil
 
-local KINDS = { points = true, aura = true, box = true, mogged = true, announce = true, combo = true, rush = true, knockout = true, capture = true, pickup = true, bonk = true, rankup = true }
+local KINDS = { points = true, aura = true, box = true, mogged = true, announce = true, combo = true, rush = true, knockout = true, capture = true, pickup = true, bonk = true, rankup = true, whoosh = true }
 
 -- Show a pop-up to one player. Bad kinds and non-positive or non-finite amounts are ignored.
 function PopupSystem.send(player: Player, kind: string, amount: number, detail: string)

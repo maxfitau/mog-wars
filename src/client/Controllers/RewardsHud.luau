@@ -1,5 +1,6 @@
 --!strict
--- The daily reward: a small button that appears (top right, under the Shop button) only while a reward is waiting. Display only: the server owns the clock and the data and
+-- The daily reward: claimed automatically the first time you play each day, and shown as a 3-second toast on the right,
+-- under the top bar (never over the scoreboard). There is no button. Display only: the server owns the clock and the data and
 -- mirrors DailyReady, DailyDay and BarracksPending onto the player. The buttons just ask.
 
 local Players = game:GetService("Players")
@@ -17,6 +18,8 @@ local dailyButton: TextButton
 local barracksButton: TextButton
 local toast: TextLabel
 local toastUntil = 0
+local claimRemote: RemoteEvent
+local asked = false
 
 local MESSAGES: { [string]: string } = {
 	already_claimed = "Come back tomorrow for the next reward!",
@@ -36,7 +39,13 @@ local function update()
 	local ready = attr("DailyReady", false) == true
 	local day = attr("DailyDay", 1)
 	local reward = Config.dailyStreak.auraRewards[day] or 0
-	dailyButton.Visible = ready -- nothing on screen once it has been claimed
+	dailyButton.Visible = false
+	if ready and not asked then
+		asked = true
+		claimRemote:FireServer() -- the server checks it is really a new day
+	elseif not ready then
+		asked = false
+	end
 	dailyButton.Text = ("Daily reward! +%d aura"):format(reward)
 	dailyButton.BackgroundColor3 = Color3.fromRGB(70, 180, 100)
 	toast.Visible = Workspace:GetServerTimeNow() < toastUntil
@@ -47,6 +56,7 @@ function RewardsHud.init()
 	local claim = remotes:WaitForChild("ClaimDailyRequest") :: RemoteEvent
 	local collect = remotes:WaitForChild("CollectBarracksRequest") :: RemoteEvent
 	local result = remotes:WaitForChild("RewardsResult") :: RemoteEvent
+	claimRemote = claim
 
 	local gui = Instance.new("ScreenGui")
 	gui.Name = "RewardsHud"
@@ -79,9 +89,9 @@ function RewardsHud.init()
 
 	toast = Instance.new("TextLabel")
 	toast.Text = "" -- never show Roblox's default placeholder text
-	toast.AnchorPoint = Vector2.new(0.5, 0)
-	toast.Position = UDim2.new(0.5, 0, 0.1, 0)
-	toast.Size = UDim2.new(0, 340, 0, 50)
+	toast.AnchorPoint = Vector2.new(1, 0)
+	toast.Position = UDim2.new(1, -16, 0, 60) -- right side, under the top bar
+	toast.Size = UDim2.new(0, 300, 0, 46)
 	toast.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
 	toast.BackgroundTransparency = 0.1
 	toast.TextColor3 = Color3.fromRGB(255, 220, 90)

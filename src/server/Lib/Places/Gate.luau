@@ -11,6 +11,8 @@ local Cover = require(script.Parent.Parent:WaitForChild("Cover"))
 local Common = require(script.Parent:WaitForChild("Common"))
 local Kit = require(script.Parent.Parent:WaitForChild("Kit"))
 local TerrainKit = require(script.Parent.Parent:WaitForChild("TerrainKit"))
+local SkyKit = require(script.Parent.Parent:WaitForChild("SkyKit"))
+local Territories = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Territories"))
 
 local STONE = Color3.fromRGB(150, 150, 166)
 local DARK = Color3.fromRGB(105, 105, 122)
@@ -46,9 +48,18 @@ end
 
 return function(folder: Folder, territory: any)
 	local cx, cz = territory.x, territory.z
-	local k = Kit.new(folder, cx, cz, 0)
+	local height = Territories.gateHeight
+	local k = Kit.new(folder, cx, cz, height)
 	Cover.reserve(cx, cz - 5, 118, 62)
-	TerrainKit.cylinder(cx, -6, cz, 115, 6, Enum.Material.Cobblestone) -- a stone plaza under the whole castle
+	-- the island itself: the biggest and highest, floating over the middle of the map, a tapering rock underside
+	SkyKit.island(cx, cz, height, 128, 50)
+	TerrainKit.cylinder(cx, height - 3, cz, 108, 3, Enum.Material.Cobblestone) -- a stone plaza under the castle
+	SkyKit.vines(folder, cx, cz, height, 125, 20)
+	SkyKit.waterfall(folder, Vector3.new(cx + 124, height, cz + 22), Vector3.new(1, 0, 0), 55)
+	SkyKit.waterfall(folder, Vector3.new(cx - 124, height, cz - 30), Vector3.new(-1, 0, 0), 48)
+	-- rope bridges: south down to the main island, and east across to Rizz Ravine's north cliff
+	SkyKit.bridge(folder, Vector3.new(cx, height, cz + 126), Vector3.new(cx, 0, cz + 300), 10)
+	SkyKit.bridge(folder, Vector3.new(cx + 107, height, cz - 67), Vector3.new(cx + 182, 24, cz - 108), 10)
 
 	-- the head: jaws either side of a 24-wide mouth tunnel, a floor over the tunnel, the throne room above it
 	k:box("JawLeft", -28.5, 0, 0, 33, 25, 60, STONE, Enum.Material.Slate)

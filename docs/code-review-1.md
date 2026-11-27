@@ -31,3 +31,13 @@ Done in the cloud session after slices 1 to 22 were written. Nothing here was ru
 - The treadmill is walk-against-the-belt for everyone; `DESIGN.md` plans tap-to-run at Rookie.
 - A player who loses a mog-off while their screen for it is hidden by the gradual reveal still sees the duel panel on purpose
   (it is exempt from hiding).
+
+## Found in the first Studio playtest (after review 1)
+- **The map was empty.** `TravelSystem` had a line starting with `(` right after a function call, which Luau reads as one
+  ambiguous call and rejects as a syntax error. That module failed to load, so the whole server script stopped before
+  building the map, leaving only Studio's own spawn pad. Fixed, and the startup script now loads, initialises and starts each
+  system on its own, so one broken system can no longer hide the map. Errors print as `[mog-wars] FAILED ...` in Output.
+- **Placeholder "Label" text** can no longer appear: every text label now starts empty and the war panel starts with "War".
+- **Mog Points** moved to the top left (the top right belongs to Roblox's player list); the left column now stacks Mog Points,
+  the war panel and the aura panel; the rank panel moved to the bottom left.
+- Studio's template Baseplate and SpawnLocation are removed from the running game so they cannot overlap the map.

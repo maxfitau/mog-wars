@@ -97,3 +97,5 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 91 | There is a TRAIN portal by each of the four home bases (not one in the middle) | Every faction has the same short walk; the owner asked for "a portal" so say if you want only one |
 | 92 | The shop button only shows on Training Island; the TRAIN button appears after the first finished war; BACK TO WAR always shows on Training Island | Keeps the war screen simple and the first session uncluttered |
 | 93 | New buttons use a shared chunky theme (rounded Fredoka font, thick outlines, big sizes) in src/client/Lib/UiTheme.luau | The owner's UI designs were not available to the cloud session, so this is a guess to be matched to them later |
+| 94 | The server and client startup scripts load, initialise and start each system inside pcall and warn "[mog-wars] FAILED ..." | One broken module (a syntax error in TravelSystem) emptied the whole map; now it only disables that system and says which |
+| 95 | Mog Points sits top left, with the war and aura panels stacked under it and the rank panel bottom left | The top right is Roblox's player list; matches the owner's UI designs |

@@ -76,7 +76,7 @@ cooldown holds.
 
 ## 7. Mog-offs
 
-**Build:** the 5-second tapping duel when two enemies stay close in a zone: server-counted taps (rate capped),
+**Build (code written, not yet playtested):** the 5-second tapping duel when two enemies stay close in a zone: server-counted taps (rate capped),
 winner, knockback and brief stun for the loser, cooldown, and a clear on-screen duel.
 **Test:** pure tests for duel resolution and tap capping. In Studio with 2 clients: both tap; one taps faster; one
 uses an autoclicker-like burst and is capped.

@@ -232,25 +232,51 @@ local function playerInZone(player: Player, zone: BasePart): boolean
 	return ZoneGeometry.contains(offset.X, offset.Y, offset.Z, zone.Size.X, zone.Size.Y, zone.Size.Z, HEADROOM)
 end
 
--- A shove inside a zone counts as a little contribution for the shover, but only while the shover is
--- attacking (the zone is not already theirs).
-function CaptureSystem.creditShove(shover: Player, target: Player)
-	local faction = shover:GetAttribute("Faction")
+-- Give a player contribution in the zone they share with `other`, but only while attacking it (the zone is
+-- not already their faction's). Used for shoves and mog-off wins.
+local function credit(player: Player, other: Player, amount: number)
+	local faction = player:GetAttribute("Faction")
 	if not active or type(faction) ~= "number" then
 		return
 	end
 	for _, record in zones do
-		if record.state.owner ~= faction and playerInZone(shover, record.part) and playerInZone(target, record.part) then
-			local entry = record.contribs[shover.UserId]
+		if record.state.owner ~= faction and playerInZone(player, record.part) and playerInZone(other, record.part) then
+			local entry = record.contribs[player.UserId]
 			if not entry or entry.faction ~= faction then
 				entry = { faction = faction, units = 0 }
-				record.contribs[shover.UserId] = entry
+				record.contribs[player.UserId] = entry
 			end
-			entry.units += Config.capture.shoveAssist
-			warUnits[shover.UserId] = (warUnits[shover.UserId] or 0) + Config.capture.shoveAssist
+			entry.units += amount
+			warUnits[player.UserId] = (warUnits[player.UserId] or 0) + amount
 			return
 		end
 	end
+end
+
+function CaptureSystem.creditShove(shover: Player, target: Player)
+	credit(shover, target, Config.capture.shoveAssist)
+end
+
+function CaptureSystem.creditMogOffWin(winner: Player, loser: Player)
+	credit(winner, loser, Config.capture.mogOffWin)
+end
+
+export type Occupancy = { owner: number, players: { Player } }
+
+-- Who is standing in each zone right now, with the zone's owner, for the mog-off system.
+function CaptureSystem.occupants(): { Occupancy }
+	local list: { Occupancy } = {}
+	for _, record in zones do
+		local _, members = powersInZone(record.part)
+		local everyone: { Player } = {}
+		for _, group in members do
+			for _, player in group do
+				table.insert(everyone, player)
+			end
+		end
+		table.insert(list, { owner = record.state.owner, players = everyone })
+	end
+	return list
 end
 
 function CaptureSystem.init()

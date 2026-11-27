@@ -59,6 +59,15 @@ export type Config = {
 		penaltyMultiplier: number,
 		minRequestInterval: number,
 	},
+	mogOff: {
+		durationSeconds: number,
+		closeRange: number,
+		closeSeconds: number,
+		maxTapsPerSecond: number,
+		cooldownSeconds: number,
+		stunSeconds: number,
+		knockbackStuds: number,
+	},
 	ranks: { Rank },
 	boxes: {
 		tiers: { [string]: Tier },
@@ -111,6 +120,15 @@ local config: Config = {
 		penaltySeconds = 3, -- the target pushes at reduced strength for this long
 		penaltyMultiplier = 0.5, -- aura power while shoved (half)
 		minRequestInterval = 0.2, -- requests faster than this are ignored, whatever their result
+	},
+	mogOff = {
+		durationSeconds = 5, -- length of the tapping duel
+		closeRange = 6, -- studs: two enemies this close inside a zone can start a duel
+		closeSeconds = 1.5, -- how long they must stay that close first
+		maxTapsPerSecond = 10, -- taps above this rate are ignored, so an autoclicker gains nothing
+		cooldownSeconds = 20, -- a player cannot be dragged into another duel for this long
+		stunSeconds = 1.5, -- the loser cannot move for this long
+		knockbackStuds = 18, -- the loser is pushed back this far
 	},
 	ranks = {
 		{ name = "Rookie", cost = 0, rewardBox = "" },

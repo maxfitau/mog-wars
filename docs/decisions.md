@@ -34,3 +34,7 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 28 | The shove request carries no data; the server picks the nearest living enemy within 8 studs | The client cannot name a target, so it cannot shove across the map or hit teammates |
 | 29 | A shove that finds no target does not use the cooldown | Missing should not be punished; the 0.2s spam guard still applies |
 | 30 | Knockback is applied by the target's own client from a server message; the push penalty is server side | Character physics is client-owned; the penalty that matters for fairness stays on the server (needs playtest) |
+| 31 | A mog-off starts when two enemies in the same zone stay within 6 studs for 1.5 seconds, with a 1-second get-ready; 20 second cooldown per player | Matches the brief ("when two enemies meet in a zone") without surprise instant duels |
+| 32 | Ties go to the defender (the duellist whose faction holds the zone); with no defender it is a draw with no loser | Follows decision 8 and avoids punishing anyone when nobody has the advantage |
+| 33 | Taps are capped at 10 per second on the server (max about 50 per duel) | A flood or autoclicker cannot win; the cap is in MogOffRules and tested |
+| 34 | The loser's messages are gentle ("Nice try! Shake it off.") and they are stunned for 1.5s | Child-friendly tone from docs/compliance.md section 1 |

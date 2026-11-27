@@ -22,6 +22,7 @@ change, run `python3 tools/pacing.py --ranks` (it reads the config file directly
 | Zone capture | Pool of 100 points per zone value (side zone 1, centre zone 2), split by contribution |
 | War bonus | 60 for the winning faction, 20 for anyone who contributed at least 5 units |
 | Rank-up box | A box on each rank-up (tier rises with rank) |
+| War box | One box per war for every contributor: Veteran for the winning faction, Recruit for the rest (max 12 a day) |
 | Daily streak | 30, 40, 50, 60, 80, 100, 150 (7-day cycle, then repeats) |
 | Barracks | 6 per hour plus 2 per rank, filling up to 8 hours |
 | Selling units | Tank 150, horse 100 |

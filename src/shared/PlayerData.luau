@@ -9,16 +9,21 @@ export type Data = {
 	warsToday: number, -- wars finished on lastWarDay (for the daily full-reward limit)
 	lastWarDay: number, -- UTC day number (days since 1970) of the last finished war, 0 = never
 	boxes: { [string]: number }, -- unopened boxes by tier id, for example { recruit = 2 }
+	units: { [string]: number }, -- owned units by id, for example { tank = 1 }
+	cosmetics: { [string]: boolean }, -- owned cosmetic ids
+	boxDay: number, -- UTC day number the boxesToday count belongs to
+	boxesToday: number, -- boxes earned from wars on boxDay (daily cap)
 }
 
 local PlayerData = {}
 
-PlayerData.CURRENT_VERSION = 3
+PlayerData.CURRENT_VERSION = 4
+PlayerData.MAX_UNITS = 1000
 PlayerData.MAX_BOXES_PER_TIER = 1000
 PlayerData.MAX_POINTS = 1_000_000_000 -- far above anything reachable; stops runaway or overflowing values
 
 function PlayerData.template(): Data
-	return { version = PlayerData.CURRENT_VERSION, points = 0, rank = 1, warsToday = 0, lastWarDay = 0, boxes = {} }
+	return { version = PlayerData.CURRENT_VERSION, points = 0, rank = 1, warsToday = 0, lastWarDay = 0, boxes = {}, units = {}, cosmetics = {}, boxDay = 0, boxesToday = 0 }
 end
 
 local function isWholeNumber(value: any): boolean
@@ -42,6 +47,31 @@ function PlayerData.boxesValid(boxes: any): boolean
 	return true
 end
 
+-- True when `counts` maps non-empty string ids to whole numbers from 0 up to `max`.
+function PlayerData.countsValid(counts: any, max: number): boolean
+	if type(counts) ~= "table" then
+		return false
+	end
+	for id, count in counts do
+		if type(id) ~= "string" or id == "" or not isWholeNumber(count) or count < 0 or count > max then
+			return false
+		end
+	end
+	return true
+end
+
+function PlayerData.cosmeticsValid(cosmetics: any): boolean
+	if type(cosmetics) ~= "table" then
+		return false
+	end
+	for id, owned in cosmetics do
+		if type(id) ~= "string" or id == "" or owned ~= true then
+			return false
+		end
+	end
+	return true
+end
+
 -- Give the player one unopened box of a tier. Returns false for an empty tier name or a full stack.
 function PlayerData.addBox(data: Data, tier: string): boolean
 	if type(tier) ~= "string" or tier == "" then
@@ -52,6 +82,57 @@ function PlayerData.addBox(data: Data, tier: string): boolean
 		return false
 	end
 	data.boxes[tier] = current + 1
+	return true
+end
+
+-- Take one unopened box of a tier. Returns false (changing nothing) if the player has none.
+function PlayerData.takeBox(data: Data, tier: string): boolean
+	local current = data.boxes[tier]
+	if type(tier) ~= "string" or not current or current < 1 then
+		return false
+	end
+	if current == 1 then
+		data.boxes[tier] = nil
+	else
+		data.boxes[tier] = current - 1
+	end
+	return true
+end
+
+-- Earn a box from a war: counts toward the daily cap, which starts fresh on a new UTC day.
+-- Returns false (changing nothing) if the cap is reached or the stack is full.
+function PlayerData.tryEarnBox(data: Data, day: number, cap: number, tier: string): boolean
+	local used = if data.boxDay == day then data.boxesToday else 0
+	if used >= cap then
+		return false
+	end
+	if not PlayerData.addBox(data, tier) then
+		return false
+	end
+	data.boxDay = day
+	data.boxesToday = used + 1
+	return true
+end
+
+-- Add a unit. Returns false for a bad id or a full stack.
+function PlayerData.addUnit(data: Data, unit: string): boolean
+	if type(unit) ~= "string" or unit == "" then
+		return false
+	end
+	local current = data.units[unit] or 0
+	if current >= PlayerData.MAX_UNITS then
+		return false
+	end
+	data.units[unit] = current + 1
+	return true
+end
+
+-- Add a cosmetic. Returns false if the id is bad or already owned.
+function PlayerData.addCosmetic(data: Data, id: string): boolean
+	if type(id) ~= "string" or id == "" or data.cosmetics[id] then
+		return false
+	end
+	data.cosmetics[id] = true
 	return true
 end
 
@@ -69,6 +150,13 @@ function PlayerData.migrate(data: any): boolean
 	if data.version == 2 then
 		data.boxes = {}
 		data.version = 3
+	end
+	if data.version == 3 then
+		data.units = {}
+		data.cosmetics = {}
+		data.boxDay = 0
+		data.boxesToday = 0
+		data.version = 4
 	end
 	return true
 end
@@ -111,6 +199,12 @@ function PlayerData.isValid(data: any): boolean
 		and isWholeNumber(data.lastWarDay)
 		and data.lastWarDay >= 0
 		and PlayerData.boxesValid(data.boxes)
+		and PlayerData.countsValid(data.units, PlayerData.MAX_UNITS)
+		and PlayerData.cosmeticsValid(data.cosmetics)
+		and isWholeNumber(data.boxDay)
+		and data.boxDay >= 0
+		and isWholeNumber(data.boxesToday)
+		and data.boxesToday >= 0
 end
 
 -- Add points to a save table. Returns true if it changed. Rejects bad amounts and never exceeds the cap.

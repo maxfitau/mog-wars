@@ -35,6 +35,8 @@ export type Config = {
 		fullRewardWarsPerDay: number,
 		reducedRewardMultiplier: number,
 		dailyBoxCap: number,
+		winnerBoxTier: string,
+		participantBoxTier: string,
 	},
 	capture: {
 		secondsForOneAura: number,
@@ -70,6 +72,7 @@ export type Config = {
 	},
 	ranks: { Rank },
 	boxes: {
+		duplicateCosmeticPoints: number,
 		tiers: { [string]: Tier },
 	},
 	units: {
@@ -96,7 +99,9 @@ local config: Config = {
 		minContributionForBonus = 5,
 		fullRewardWarsPerDay = 8, -- after this many wars in a day rewards are halved, so play never feels like a chore
 		reducedRewardMultiplier = 0.5,
-		dailyBoxCap = 12,
+		dailyBoxCap = 12, -- most boxes a player can earn from wars in one UTC day
+		winnerBoxTier = "veteran", -- box for contributors on the winning faction
+		participantBoxTier = "recruit", -- box for every other contributor
 	},
 	capture = {
 		secondsForOneAura = 24, -- one player with aura power 1 captures an empty zone alone in this many seconds
@@ -143,6 +148,7 @@ local config: Config = {
 		{ name = "Mog God", cost = 16000, rewardBox = "legend" },
 	},
 	boxes = {
+		duplicateCosmeticPoints = 50, -- a cosmetic you already own pays this many Mog Points instead
 		tiers = {
 			recruit = {
 				displayName = "Recruit Box",

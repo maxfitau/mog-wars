@@ -41,6 +41,13 @@ for index, entry in shown do
 end
 check("shown odds add up to 100", total == 100)
 
+-- every box tier named anywhere in the config must exist
+check("winner box tier exists", Config.boxes.tiers[Config.war.winnerBoxTier] ~= nil)
+check("participant box tier exists", Config.boxes.tiers[Config.war.participantBoxTier] ~= nil)
+for _, rank in Config.ranks do
+	check("rank box tier exists for " .. rank.name, rank.rewardBox == "" or Config.boxes.tiers[rank.rewardBox] ~= nil)
+end
+
 -- a bad tier is rejected
 local bad = { displayName = "Bad", drops = { { weight = 50, kind = "points", amount = 10 } } }
 local okBad, reasonBad = BoxRoll.validate(bad)

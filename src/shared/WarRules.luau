@@ -84,6 +84,11 @@ function WarRules.applyMultiplier(amount: number, multiplier: number): number
 	return math.max(1, math.floor(amount * multiplier))
 end
 
+-- Which box tier a contributor earns: the winner tier for the winning faction, otherwise the participant tier.
+function WarRules.boxTier(winner: number, faction: number, winnerTier: string, participantTier: string): string
+	return if winner ~= 0 and faction == winner then winnerTier else participantTier
+end
+
 -- The war cycle is Intermission, then War, then back to Intermission.
 function WarRules.nextPhase(phase: string): string
 	return if phase == "War" then "Intermission" else "War"

@@ -41,3 +41,6 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 35 | Rank-up reward boxes are stored on the player's save (PlayerData v3 `boxes`) until slice 9 adds opening them | Rewards are never lost between slices; boxes are capped at 1000 per tier |
 | 36 | Aura scales a player's push strength in the capture bar; contribution for payouts stays based on time spent pushing | Rank speeds captures a little without letting a high rank take a whole zone's pool |
 | 37 | The rank-up request carries no data and is limited to one every 0.5 seconds; a full box stack blocks the rank-up before any points are spent | The server decides everything, and nothing is half-applied |
+| 38 | Every war contributor earns one box: Veteran for the winning faction, Recruit for others, up to 12 a day | This is what the pacing simulation already assumed, so the pacing numbers still hold |
+| 39 | A duplicate cosmetic or a full unit stack pays Mog Points instead (50 for a cosmetic, the unit's sell value for a unit) | Nothing is wasted and no outcome is ever blocked |
+| 40 | The open-box request carries only a tier name, validated against the config; the roll happens after every check and the box is taken in the same step | The client cannot open boxes it does not own or pick an outcome |

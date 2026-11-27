@@ -91,7 +91,7 @@ scaling.
 
 ## 9. Boxes
 
-**Build:** earn boxes after wars, a box-opening screen that shows the odds for that tier before opening, server
+**Build (code written, not yet playtested):** earn boxes after wars, a box-opening screen that shows the odds for that tier before opening, server
 rolls (`src/shared/BoxRoll.luau`), and the rewards.
 **Test:** pure tests for rolls and odds. In Studio: open many boxes and compare the results with the shown odds.
 **Done when:** shown odds equal the server's weights, every tier sums to 100 percent, and there is no way to buy a

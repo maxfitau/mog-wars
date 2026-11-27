@@ -67,6 +67,34 @@ check("boxes with a negative count are invalid", not PlayerData.isValid(save({ b
 check("boxes with a fractional count are invalid", not PlayerData.isValid(save({ boxes = { recruit = 1.5 } })))
 check("boxes that are not a table are invalid", not PlayerData.isValid(save({ boxes = 5 })))
 
+-- taking boxes
+local taker = PlayerData.template()
+PlayerData.addBox(taker, "recruit")
+PlayerData.addBox(taker, "recruit")
+check("taking a box works", PlayerData.takeBox(taker, "recruit") and taker.boxes.recruit == 1)
+check("taking the last box removes the entry", PlayerData.takeBox(taker, "recruit") and taker.boxes.recruit == nil)
+check("taking from none changes nothing", not PlayerData.takeBox(taker, "recruit") and next(taker.boxes) == nil)
+
+-- daily box cap
+local earner = PlayerData.template()
+local boxDay = 5000
+for _ = 1, 12 do
+	PlayerData.tryEarnBox(earner, boxDay, 12, "recruit")
+end
+check("12 boxes earned fills the daily cap", earner.boxesToday == 12 and earner.boxes.recruit == 12)
+check("the 13th box is refused", not PlayerData.tryEarnBox(earner, boxDay, 12, "recruit") and earner.boxes.recruit == 12)
+check("a new day resets the cap", PlayerData.tryEarnBox(earner, boxDay + 1, 12, "recruit") and earner.boxesToday == 1)
+
+-- units and cosmetics
+local owner = PlayerData.template()
+check("adding a unit works", PlayerData.addUnit(owner, "tank") and owner.units.tank == 1)
+check("an empty unit id is rejected", not PlayerData.addUnit(owner, ""))
+check("adding a cosmetic works once", PlayerData.addCosmetic(owner, "trail_spark") and not PlayerData.addCosmetic(owner, "trail_spark"))
+check("invalid unit counts are rejected", not PlayerData.isValid(save({ units = { tank = -1 } })))
+check("a cosmetic marked false is invalid", not PlayerData.isValid(save({ cosmetics = { trail_spark = false } })))
+local v3: any = { version = 3, points = 1, rank = 1, warsToday = 0, lastWarDay = 0, boxes = { recruit = 2 } }
+check("migrate upgrades version 3 and keeps boxes", PlayerData.migrate(v3) and PlayerData.isValid(v3) and v3.boxes.recruit == 2)
+
 -- daily war limit
 local day = PlayerData.dayNumber(86400 * 20000 + 5)
 check("day number is days since 1970", day == 20000)

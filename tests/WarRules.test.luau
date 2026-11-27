@@ -50,6 +50,10 @@ check("multiplier never rounds a reward to zero", WarRules.applyMultiplier(1, 0.
 check("bad multiplier pays nothing", WarRules.applyMultiplier(80, 0) == 0 and WarRules.applyMultiplier(80, 0 / 0) == 0)
 check("bad amount pays nothing", WarRules.applyMultiplier(-5, 1) == 0)
 
+check("winning faction earns the winner box tier", WarRules.boxTier(1, 1, "veteran", "recruit") == "veteran")
+check("other contributors earn the participant tier", WarRules.boxTier(1, 2, "veteran", "recruit") == "recruit")
+check("a draw gives everyone the participant tier", WarRules.boxTier(0, 1, "veteran", "recruit") == "recruit")
+
 check("phase cycle", WarRules.nextPhase("War") == "Intermission" and WarRules.nextPhase("Intermission") == "War")
 check("phase lengths", WarRules.phaseSeconds("War", 600, 20) == 600 and WarRules.phaseSeconds("Intermission", 600, 20) == 20)
 

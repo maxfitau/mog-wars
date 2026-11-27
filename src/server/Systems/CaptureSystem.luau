@@ -15,7 +15,7 @@ local Config = require(Shared:WaitForChild("EconomyConfig"))
 local FactionRules = require(Shared:WaitForChild("FactionRules"))
 local BoxRoll = require(Shared:WaitForChild("BoxRoll"))
 local ContributionScoring = require(Shared:WaitForChild("ContributionScoring"))
-local RankRules = require(Shared:WaitForChild("RankRules"))
+local TrainingRules = require(Shared:WaitForChild("TrainingRules"))
 local SpawnRules = require(Shared:WaitForChild("SpawnRules"))
 local ShoveRules = require(Shared:WaitForChild("ShoveRules"))
 local UnitRules = require(Shared:WaitForChild("UnitRules"))
@@ -73,7 +73,7 @@ local function unregister(instance: Instance)
 	end
 end
 
--- Aura power per faction of everyone alive and standing in the zone. Aura grows with rank; a recent shove
+-- Aura power per faction of everyone alive and standing in the zone. Aura grows with training; a recent shove
 -- or mog-off loss weakens it for a few seconds.
 local function powersInZone(zone: BasePart): ({ [number]: number }, { [number]: { Player } })
 	local powers: { [number]: number } = {}
@@ -102,8 +102,8 @@ local function powersInZone(zone: BasePart): ({ [number]: number }, { [number]: 
 					if type(penaltyUntil) == "number" then penaltyUntil else 0,
 					Config.shove
 				)
-				local rank = player:GetAttribute("Rank")
-				local aura = RankRules.auraMultiplier(Config, if type(rank) == "number" then rank else 1)
+				local level = player:GetAttribute("TrainingLevel")
+				local aura = TrainingRules.auraMultiplier(if type(level) == "number" then level else 0, Config.training)
 				powers[faction] = (powers[faction] or 0) + weight * aura
 				members[faction] = members[faction] or {}
 				table.insert(members[faction], player)

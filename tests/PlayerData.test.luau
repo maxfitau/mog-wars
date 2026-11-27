@@ -97,6 +97,10 @@ check("invalid unit counts are rejected", not PlayerData.isValid(save({ units = 
 check("a cosmetic marked false is invalid", not PlayerData.isValid(save({ cosmetics = { trail_spark = false } })))
 check("streak day above 7 is invalid", not PlayerData.isValid(save({ streakDay = 8 })))
 check("negative barracks time is invalid", not PlayerData.isValid(save({ barracksSince = -1 })))
+check("negative training level is invalid", not PlayerData.isValid(save({ trainingLevel = -1 })))
+check("a huge training count is invalid", not PlayerData.isValid(save({ trainingToday = 90000 })))
+local v5: any = { version = 5, points = 9, rank = 2, warsToday = 0, lastWarDay = 0, boxes = {}, units = {}, cosmetics = {}, boxDay = 0, boxesToday = 0, streakDay = 2, lastClaimDay = 5, barracksSince = 7 }
+check("migrate upgrades version 5 and keeps the streak", PlayerData.migrate(v5) and PlayerData.isValid(v5) and v5.streakDay == 2 and v5.trainingLevel == 0)
 local v4: any = { version = 4, points = 9, rank = 2, warsToday = 0, lastWarDay = 0, boxes = {}, units = {}, cosmetics = {}, boxDay = 0, boxesToday = 0 }
 check("migrate upgrades version 4", PlayerData.migrate(v4) and PlayerData.isValid(v4) and v4.streakDay == 0)
 local v3: any = { version = 3, points = 1, rank = 1, warsToday = 0, lastWarDay = 0, boxes = { gold = 2 } }

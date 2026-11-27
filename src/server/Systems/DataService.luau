@@ -11,6 +11,7 @@ local RankRules = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild(
 local BoxRoll = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("BoxRoll"))
 local BarracksRules = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("BarracksRules"))
 local StreakRules = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("StreakRules"))
+local TrainingRules = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("TrainingRules"))
 local PlayerData = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("PlayerData"))
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("EconomyConfig"))
 
@@ -39,6 +40,18 @@ local function syncRewards(player: Player, data: PlayerData.Data)
 	player:SetAttribute("BarracksPending", BarracksRules.pending(now, data.barracksSince, data.rank, Config.barracks))
 end
 
+-- Mirror the Training Arena state to attributes for the client and for CaptureSystem (read only):
+-- TrainingLevel, TrainingProgress (0 to 1 into the current level) and TrainingLeft (seconds left today).
+local function syncTraining(player: Player, data: PlayerData.Data)
+	local settings = Config.training
+	local day = PlayerData.dayNumber(os.time())
+	local trainedToday = if data.trainingDay == day then data.trainingToday else 0
+	player:SetAttribute("TrainingLevel", data.trainingLevel)
+	local cost = TrainingRules.levelCost(data.trainingLevel, settings)
+	player:SetAttribute("TrainingProgress", if data.trainingLevel >= settings.maxLevel then 1 else data.trainingProgress / cost)
+	player:SetAttribute("TrainingLeft", math.max(0, settings.dailyStrideCap - trainedToday))
+end
+
 local function load(player: Player)
 	if profiles[player] or not store then
 		return
@@ -55,6 +68,10 @@ local function load(player: Player)
 	profile:AddUserId(player.UserId)
 	profile:Reconcile()
 	PlayerData.migrate(profile.Data)
+	if type(profile.Data.trainingLevel) == "number" and profile.Data.trainingLevel > Config.training.maxLevel then
+		profile.Data.trainingLevel = Config.training.maxLevel -- a save from before the level cap changed
+		profile.Data.trainingProgress = 0
+	end
 	if type(profile.Data.rank) == "number" and profile.Data.rank > #Config.ranks then
 		profile.Data.rank = #Config.ranks -- a save from before the rank list changed
 	end
@@ -80,6 +97,7 @@ local function load(player: Player)
 		profile.Data.barracksSince = os.time() -- the barracks starts building from the first visit
 	end
 	syncRewards(player, profile.Data :: any)
+	syncTraining(player, profile.Data :: any)
 end
 
 -- The live save table for a player, or nil while loading or after they leave.
@@ -259,6 +277,35 @@ function DataService.openBox(player: Player, tierId: any, random: () -> number):
 	end
 	syncInventory(player, data)
 	return result
+end
+
+-- Count one stride of treadmill running. All or nothing, no yielding. Returns ok, a stable reason
+-- ("daily_cap", "max_level", "not_loaded") and whether a level was gained.
+function DataService.addTrainingStride(player: Player): (boolean, string, boolean)
+	local data = DataService.get(player)
+	if not data then
+		return false, "not_loaded", false
+	end
+	local settings = Config.training
+	if data.trainingLevel >= settings.maxLevel then
+		return false, "max_level", false
+	end
+	local day = PlayerData.dayNumber(os.time())
+	if data.trainingDay ~= day then
+		data.trainingDay = day
+		data.trainingToday = 0
+	end
+	local allowed = TrainingRules.allowedStrides(data.trainingToday, 1, settings)
+	if allowed < 1 then
+		syncTraining(player, data)
+		return false, "daily_cap", false
+	end
+	local level, progress, gained = TrainingRules.addStrides(data.trainingLevel, data.trainingProgress, allowed, settings)
+	data.trainingLevel = level
+	data.trainingProgress = progress
+	data.trainingToday += allowed
+	syncTraining(player, data)
+	return true, "", gained > 0
 end
 
 -- Refresh the rewards attributes (called on a timer so the numbers stay current).

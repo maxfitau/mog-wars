@@ -76,7 +76,8 @@ accept that boxes then become indirect paid random items.
 Allowed in the shop: cosmetics (trails, aura colours, name styles, emotes) and convenience that gives no
 advantage (extra cosmetic slots). Not allowed:
 
-- Mog Points, ranks, rank discounts, boxes, units, capture speed, extra aura, shove or mog-off advantages.
+- Mog Points, ranks, rank discounts, boxes, units, capture speed, extra aura or training speed or training time,
+  shove or mog-off advantages.
 - Anything random for Robux.
 - Pressure for children: no fake countdowns, no "last chance" scarcity, no guilt text, no purchase prompts on
   join or during a war. A purchase only starts from a tap.

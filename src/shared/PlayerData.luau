@@ -16,17 +16,21 @@ export type Data = {
 	streakDay: number, -- 0 = never claimed, else 1 to 7: the day of the last daily claim
 	lastClaimDay: number, -- UTC day number of the last daily claim, 0 = never
 	barracksSince: number, -- unix seconds when barracks income started building, 0 = not started
+	trainingLevel: number, -- Training Arena level (raises aura power), 0 = untrained
+	trainingProgress: number, -- strides into the current level
+	trainingDay: number, -- UTC day number the trainingToday count belongs to
+	trainingToday: number, -- strides counted on trainingDay (daily cap)
 }
 
 local PlayerData = {}
 
-PlayerData.CURRENT_VERSION = 5
+PlayerData.CURRENT_VERSION = 6
 PlayerData.MAX_UNITS = 1000
 PlayerData.MAX_BOXES_PER_TIER = 1000
 PlayerData.MAX_POINTS = 1_000_000_000 -- far above anything reachable; stops runaway or overflowing values
 
 function PlayerData.template(): Data
-	return { version = PlayerData.CURRENT_VERSION, points = 0, rank = 1, warsToday = 0, lastWarDay = 0, boxes = {}, units = {}, cosmetics = {}, boxDay = 0, boxesToday = 0, streakDay = 0, lastClaimDay = 0, barracksSince = 0 }
+	return { version = PlayerData.CURRENT_VERSION, points = 0, rank = 1, warsToday = 0, lastWarDay = 0, boxes = {}, units = {}, cosmetics = {}, boxDay = 0, boxesToday = 0, streakDay = 0, lastClaimDay = 0, barracksSince = 0, trainingLevel = 0, trainingProgress = 0, trainingDay = 0, trainingToday = 0 }
 end
 
 local function isWholeNumber(value: any): boolean
@@ -181,6 +185,13 @@ function PlayerData.migrate(data: any): boolean
 		data.barracksSince = 0
 		data.version = 5
 	end
+	if data.version == 5 then
+		data.trainingLevel = 0
+		data.trainingProgress = 0
+		data.trainingDay = 0
+		data.trainingToday = 0
+		data.version = 6
+	end
 	return true
 end
 
@@ -235,6 +246,16 @@ function PlayerData.isValid(data: any): boolean
 		and data.lastClaimDay >= 0
 		and isWholeNumber(data.barracksSince)
 		and data.barracksSince >= 0
+		and isWholeNumber(data.trainingLevel)
+		and data.trainingLevel >= 0
+		and data.trainingLevel <= 100
+		and isWholeNumber(data.trainingProgress)
+		and data.trainingProgress >= 0
+		and isWholeNumber(data.trainingDay)
+		and data.trainingDay >= 0
+		and isWholeNumber(data.trainingToday)
+		and data.trainingToday >= 0
+		and data.trainingToday <= 86400
 end
 
 -- Add points to a save table. Returns true if it changed. Rejects bad amounts and never exceeds the cap.

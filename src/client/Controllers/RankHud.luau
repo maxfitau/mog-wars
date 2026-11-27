@@ -1,5 +1,5 @@
 --!strict
--- Rank panel: current rank, aura strength, next rank and its cost, and a Rank up button.
+-- Rank panel: current rank, next rank and its cost, and a Rank up button.
 -- Display only. The server mirrors Points and Rank onto the player and decides every rank-up; the button
 -- just asks, and the answer comes back as a message.
 
@@ -10,7 +10,6 @@ local Workspace = game:GetService("Workspace")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("EconomyConfig"))
-local RankRules = require(Shared:WaitForChild("RankRules"))
 
 local RankHud = {}
 
@@ -36,7 +35,7 @@ end
 local function update()
 	local rank = math.clamp(number("Rank", 1), 1, #Config.ranks)
 	local points = number("Points", 0)
-	rankLabel.Text = ("%s  (aura x%.1f)"):format(Config.ranks[rank].name, RankRules.auraMultiplier(Config, rank))
+	rankLabel.Text = Config.ranks[rank].name
 	local nextEntry = Config.ranks[rank + 1]
 	if nextEntry then
 		nextLabel.Text = ("Next: %s for %d points"):format(nextEntry.name, nextEntry.cost)

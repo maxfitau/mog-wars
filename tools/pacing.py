@@ -43,11 +43,12 @@ def number(text: str, name: str) -> float:
 def load():
     text = strip_comments(CONFIG.read_text(encoding="utf-8"))
     cfg = {}
-    war, capture, aura = block(text, "war"), block(text, "capture"), block(text, "aura")
+    war, capture, training = block(text, "war"), block(text, "capture"), block(text, "training")
     cfg["war"] = {k: number(war, k) for k in ("winnerBonusPoints", "participantBonusPoints",
                                               "fullRewardWarsPerDay", "reducedRewardMultiplier")}
     cfg["capture"] = {k: number(capture, k) for k in ("basePool",)}
-    cfg["aura"] = {"perRankBonus": number(aura, "perRankBonus")}
+    cfg["training"] = {k: number(training, k) for k in ("maxLevel", "perLevelBonus", "firstLevelSeconds",
+                                                        "stepSeconds", "dailyStrideCap")}
     cfg["ranks"] = [(m.group(1), int(m.group(2))) for m in re.finditer(
         r'\{\s*name\s*=\s*"([^"]+)"\s*,\s*cost\s*=\s*(\d+)\s*\}', block(text, "ranks"))]
     units = block(text, "units")
@@ -88,10 +89,10 @@ def load():
 # Assumed player types. share = the player's typical share of a capture's pool, captures = captures they
 # take part in per war, winRate = how often their faction wins, awayHours = hours per day away (barracks).
 PROFILES = {
-    "light":   dict(wars=2,  days=(1, 1, 0, 1, 0, 1, 0), share=0.20, captures=2.5, winRate=0.25, awayHours=8),
-    "casual":  dict(wars=3,  days=(1, 1, 1, 1, 1, 1, 0), share=0.25, captures=3.0, winRate=0.25, awayHours=8),
-    "regular": dict(wars=5,  days=(1, 1, 1, 1, 1, 1, 1), share=0.30, captures=3.5, winRate=0.25, awayHours=8),
-    "hardcore": dict(wars=12, days=(1, 1, 1, 1, 1, 1, 1), share=0.40, captures=4.0, winRate=0.30, awayHours=8),
+    "light":   dict(trainMinutes=5, wars=2,  days=(1, 1, 0, 1, 0, 1, 0), share=0.20, captures=2.5, winRate=0.25, awayHours=8),
+    "casual":  dict(trainMinutes=10, wars=3,  days=(1, 1, 1, 1, 1, 1, 0), share=0.25, captures=3.0, winRate=0.25, awayHours=8),
+    "regular": dict(trainMinutes=10, wars=5,  days=(1, 1, 1, 1, 1, 1, 1), share=0.30, captures=3.5, winRate=0.25, awayHours=8),
+    "hardcore": dict(trainMinutes=10, wars=12, days=(1, 1, 1, 1, 1, 1, 1), share=0.40, captures=4.0, winRate=0.30, awayHours=8),
 }
 
 
@@ -107,6 +108,8 @@ def simulate(cfg, p, max_days=400):
     avg_pool = cfg["capture"]["basePool"] * sum(cfg["zoneValues"]) / len(cfg["zoneValues"])
     avg_box = sum(cfg["boxEV"][tier_for(cfg, v)] for v in cfg["zoneValues"]) / len(cfg["zoneValues"])
     rank, points, streak_day = 1, 0.0, 0
+    t = cfg["training"]
+    t_level, t_progress = 0, 0.0
     days_to = {}
     history = []
     for day in range(max_days):
@@ -120,7 +123,13 @@ def simulate(cfg, p, max_days=400):
         full = min(wars, cfg["war"]["fullRewardWarsPerDay"])
         reduced = max(0, wars - full)
         mult = (full + reduced * cfg["war"]["reducedRewardMultiplier"])
-        share_mult = 1 + 0.04 * (rank - 1)  # a higher rank adds a little aura power, so a little more share
+        # Training: strides (seconds on a treadmill) fill levels; a higher level adds aura power and so a
+        # little more share of each capture.
+        t_progress += min(t["dailyStrideCap"], p["trainMinutes"] * 60)
+        while t_level < t["maxLevel"] and t_progress >= t["firstLevelSeconds"] + t_level * t["stepSeconds"]:
+            t_progress -= t["firstLevelSeconds"] + t_level * t["stepSeconds"]
+            t_level += 1
+        share_mult = 1 + 0.02 * t_level
         per_war = (p["captures"] * avg_pool * min(0.9, p["share"] * share_mult)
                    + p["winRate"] * cfg["war"]["winnerBonusPoints"] + (1 - p["winRate"]) * cfg["war"]["participantBonusPoints"])
         earned = per_war * mult

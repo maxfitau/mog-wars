@@ -2,7 +2,7 @@
 
 `DESIGN.md` is now in the repo root and it wins. Everything in slices 1 to 11 was written before it was
 available, from the owner's defaults. This file lists every difference, what I recommend, and how big the
-change is. Sections A and rows 1, 2, 4 and 5 of B (ranks, boxes, spawning and map size) have been applied. The rest waits for your yes.
+change is. Sections A and rows 1 to 5 of B (ranks, boxes, the Training Arena, spawning and map size) have been applied. The rest waits for your yes.
 
 ## A. Fixed already
 
@@ -20,7 +20,7 @@ change is. Sections A and rows 1, 2, 4 and 5 of B (ranks, boxes, spawning and ma
 |---|---|---|---|---|
 | 1 | ~~7 ranks~~ | **Done** | | |
 | 2 | ~~Boxes from captures: Gold, Diamond, Ultra~~ | **Done** | | |
-| 3 | Aura power is raised by **training** in a Training Arena between wars | Aura power only rises with rank | Build the Training Arena (build order step 6): a safe area with a treadmill-style action that slowly raises a saved aura level, capped. Then rank would no longer drive aura | Large: new slice |
+| 3 | ~~Aura power raised by training in a Training Arena~~ | **Done** (decisions 54 to 57) | | |
 | 4 | ~~Join mid-round, front-line spawn, 10 to 15 minute rounds~~ | **Done** | | |
 | 5 | ~~8 to 12 territories~~ | **Done** (9 zones) | | |
 | 6 | Faction 4 is "Aura Cartel" | Renamed "Aura Collective" (the word "cartel" suggests drug crime, see compliance) | Your call. One line in `src/shared/FactionRules.luau` | Tiny |
@@ -42,6 +42,6 @@ change is. Sections A and rows 1, 2, 4 and 5 of B (ranks, boxes, spawning and ma
 
 1. ~~Ranks (B1) and boxes (B2)~~ done.
 2. ~~Spawn and map size (B4, B5)~~ done.
-3. Training Arena (B3).
+3. ~~Training Arena (B3)~~ done.
 4. Cosmetic shop (slice 12), after checking gifting (B8).
 5. Seasons, friends and weekly events (B7).

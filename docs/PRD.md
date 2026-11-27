@@ -36,7 +36,7 @@ shoving rivals, winning tapping duels called mog-offs, and spending the Mog Poin
 | Factions | Four placeholder factions: Jawline Legion, Mewing Order, Sigma Syndicate, Aura Cartel (names may change, see `docs/compliance.md`) | Server assigns and balances; a player cannot switch mid-war |
 | Map | Four home bases (safe, cannot be captured) and nine contested zones (eight worth 1, the centre worth double). Layout is data in `src/shared/MapLayout.luau` | Zones are tagged parts; the server finds them by tag |
 | Capture bar | Per zone; stronger faction presence pushes progress; enemies push it back | Pure math in `src/shared`, server runs it every tick (`docs/economy.md` has the numbers) |
-| Aura power | Each player's contribution to the bar, a little higher with rank | Capped so a Mog God is at most about 2x an NPC |
+| Aura power | Each player's push strength in the capture bar, raised by training in the Training Arena | Capped at about 1.9x; 10 minutes of training count per day; never for sale |
 | Shove | Short cooldown ability: knocks a rival back and briefly weakens their push | Server validates range and cooldown |
 | Mog-off | When two enemies stay close in a zone, a 5-second tapping duel starts; more taps wins; loser is knocked back and stunned briefly; ties go to the defender | Taps are counted on the server, capped per second, and ranks give no advantage |
 | Units | Tank: speeds capture in its zone. Horse: speeds movement. Each lasts one war. | Earned from boxes, sellable for Mog Points, never sold for Robux |

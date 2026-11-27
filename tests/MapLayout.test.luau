@@ -74,6 +74,32 @@ end
 check("bases are on the baseplate", onPlate)
 check("bases are at least 8 studs from every zone", safe)
 
+-- Training Arena: a treadmill by every base, on the plate, clear of zones and bases
+check("one treadmill per base", #MapLayout.treadmills == #MapLayout.bases)
+do
+	local clear = true
+	for _, mill in MapLayout.treadmills do
+		if math.abs(mill.x) + mill.width / 2 > half or math.abs(mill.z) + mill.length / 2 > half then
+			clear = false
+		end
+		for _, zone in zones do
+			local gapX = math.abs(mill.x - zone.x) - (mill.width + zone.size) / 2
+			local gapZ = math.abs(mill.z - zone.z) - (mill.length + zone.size) / 2
+			if math.max(gapX, gapZ) < 8 then
+				clear = false
+			end
+		end
+		for _, base in MapLayout.bases do
+			local gapX = math.abs(mill.x - base.x) - (mill.width + MapLayout.baseSize) / 2
+			local gapZ = math.abs(mill.z - base.z) - (mill.length + MapLayout.baseSize) / 2
+			if math.max(gapX, gapZ) < 4 then
+				clear = false
+			end
+		end
+	end
+	check("treadmills are on the plate and clear of zones and bases", clear)
+end
+
 -- there is exactly one centre zone and it is worth the most
 local best = 0
 for _, zone in zones do

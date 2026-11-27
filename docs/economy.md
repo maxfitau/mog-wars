@@ -11,9 +11,9 @@ change, run `python3 tools/pacing.py --ranks` (it reads the config file directly
 1. **One currency, Mog Points.** Earned only by playing. Robux never buys points, ranks, boxes, units or
    capture speed. (Never pay-to-win.)
 2. **Ranks are a sink.** Points are spent to rank up, so they do not pile up unused.
-3. **Skill and presence matter more than rank.** Rank gives +15 percent aura per step (Mog God is 1.9x an NPC),
-   so a new player in a team still matters. Mog-offs ignore rank completely. (The Training Arena in
-   `DESIGN.md` will later become the main way to raise aura power.)
+3. **Skill and presence matter more than rank.** Rank is status. Aura power comes from training in the
+   Training Arena (up to 1.9x), so a new player in a team still matters. Mog-offs ignore aura and rank
+   completely.
 4. **Healthy pacing for children.** Full point rewards for the first 8 wars a day, half after that. Boxes are
    capped at 12 a day. Offline income is capped at 8 hours and is small, so there is no reward for grinding or
    for never leaving.
@@ -34,7 +34,7 @@ There are no rank-up boxes and no war-participation boxes.
 
 ## Capture and contribution
 
-One player with aura power 1 captures an empty zone alone in 24 seconds. Teammates stack, so four players do it
+One player with aura power 1 (an untrained player) captures an empty zone alone in 24 seconds. Teammates stack, so four players do it
 in about 6. A zone pays a pool of `100 x zone value`, split by each player's share of contribution. A player
 needs at least 3 contribution units to be paid at all (stops standing at the edge for a free ride) and a paid
 player receives at least 5 points. Shoves that help (1.5 units) and mog-off wins (3 units) count as
@@ -54,7 +54,17 @@ paid also gets the zone's box.
 | 7 | Mog God | 24,000 | 39,250 |
 
 The ladder is gentle up to Chad (so the first week is fun and fast) then steep (so Gigachad and Mog God take
-weeks and mean something). Ranks measure aura earned by winning, never looks.
+weeks and mean something). Ranks measure aura earned by winning, never looks. Rank does not change aura power.
+
+## Training Arena
+
+A treadmill belt sits just outside each home base. The belt pushes you backward, so you walk against it. Each
+second you are alive, on a belt and moving earns one stride. Strides fill training levels and each level adds
+4.5 percent aura power (1.9x at level 20). Level 1 takes 45 seconds, and each level after needs 60 more
+seconds than the one before, so all 20 levels take 12,300 strides, about 3.4 hours. Only 10 minutes a day
+count (healthy play), so a full set of levels takes about three weeks. Training costs nothing, can never be
+bought, and keeps you away from the front line while you do it, which is the trade-off. Seconds are counted by
+the server.
 
 ## Boxes
 
@@ -65,18 +75,19 @@ zone's value, so fighting for the centre is worth more.
 
 ## Pacing simulation
 
-`tools/pacing.py` assumes: a capture share per player type, win rate, one box per capture (capped at 12 a day)
+`tools/pacing.py` assumes: a capture share per player type that grows a little with training level (10 minutes
+a day for most players, 5 for light ones), win rate, one box per capture (capped at 12 a day)
 at the average zone's box value (the zone values come from `src/shared/MapLayout.luau`), the daily box and barracks, and half point rewards after 8 wars. Results from
 the current config:
 
 | Player | Wars/day | Days/week | Days to Chad | Days to Mog God |
 |---|---|---|---|---|
-| Light | 2 | 4 | 18 | 123 |
-| **Casual** | **3** | **6** | **6** | **47** |
-| Regular | 5 | 7 | 4 | 25 |
+| Light | 2 | 4 | 18 | 120 |
+| **Casual** | **3** | **6** | **6** | **45** |
+| Regular | 5 | 7 | 4 | 24 |
 | Hardcore | 12 | 7 | 2 | 13 |
 
-Target met: a casual player reaches Chad in about a week (day 6) and Mog God in about seven weeks (day 47),
+Target met: a casual player reaches Chad in about a week (day 6) and Mog God in about six and a half weeks (day 45),
 inside the one to two month goal. A light player takes about four months, a deliberate choice: they still
 progress every session, and no tier is gated by money.
 

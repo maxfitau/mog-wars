@@ -24,6 +24,7 @@ clients can only ask; the server decides.
 | 12 | Cosmetic shop | 4 |
 | 13 | Polish: tutorial, effects, sounds, mobile | 5 |
 | 14 | Launch prep | all |
+| 15 | Training Arena (added from `DESIGN.md`) | 8 |
 
 ## 1. Capture one territory by standing in it
 
@@ -127,3 +128,13 @@ war, and sell units for Mog Points.
 **Build:** the launch pack and checks.
 **Test:** run the launch scan and tick every item in `docs/compliance.md`.
 **Done when:** the owner has answered the maturity questionnaire themselves and read the current Roblox rules.
+
+## 15. Training Arena
+
+**Build (code written, not yet playtested):** a treadmill belt beside each home base. Walking on it earns strides
+once a second (server counted, 10 minutes a day); strides fill 20 training levels; each level raises aura power.
+Aura power now comes from training, not rank. A small panel shows level, progress and time left today.
+**Test:** pure tests for level costs, the daily cap and the top level (`tests/TrainingRules.test.luau`). In Studio:
+stand on the belt and walk against it, watch the bar fill and the level rise, stop and watch it stop, check a
+capture is faster at a higher level, and check the daily time runs out.
+**Done when:** only moving on a belt counts, the cap holds, and the capture speed matches the aura level.

@@ -24,9 +24,6 @@ check("total to Chad", RankRules.totalToReach(Config, 5) == 300 + 700 + 1300 + 2
 check("total to Mog God", RankRules.totalToReach(Config, 7) == 300 + 700 + 1300 + 2300 + 7000 + 17000)
 check("next cost from NPC", RankRules.nextCost(Config, 1) == 300)
 check("no next cost at the top", RankRules.nextCost(Config, 7) == nil)
-check("aura at NPC is 1", RankRules.auraMultiplier(Config, 1) == 1)
-check("aura at Mog God is about 1.9", math.abs(RankRules.auraMultiplier(Config, 7) - 1.9) < 1e-9)
-check("aura clamps out of range ranks", RankRules.auraMultiplier(Config, 99) == RankRules.auraMultiplier(Config, 7))
 
 do
 	local result = RankRules.tryRankUp(Config, 1, 350)

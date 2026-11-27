@@ -1,6 +1,6 @@
 --!strict
--- Placeholder map built by code from src/shared/MapLayout.luau: a baseplate, four faction home bases and the
--- capture zones. Skipped if the place already has a part tagged "Zone" (a real map replaces this one).
+-- Placeholder map built by code from src/shared/MapLayout.luau: a baseplate, four faction home bases, a
+-- treadmill for the Training Arena beside each base, and the capture zones. Skipped if the place already has a part tagged "Zone" (a real map replaces this one).
 
 local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -49,6 +49,35 @@ function PlaceholderMap.start()
 		spawn.Color = FactionRules.color(faction)
 		spawn:SetAttribute("HomeBase", faction.id)
 		spawn.Parent = Workspace
+	end
+
+	-- Training Arena: a treadmill belt by each base. The belt pushes along z; players walk against it.
+	for index, spec in MapLayout.treadmills do
+		local belt = makePart(
+			"Treadmill_" .. index,
+			Vector3.new(spec.width, 1, spec.length),
+			Vector3.new(spec.x, 0.5, spec.z),
+			Color3.fromRGB(60, 60, 70)
+		)
+		belt.Material = Enum.Material.Metal
+		belt:SetAttribute("BeltPush", spec.push)
+		CollectionService:AddTag(belt, "Treadmill")
+
+		local sign = Instance.new("BillboardGui")
+		sign.Name = "TrainingSign"
+		sign.Size = UDim2.new(0, 180, 0, 40)
+		sign.StudsOffset = Vector3.new(0, 7, 0)
+		sign.AlwaysOnTop = true
+		sign.Adornee = belt
+		sign.Parent = belt
+		local text = Instance.new("TextLabel")
+		text.Size = UDim2.new(1, 0, 1, 0)
+		text.BackgroundTransparency = 1
+		text.TextColor3 = Color3.fromRGB(255, 220, 90)
+		text.Font = Enum.Font.GothamBold
+		text.TextScaled = true
+		text.Text = "Training Arena"
+		text.Parent = sign
 	end
 
 	for _, spec in MapLayout.zones do

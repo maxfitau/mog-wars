@@ -49,8 +49,12 @@ export type Config = {
 		shoveAssist: number,
 		mogOffWin: number,
 	},
-	aura: {
-		perRankBonus: number,
+	training: {
+		maxLevel: number,
+		perLevelBonus: number,
+		firstLevelSeconds: number,
+		stepSeconds: number,
+		dailyStrideCap: number,
 	},
 	shove: {
 		cooldownSeconds: number,
@@ -111,8 +115,12 @@ local config: Config = {
 		shoveAssist = 1.5, -- contribution for a shove that helps a capture
 		mogOffWin = 3, -- contribution for winning a mog-off
 	},
-	aura = {
-		perRankBonus = 0.15, -- each rank adds 15 percent aura power: Mog God (rank 7) is 1.9 times an NPC
+	training = {
+		maxLevel = 20, -- training levels; aura power is 1x at level 0 and 1.9x at the top
+		perLevelBonus = 0.045, -- each training level adds 4.5 percent aura power
+		firstLevelSeconds = 45, -- seconds of running to reach level 1
+		stepSeconds = 60, -- each later level needs this many more seconds than the one before
+		dailyStrideCap = 600, -- at most 10 minutes of training count per UTC day (healthy play)
 	},
 	shove = {
 		cooldownSeconds = 6, -- time before the same player can shove again

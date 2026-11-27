@@ -6,7 +6,6 @@ export type RankEntry = { name: string, cost: number }
 
 export type RankConfig = {
 	ranks: { RankEntry },
-	aura: { perRankBonus: number },
 }
 
 export type RankUpResult = {
@@ -43,12 +42,6 @@ function RankRules.totalToReach(config: RankConfig, rank: number): number
 		total += config.ranks[index].cost
 	end
 	return total
-end
-
--- Aura power multiplier for a rank: 1 at Rookie, plus a fixed bonus per rank.
-function RankRules.auraMultiplier(config: RankConfig, rank: number): number
-	local clamped = math.clamp(math.floor(rank), 1, #config.ranks)
-	return 1 + config.aura.perRankBonus * (clamped - 1)
 end
 
 function RankRules.tryRankUp(config: RankConfig, rank: number, points: number): RankUpResult

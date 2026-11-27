@@ -11,24 +11,23 @@
 --   value    pool multiplier for Mog Points and the tier of the box (Gold 1, Diamond 2, Ultra 3)
 --   trickle  aura every minute, for every member of a faction that holds the territory (harder tiers pay more)
 
-export type Waypoint = { x: number, z: number, y: number }
-
 export type Flag = {
 	name: string,
 	x: number,
 	z: number,
-	y: number,
-	size: number,
-	route: { Waypoint }?,
+	y: number, -- height of the ground the flag circle sits on
+	size: number, -- diameter of the capture circle
+	pole: number?, -- flag pole height (shorter indoors)
+	beam: number?, -- height of the thin beam shown while the flag is neutral or contested
+	noSpawn: boolean?, -- true if players must never be spawned beside this flag (for example inside a hollow brain)
 }
 
 export type Territory = {
 	id: string,
 	name: string,
 	tier: string,
-	x: number, -- middle of the territory, for scenery and its sign
+	x: number, -- middle of the territory
 	z: number,
-	sign: { x: number, z: number },
 	flags: { Flag },
 }
 
@@ -51,110 +50,70 @@ Territories.list = {
 		tier = "ultra",
 		x = 0,
 		z = 0,
-		sign = { x = 0, z = 52 },
-		-- Landmark: a giant stone face with a square jaw and sunglasses. Its mouth is the gate players walk through.
-		-- Flags on both towers (at their bases) and on top of the head (reached by a long ramp from the north).
+		-- A giant stone face with sunglasses. Its mouth is a tunnel you walk through; inside the head is the throne room
+		-- (reached from the two spiral-staircase towers by covered corridors). One flag on top of each tower, one in the
+		-- throne room.
 		flags = {
-			{ name = "Left Tower", x = -30, z = 0, y = 0, size = 18 },
-			{ name = "Right Tower", x = 30, z = 0, y = 0, size = 18 },
-			{
-				name = "Top of the Head",
-				x = 0,
-				z = 0,
-				y = 34,
-				size = 20,
-				route = { { x = 0, z = -132, y = 3 }, { x = 0, z = -26, y = 37 } },
-			},
+			{ name = "Left Tower", x = -75, z = 0, y = 60, size = 14, pole = 9, beam = 22 },
+			{ name = "Right Tower", x = 75, z = 0, y = 60, size = 14, pole = 9, beam = 22 },
+			{ name = "Throne Room", x = 0, z = 0, y = 26, size = 22, pole = 10, beam = 14 },
 		},
 	},
 	{
 		id = "rizz_ravine",
 		name = "Rizz Ravine",
 		tier = "diamond",
-		x = 85,
-		z = -15,
-		sign = { x = 120, z = -15 },
-		-- Landmark: a giant pink heart in the middle of the rope bridge. Flags on each cliff.
+		x = 215,
+		z = -70,
+		-- A deep pink-rock ravine with a rope bridge; a flag on top of each cliff; a hollow heart on the bridge.
 		flags = {
-			{ name = "North Cliff", x = 85, z = -37, y = 5, size = 18, route = { { x = 85, z = -68, y = 3 }, { x = 85, z = -52, y = 8 } } },
-			{ name = "South Cliff", x = 85, z = 7, y = 5, size = 18, route = { { x = 85, z = 41, y = 3 }, { x = 85, z = 22, y = 8 } } },
+			{ name = "North Cliff", x = 215, z = -112, y = 24, size = 20, pole = 14, beam = 30 },
+			{ name = "South Cliff", x = 215, z = -28, y = 24, size = 20, pole = 14, beam = 30 },
 		},
 	},
 	{
 		id = "locked_in_lighthouse",
 		name = "Locked-In Lighthouse",
 		tier = "diamond",
-		x = -85,
-		z = 10,
-		sign = { x = -120, z = 28 },
-		-- Landmark: the lamp is a giant golden padlock that shines a beam. Flags at the base and at the top.
+		x = -185,
+		z = 45,
+		-- A striped lighthouse on a rocky island, spiral stairs inside, and a giant golden padlock for a lamp room.
 		flags = {
-			{ name = "Lighthouse Base", x = -85, z = 40, y = 0, size = 18 },
-			{
-				name = "Lighthouse Top",
-				x = -85,
-				z = 10,
-				y = 28,
-				size = 20,
-				route = { { x = -150, z = 10, y = 3 }, { x = -100, z = 10, y = 31 } },
-			},
+			{ name = "Lighthouse Base", x = -148, z = 45, y = 12, size = 16, pole = 12, beam = 30 },
+			{ name = "Lighthouse Top", x = -165, z = 45, y = 84, size = 14, pole = 9, beam = 16 },
 		},
 	},
 	{
 		id = "npc_village",
 		name = "NPC Village",
 		tier = "gold",
-		x = -55,
-		z = -105,
-		sign = { x = -95, z = -88 },
-		-- Landmark: a giant blocky grey NPC statue with a blank face and a "..." speech bubble. Flag on its head.
+		x = -100,
+		z = -170,
+		-- A blocky village of enterable houses and a giant grey NPC statue climbed by scaffolding. Flag on its head.
 		flags = {
-			{
-				name = "Statue Head",
-				x = -55,
-				z = -105,
-				y = 32,
-				size = 16,
-				route = { { x = -142, z = -105, y = 3 }, { x = -70, z = -105, y = 35 } },
-			},
+			{ name = "Statue Head", x = -100, z = -190, y = 84, size = 14, pole = 9, beam = 20 },
 		},
 	},
 	{
 		id = "brainrot_bog",
 		name = "Brainrot Bog",
 		tier = "gold",
-		x = -105,
-		z = 70,
-		sign = { x = -80, z = 100 },
-		-- Landmark: a giant pink brain half-sunk in bubbling green goo. Flag stuck in the brain.
+		x = -110,
+		z = 190,
+		-- A foggy green swamp and a giant HOLLOW pink brain. Flag in the middle of its fleshy tunnels.
 		flags = {
-			{
-				name = "Brain Top",
-				x = -105,
-				z = 70,
-				y = 14,
-				size = 16,
-				route = { { x = -150, z = 70, y = 3 }, { x = -118, z = 70, y = 17 } },
-			},
+			{ name = "Brain Core", x = -110, z = 190, y = 0, size = 18, pole = 9, beam = 12, noSpawn = true },
 		},
 	},
 	{
 		id = "cooked_canyon",
 		name = "Cooked Canyon",
 		tier = "gold",
-		x = 105,
-		z = 70,
-		sign = { x = 78, z = 100 },
-		-- Landmark: a giant frying pan with a fried egg over the lava river. Flag in the yolk.
+		x = 120,
+		z = 190,
+		-- A red canyon with a lava river, rock jumps up to a giant frying pan, and the flag in the yolk.
 		flags = {
-			{
-				name = "The Yolk",
-				x = 105,
-				z = 70,
-				y = 9,
-				size = 20,
-				route = { { x = 58, z = 70, y = 3 }, { x = 86, z = 70, y = 12 } },
-			},
+			{ name = "The Yolk", x = 120, z = 190, y = 18, size = 22, pole = 12, beam = 26 },
 		},
 	},
 } :: { Territory }

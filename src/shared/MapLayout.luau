@@ -22,23 +22,23 @@ export type TrainingIsland = {
 }
 
 local MapLayout = {
-	baseplateSize = 320,
+	baseplateSize = 720, -- War Island is about 700 studs across (a round island of terrain; this is its bounding square)
 	baseSize = 16,
 	bases = {
-		{ x = -130, z = -130 }, -- faction 1, north west
-		{ x = 130, z = -130 }, -- faction 2, north east
-		{ x = 130, z = 130 }, -- faction 3, south east
-		{ x = -130, z = 130 }, -- faction 4, south west
+		{ x = -225, z = -225 }, -- faction 1, north west
+		{ x = 225, z = -225 }, -- faction 2, north east
+		{ x = 225, z = 225 }, -- faction 3, south east
+		{ x = -225, z = 225 }, -- faction 4, south west
 	} :: { Base },
 	-- The portal on War Island, at the top (north) edge. Walking into it sends you to Training Island.
 	warPortals = {
-		{ x = 0, z = -148, size = 14 },
+		{ x = 0, z = -312, size = 14 },
 	} :: { Portal },
 	-- Training Island: a second platform in the same place, far from War Island. All positions inside it are
 	-- LOCAL to its centre (x east, z south). Everything for training and the shop is grouped here; the two
 	-- "reserved" areas are kept empty for the prestige altar (Update 2) and the Mog Arena plots (Update 3).
 	trainingIsland = {
-		x = 700,
+		x = 800,
 		z = 0,
 		size = 260,
 		arrival = { x = 0, z = 100 }, -- where you land from War Island

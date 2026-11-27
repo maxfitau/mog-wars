@@ -54,7 +54,7 @@ type ZoneRecord = {
 	shownProgress: number,
 	territory: TerritoryState,
 	height: number, -- how high the flag's ground is (raised flags are skipped for spawning)
-	route: { Territories.Waypoint }?, -- waypoints bots follow to reach a raised flag
+	noSpawn: boolean, -- never spawn players beside this flag
 	boosts: { [number]: number }, -- tank boost per faction in this zone (set by UnitSystem)
 	beacon: BasePart?, -- the tall glowing pillar over the zone, recoloured with it
 	light: PointLight?,
@@ -113,7 +113,7 @@ local function register(instance: Instance)
 		shownProgress = -1,
 		territory = territory,
 		height = if flagInfo then flagInfo.y else 0,
-		route = if flagInfo then flagInfo.route else nil,
+		noSpawn = if flagInfo then flagInfo.noSpawn == true else false,
 		boosts = {},
 		beacon = instance:FindFirstChild("Beacon") :: BasePart?,
 		light = instance:FindFirstChildOfClass("PointLight"),
@@ -548,7 +548,7 @@ end
 function CaptureSystem.zoneList(): { SpawnRules.ZoneInfo }
 	local list: { SpawnRules.ZoneInfo } = {}
 	for _, record in zones do
-		if record.height <= 3 then -- raised flags (cliffs, the lighthouse top) are not used for spawning
+		if record.height <= 3 and not record.noSpawn then -- raised flags (cliffs, the lighthouse top) and hidden ones are not used for spawning
 			local position = record.part.Position
 			table.insert(list, { x = position.X, z = position.Z, size = record.part.Size.X, owner = record.state.owner })
 		end
@@ -610,7 +610,6 @@ function CaptureSystem.zoneViews(): { BotService.ZoneView }
 			size = record.part.Size.X,
 			owner = record.state.owner,
 			value = Territories.tiers[record.territory.tier].value,
-			route = record.route,
 		})
 	end
 	return list

@@ -7,48 +7,57 @@
 local Lighting = game:GetService("Lighting")
 local Workspace = game:GetService("Workspace")
 
-local MapLayout = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("MapLayout"))
 
 local IslandTerrain = {}
 
-local SAND_RADIUS = 215
-local GRASS_RADIUS = 198
-local WATER_HALF = 480 -- stays clear of Training Island, which starts at x = 570
+local TerrainKit = require(script.Parent:WaitForChild("TerrainKit"))
 
--- Where hills may stand: near the rim, clear of every landmark and base.
+local SAND_RADIUS = 355
+local GRASS_RADIUS = 340
+local DEPTH = 24
+local WATER_HALF = 560 -- stays clear of Training Island, which starts at x = 670
+
+-- Dirt paths: from each base to its nearest territory, and on to the Gate in the middle. Laid flat on the ground.
+IslandTerrain.paths = {
+	{ { -225, -225 }, { -100, -170 } }, -- base 1 to NPC Village
+	{ { 225, -225 }, { 215, -70 } }, -- base 2 to Rizz Ravine
+	{ { 225, 225 }, { 120, 190 } }, -- base 3 to Cooked Canyon
+	{ { -225, 225 }, { -110, 190 } }, -- base 4 to Brainrot Bog
+	{ { -100, -170 }, { 0, 0 } },
+	{ { 215, -70 }, { 0, 0 } },
+	{ { 120, 190 }, { 0, 0 } },
+	{ { -185, 45 }, { 0, 0 } },
+	{ { -110, 190 }, { -185, 45 } },
+	{ { -225, -225 }, { 0, -312 } },
+	{ { 225, -225 }, { 0, -312 } },
+}
+
+-- Hills near the rim, clear of every landmark and base (wide and low, so they are easy to walk up).
 local HILLS = {
-	{ x = -190, z = 0, radius = 18 },
-	{ x = 190, z = 10, radius = 18 },
-	{ x = 55, z = 188, radius = 16 },
-	{ x = -60, z = -188, radius = 16 },
-	{ x = 188, z = -70, radius = 12 },
-	{ x = -190, z = 80, radius = 12 },
+	{ x = -300, z = 0, base = 55, height = 22 },
+	{ x = 300, z = 40, base = 55, height = 22 },
+	{ x = 60, z = 300, base = 50, height = 18 },
+	{ x = -60, z = -300, base = 50, height = 18 },
+	{ x = 310, z = -120, base = 40, height = 14 },
+	{ x = -310, z = 120, base = 40, height = 14 },
 }
 
 function IslandTerrain.build()
 	local terrain = Workspace.Terrain
 	terrain:Clear()
+	TerrainKit.colors()
 	-- water first, then the island on top of it
-	terrain:FillBlock(CFrame.new(0, -5, 0), Vector3.new(WATER_HALF * 2, 7, WATER_HALF * 2), Enum.Material.Water) -- surface at y = -1.5
-	terrain:FillCylinder(CFrame.new(0, -4, 0), 8, SAND_RADIUS, Enum.Material.Sand) -- y from -8 to 0
-	terrain:FillCylinder(CFrame.new(0, -3, 0), 6, GRASS_RADIUS, Enum.Material.Grass) -- y from -6 to 0
+	terrain:FillBlock(CFrame.new(0, -DEPTH / 2 - 0.75, 0), Vector3.new(WATER_HALF * 2, DEPTH - 1.5, WATER_HALF * 2), Enum.Material.Water) -- surface at y = -1.5
+	TerrainKit.cylinder(0, -DEPTH, 0, SAND_RADIUS, DEPTH, Enum.Material.Sand) -- the beach
+	TerrainKit.cylinder(0, -DEPTH + 2, 0, GRASS_RADIUS, DEPTH - 2, Enum.Material.Grass)
 	for _, hill in HILLS do
-		terrain:FillBall(Vector3.new(hill.x, -hill.radius * 0.45, hill.z), hill.radius, Enum.Material.Grass)
-		terrain:FillBall(Vector3.new(hill.x, -hill.radius * 0.45 - hill.radius * 0.6, hill.z), hill.radius * 0.8, Enum.Material.Rock) -- a rocky foot
+		TerrainKit.dome(hill.x, hill.z, hill.base, hill.height, Enum.Material.Grass)
 	end
-	-- dirt paths from each base to the middle, and across the north to the Train portal
-	local function path(ax: number, az: number, bx: number, bz: number)
-		local from, to = Vector3.new(ax, -0.5, az), Vector3.new(bx, -0.5, bz)
+	for _, path in IslandTerrain.paths do
+		local from, to = Vector3.new(path[1][1], -0.75, path[1][2]), Vector3.new(path[2][1], -0.75, path[2][2])
 		local middle = (from + to) / 2
-		local cframe = CFrame.lookAt(middle, to)
-		terrain:FillBlock(cframe, Vector3.new(9, 1, (to - from).Magnitude), Enum.Material.Ground)
+		terrain:FillBlock(CFrame.lookAt(middle, to), Vector3.new(10, 1.5, (to - from).Magnitude), Enum.Material.Ground)
 	end
-	for _, base in MapLayout.bases do
-		path(base.x, base.z, 0, 0)
-	end
-	local portal = MapLayout.warPortals[1]
-	path(MapLayout.bases[1].x, MapLayout.bases[1].z, portal.x, portal.z)
-	path(MapLayout.bases[2].x, MapLayout.bases[2].z, portal.x, portal.z)
 end
 
 function IslandTerrain.lighting()

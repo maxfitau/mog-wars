@@ -11,6 +11,7 @@
 -- BotService.setZoneSource (so the two modules never require each other).
 
 local CollectionService = game:GetService("CollectionService")
+local PathfindingService = game:GetService("PathfindingService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
@@ -36,10 +37,11 @@ export type Bot = {
 	routeIndex: number,
 	thinkAt: number,
 	moveAt: number,
+	pathing: boolean, -- a pathfinding request is running
 	holdUntil: number, -- combat (strafing, taking cover) drives the movement until this server time
 }
 
-export type Waypoint = { x: number, z: number, y: number }
+export type Waypoint = { x: number, z: number, y: number, jump: boolean? }
 export type ZoneView = {
 	part: BasePart,
 	x: number,
@@ -206,6 +208,7 @@ local function spawnBot(faction: number)
 		thinkAt = 0,
 		moveAt = 0,
 		holdUntil = 0,
+		pathing = false,
 	}
 	table.insert(bots, bot)
 	humanoid.Died:Connect(function()
@@ -270,6 +273,33 @@ local function manage()
 	end
 end
 
+-- Ask Roblox's pathfinding for a walking route to a flag (stairs, doors, jumps and all) and store it as the bot's route.
+-- It runs in the background; the bot heads straight for the flag until the route arrives.
+local function computeRoute(bot: Bot, destination: Vector3)
+	if bot.pathing then
+		return
+	end
+	bot.pathing = true
+	task.spawn(function()
+		local path = PathfindingService:CreatePath({ AgentRadius = 2.5, AgentHeight = 5, AgentCanJump = true, WaypointSpacing = 6 })
+		local ok = pcall(function()
+			path:ComputeAsync(bot.root.Position, destination)
+		end)
+		if ok and path.Status == Enum.PathStatus.Success then
+			local list: { Waypoint } = {}
+			for _, waypoint in path:GetWaypoints() do
+				table.insert(list, { x = waypoint.Position.X, z = waypoint.Position.Z, y = waypoint.Position.Y, jump = waypoint.Action == Enum.PathWaypointAction.Jump })
+			end
+			if #list > 1 then
+				bot.route = list
+				bot.routeIndex = 2 -- the first waypoint is where the bot already stands
+				bot.moveAt = 0
+			end
+		end
+		bot.pathing = false
+	end)
+end
+
 local function jitteredPoint(zone: BasePart): Vector3
 	local reach = zone.Size.X * 0.35
 	return Vector3.new(zone.Position.X + (random() * 2 - 1) * reach, zone.Position.Y + 3, zone.Position.Z + (random() * 2 - 1) * reach)
@@ -309,14 +339,9 @@ local function think()
 						local view = views[index]
 						bot.target = view.part
 						assigned[index] = (assigned[index] or 0) + 1
-						-- a raised flag (cliff, lighthouse top) is reached by walking its ramp route first
-						if view.route and #view.route > 0 and bot.root.Position.Y < view.y + 2 then -- the bot is standing below the flag's level
-							bot.route = view.route
-							bot.routeIndex = 1
-						else
-							bot.route = nil
-							bot.routeIndex = 0
-						end
+						bot.route = nil
+						bot.routeIndex = 0
+						computeRoute(bot, Vector3.new(view.x, view.y + 3, view.z)) -- stairs, tunnels and rooftops included
 					end
 					bot.thinkAt = now + 6 + random() * 6
 					bot.moveAt = 0
@@ -335,6 +360,9 @@ local function think()
 						end
 						bot.moveAt = 0
 					elseif now >= bot.moveAt then
+						if waypoint.jump then
+							bot.humanoid.Jump = true
+						end
 						bot.humanoid:MoveTo(Vector3.new(waypoint.x, waypoint.y, waypoint.z))
 						bot.moveAt = now + 1.5
 					end

@@ -326,7 +326,7 @@ nearest 1-flag territory. Studio-only `AssetCheck` hunts the "ContentId 20378549
 **Done when:** holding 2 of 3 flags pays nothing, holding all 3 pays once, and every shown number matches what the server granted.
 
 ## Slice 26: Mog combat
-Three blasters (Mogter, Splash Cannon, Long Shot), health 100, 25 damage hits, mog = 3s respawn at the faction corner with a 2s shield. Server-side shots (`CombatSystem`): rate limit, direction check, ammo, fire interval, server raycast. Mog pays 10 aura + a few Mog Points (half for bots), assists, streak announcements, kill feed, defend bonus. Contested flags hold still. Mog-off duels are off in wars (`Features.mogOffsInWar`). Bots shoot, strafe and take cover. Weapons unlock by rank or from Gold/Diamond boxes (save version 10).
+Three weapons (Aura Blaster, Flex Blast, Side-Eye Sniper), ego 100, hits that take 34 (3 to mog), then a respawn at the faction corner with a shield. Server-side shots (`CombatSystem`): rate limit, direction check, aura charge, fire interval, server raycast. A mog pays aura + a few Mog Points (half for bots), assists, streak banners, kill feed, defend bonus. Contested flags hold still. Mog-off duels are off in wars (`Features.mogOffsInWar`). Bots shoot, strafe and take cover. Weapons unlock by rank or from Gold/Diamond boxes (save version 10).
 **Test:** `tests/CombatRules.test.luau`, `tests/PlayerData.test.luau`, `tests/BoxRoll.test.luau`; see `docs/PLAYTEST.md`, "Combat".
 **Done when:** you can mog a bot in 3 hits, a mog pays once per 20 seconds per victim, shielded players cannot be hurt or shoot, and a contested flag does not move.
 
@@ -338,4 +338,4 @@ Terrain island (sand rim, grass, hills, dirt paths, water), bright lighting, rea
 ## Slice 28: Fast pace and the Mog retheme
 Speed 22/55 on War Island, speed pads, dash, launch pads, AURA RUSH; 6-minute wars with overtime (all aura x2), flag capture in 4/6/8 seconds with a team bonus; free pickups (Protein Shake, Aura Refill, Main Character Mode); +1/+2/+10/+5/+25 aura pop-ups with a combo, streak banners, coins to the counter, screen punch; a 5-second results screen with MVPs. Combat renamed and restyled: aura blasts, Flex Blast cone, Side-Eye beam, ego and aura charge, REDUCED TO NPC.
 **Test:** `tests/Pace.test.luau`, `tests/CombatRules.test.luau`; see `docs/PLAYTEST.md`, "Combat and pace".
-**Done when:** a Gold flag takes about 4 seconds, the last minute is OVERTIME, no pop-up covers the crosshair, and nothing in the game says paint or splat.
+**Done when:** a Gold flag takes about 4 seconds, the last minute is OVERTIME, no pop-up covers the crosshair, and no old placeholder combat wording is left anywhere.

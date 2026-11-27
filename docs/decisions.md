@@ -134,7 +134,7 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 127 | Floating name signs are BillboardGuis at the landmark (they replaced the post-and-board signs) | The owner's request; one sign per territory |
 | 128 | All speed, dash, capture-time, overtime, pickup and tick numbers live in `src/shared/Pace.luau` (war length and the gap between wars stay in `EconomyConfig.war`) | The owner wants to tune them in one place |
 | 129 | Capture push is a faction's average aura power times the team bonus (+25% per extra player, max 2x) | The owner's rule; training still helps a little, numbers of players help more |
-| 130 | Weapon ids are `aurablaster`, `flexblast`, `sideeye` (renamed from the paintball ids; no saves existed yet) | Mog retheme; the rename needs no migration |
+| 130 | Weapon ids are `aurablaster`, `flexblast`, `sideeye` (renamed from the earlier placeholder ids; no saves existed yet) | Mog retheme; the rename needs no migration |
 | 131 | Combo multiplies aura only, never Mog Points, capped at x5 | Keeps Mog Points (the rank currency) paced by `docs/economy.md` |
 | 132 | Aura gains below 10 are collected until they make a whole treadmill stride | The +1 ticks would otherwise round to nothing |
 | 133 | Mogged players keep their joints (grey, standing) for the 2 second respawn | A cartoon "reduced to NPC" instead of falling apart |

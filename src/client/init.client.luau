@@ -3,7 +3,7 @@
 -- Controllers expose init() then start(); this file runs them in order.
 local Controllers = script:WaitForChild("Controllers")
 
-local order = { "CaptureHud" }
+local order = { "CaptureHud", "PointsHud" }
 
 local loaded = {}
 for _, name in order do

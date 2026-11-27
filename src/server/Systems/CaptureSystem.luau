@@ -12,7 +12,9 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local CaptureBar = require(Shared:WaitForChild("CaptureBar"))
 local Config = require(Shared:WaitForChild("EconomyConfig"))
 local FactionRules = require(Shared:WaitForChild("FactionRules"))
+local ContributionScoring = require(Shared:WaitForChild("ContributionScoring"))
 local ZoneGeometry = require(Shared:WaitForChild("ZoneGeometry"))
+local DataService = require(script.Parent:WaitForChild("DataService"))
 
 local HEADROOM = 8 -- studs above the zone that still count as standing in it
 local UNOWNED_COLOR = Color3.fromRGB(200, 200, 200)
@@ -22,6 +24,7 @@ type ZoneRecord = {
 	part: BasePart,
 	state: CaptureBar.State,
 	shownProgress: number,
+	contribs: { [number]: { faction: number, units: number } }, -- by user id, for the next payout
 }
 
 local zones: { [BasePart]: ZoneRecord } = {}
@@ -42,6 +45,7 @@ local function register(instance: Instance)
 		part = instance,
 		state = CaptureBar.newState(),
 		shownProgress = -1,
+		contribs = {},
 	}
 	instance:SetAttribute("OwnerFaction", 0)
 	instance:SetAttribute("Progress", 0)
@@ -58,8 +62,9 @@ local function unregister(instance: Instance)
 end
 
 -- Aura power per faction of everyone alive and standing in the zone. Rank scaling arrives in slice 8.
-local function powersInZone(zone: BasePart): { [number]: number }
+local function powersInZone(zone: BasePart): ({ [number]: number }, { [number]: { Player } })
 	local powers: { [number]: number } = {}
+	local members: { [number]: { Player } } = {}
 	for _, player in Players:GetPlayers() do
 		local character = player.Character
 		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
@@ -79,10 +84,12 @@ local function powersInZone(zone: BasePart): { [number]: number }
 				)
 			then
 				powers[faction] = (powers[faction] or 0) + 1
+				members[faction] = members[faction] or {}
+				table.insert(members[faction], player)
 			end
 		end
 	end
-	return powers
+	return powers, members
 end
 
 local function ownerColor(owner: number): Color3
@@ -113,13 +120,54 @@ local function show(record: ZoneRecord)
 	end
 end
 
+-- Pay out a captured zone: the pool is split by contribution among players of the capturing faction.
+local function payOut(record: ZoneRecord, winner: number)
+	local value = record.part:GetAttribute("Value")
+	local zoneValue = if type(value) == "number" then value else 1
+	local pool = Config.capture.basePool * zoneValue
+	local units: { [number]: number } = {}
+	for userId, entry in record.contribs do
+		if entry.faction == winner then
+			units[userId] = entry.units
+		end
+	end
+	local payouts = ContributionScoring.split(pool, units, {
+		minContribution = Config.capture.minContribution,
+		minAward = Config.capture.minAward,
+	})
+	for userId, amount in payouts do
+		local player = Players:GetPlayerByUserId(userId)
+		if player then
+			DataService.addPoints(player, amount) -- a player who left before payout loses that share
+		end
+	end
+	record.contribs = {}
+end
+
 local function tick(dt: number)
 	for _, record in zones do
-		local powers = powersInZone(record.part)
+		local powers, members = powersInZone(record.part)
+
+		-- Players on the pushing faction earn contribution while the zone is being attacked.
+		local leaderId = CaptureBar.leader(powers)
+		if leaderId ~= 0 and leaderId ~= record.state.owner and members[leaderId] then
+			for _, player in members[leaderId] do
+				local entry = record.contribs[player.UserId]
+				if not entry or entry.faction ~= leaderId then
+					entry = { faction = leaderId, units = 0 }
+					record.contribs[player.UserId] = entry
+				end
+				entry.units += ContributionScoring.fromPush(1, dt)
+			end
+		end
+
 		local result = CaptureBar.step(record.state, powers, dt, params)
 		record.state = result.state
 		if result.captured then
 			print(("[mog-wars] zone %s captured by faction %d"):format(record.part.Name, result.newOwner))
+			payOut(record, result.newOwner)
+		elseif record.state.capturer == 0 and record.state.progress == 0 and leaderId == 0 then
+			record.contribs = {} -- the zone went idle, so old pushing no longer counts
 		end
 		show(record)
 	end

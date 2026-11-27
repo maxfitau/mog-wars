@@ -13,3 +13,7 @@ Roblox game. Read `DESIGN.md` (the design brief) and `CLAUDE.md` (how to work on
 
 Cloud sessions have no Studio, Rojo or Luau runtime. Not yet run or verified: all `tests/*.test.luau`, StyLua,
 Selene, and every slice in `docs/slices.md` (none is built yet). See `docs/morning-notes.md`.
+
+## Saving (slice 4)
+
+See `docs/DATA.md` in the roblox-framework repo for vendoring the real ProfileStore. Until then, saving is an in-memory mock that only works in Studio and the game refuses to run saving outside Studio.

@@ -54,7 +54,7 @@ Studio with 2 clients on different factions.
 
 ## 4. Mog Points and saving
 
-**Build:** contribution scoring while pushing; payout on capture split by contribution
+**Build (code written, not yet playtested):** contribution scoring while pushing; payout on capture split by contribution
 (`src/shared/ContributionScoring.luau`); a points counter on the HUD; saving points with session locking.
 **Test:** pure tests for scoring and payouts. In Studio: capture with a teammate and check the split; rejoin and
 check points saved (needs a scratch place with live stores).

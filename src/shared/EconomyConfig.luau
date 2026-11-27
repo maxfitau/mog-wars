@@ -86,6 +86,20 @@ export type Config = {
 		flushSeconds: number,
 		refreshSeconds: number,
 	},
+	bots: {
+		minFighters: number,
+		rewardFactor: number,
+		tapRateBase: number,
+		tapRatePerRank: number,
+		tapRateSpread: number,
+		tapRateNewPlayerFactor: number,
+		tapRateMin: number,
+		tapRateMax: number,
+		auraPerRank: number,
+		manageSeconds: number,
+		thinkSeconds: number,
+		walkSpeed: number,
+	},
 	ranks: { Rank },
 	boxes: {
 		dailyCap: number,
@@ -164,6 +178,20 @@ local config: Config = {
 		pointsMogOffWin = 1,
 		flushSeconds = 30, -- how often a server adds its new season points to the shared faction totals
 		refreshSeconds = 60, -- how often a server reads the shared faction totals
+	},
+	bots = {
+		minFighters = 8, -- a war with fewer fighters than this is filled up with bots
+		rewardFactor = 0.4, -- Mog Points for beating a bot are 40 percent of the normal amount
+		tapRateBase = 3.0, -- taps a second a bot taps against an NPC-rank player in a mog-off
+		tapRatePerRank = 0.4, -- plus this much for each rank of the player it faces
+		tapRateSpread = 0.9, -- how much each duel varies, so bots sometimes win and sometimes lose
+		tapRateNewPlayerFactor = 0.8, -- bots tap this much slower against a player who has not finished a war yet
+		tapRateMin = 1.5,
+		tapRateMax = 8.5, -- always below the server's cap of 10 taps a second
+		auraPerRank = 0.03, -- bot aura power grows this much per average player rank (small)
+		manageSeconds = 1, -- how often the server adds or removes ONE bot
+		thinkSeconds = 0.5, -- how often bots choose where to run
+		walkSpeed = 16,
 	},
 	ranks = {
 		{ name = "NPC", cost = 0 },

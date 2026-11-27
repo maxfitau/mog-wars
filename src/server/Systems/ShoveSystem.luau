@@ -13,6 +13,7 @@ local Workspace = game:GetService("Workspace")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("EconomyConfig"))
 local ShoveRules = require(Shared:WaitForChild("ShoveRules"))
+local BotService = require(script.Parent:WaitForChild("BotService"))
 local CaptureSystem = require(script.Parent:WaitForChild("CaptureSystem"))
 
 local ShoveSystem = {}
@@ -52,6 +53,7 @@ local function handle(player: Player, knockbackRemote: RemoteEvent)
 
 	local candidates: { ShoveRules.Candidate } = {}
 	local byId: { [number]: Player } = {}
+	local botById: { [number]: BotService.Bot } = {}
 	for _, other in Players:GetPlayers() do
 		local otherRoot = rootOf(other)
 		local otherFaction = other:GetAttribute("Faction")
@@ -69,8 +71,24 @@ local function handle(player: Player, knockbackRemote: RemoteEvent)
 		end
 	end
 
+	-- Bots can be shoved too (their ids are negative, so they never clash with player ids).
+	for _, bot in BotService.list() do
+		local position = bot.root.Position
+		table.insert(candidates, { id = bot.id, x = position.X, y = position.Y, z = position.Z, faction = bot.faction, alive = true })
+		botById[bot.id] = bot
+	end
+
 	local origin = root.Position
 	local targetId = ShoveRules.pickTarget(origin.X, origin.Y, origin.Z, faction, candidates, Config.shove)
+	local targetBot = if targetId then botById[targetId] else nil
+	if targetBot then
+		lastShove[player] = now
+		player:SetAttribute("ShoveReadyAt", now + Config.shove.cooldownSeconds)
+		local bx, bz = ShoveRules.direction(origin.X, origin.Z, targetBot.root.Position.X, targetBot.root.Position.Z)
+		BotService.weaken(targetBot, now + Config.shove.penaltySeconds)
+		BotService.knockback(targetBot, bx, bz, Config.shove.knockbackStuds)
+		return -- no contribution for shoving a bot
+	end
 	local target = if targetId then byId[targetId] else nil
 	local targetRoot = if target then rootOf(target) else nil
 	if not target or not targetRoot then

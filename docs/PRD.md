@@ -40,6 +40,7 @@ shoving rivals, winning tapping duels called mog-offs, and spending the Mog Poin
 | Shove | Short cooldown ability: knocks a rival back and briefly weakens their push | Server validates range and cooldown |
 | Mog-off | When two enemies stay close in a zone, a 5-second tapping duel starts; more taps wins; loser is knocked back and stunned briefly; ties go to the defender | Taps are counted on the server, capped per second, and ranks give no advantage |
 | Units | Tank: speeds capture in its zone. Horse: speeds movement. Each lasts one war. | Earned from boxes, sellable for Mog Points, never sold for Robux |
+| Bots | A war with fewer than 8 fighters is filled with bots, balanced across factions and removed one at a time as players join. They tap at human-like speeds that depend on the player's rank, wear a "BOT" tag and are never ranked or counted | Not Players; beating a bot pays 40 percent |
 | Mog Points | The one currency. Earned from captures by contribution, boxes, streaks, barracks; spent on rank-ups | Granted by the server only |
 | Ranks | Seven ranks: NPC, Rookie, Sigma, Chadlite, Chad, Gigachad, Mog God | Cost curve in `docs/economy.md` |
 | Boxes | Earned on captures by territory value (Gold, Diamond, Ultra) and from the daily streak, never bought. Published odds | Odds shown to players, no pity or boosts |

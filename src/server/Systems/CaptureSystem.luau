@@ -23,13 +23,15 @@ local ShoveRules = require(Shared:WaitForChild("ShoveRules"))
 local UnitRules = require(Shared:WaitForChild("UnitRules"))
 local WarRules = require(Shared:WaitForChild("WarRules"))
 local ZoneGeometry = require(Shared:WaitForChild("ZoneGeometry"))
+local BotRules = require(Shared:WaitForChild("BotRules"))
+local BotService = require(script.Parent:WaitForChild("BotService"))
 local DataService = require(script.Parent:WaitForChild("DataService"))
 local FriendService = require(script.Parent:WaitForChild("FriendService"))
 local SeasonService = require(script.Parent:WaitForChild("SeasonService"))
 
 local HEADROOM = 8 -- studs above the zone that still count as standing in it
-local UNOWNED_COLOR = Color3.fromRGB(200, 200, 200)
-local PUSH_COLOR = Color3.fromRGB(255, 200, 60)
+local UNOWNED_COLOR = Color3.fromRGB(0, 235, 255) -- bright glowing cyan: nobody owns it yet
+local PUSH_COLOR = Color3.fromRGB(255, 235, 40) -- turns bright yellow as it fills
 
 type ZoneRecord = {
 	part: BasePart,
@@ -37,6 +39,8 @@ type ZoneRecord = {
 	shownProgress: number,
 	contribs: { [number]: { faction: number, units: number } }, -- by user id, for the next payout
 	boosts: { [number]: number }, -- tank boost per faction in this zone (set by UnitSystem)
+	beacon: BasePart?, -- the tall glowing pillar over the zone, recoloured with it
+	light: PointLight?,
 }
 
 local zones: { [BasePart]: ZoneRecord } = {}
@@ -62,6 +66,8 @@ local function register(instance: Instance)
 		shownProgress = -1,
 		contribs = {},
 		boosts = {},
+		beacon = instance:FindFirstChild("Beacon") :: BasePart?,
+		light = instance:FindFirstChildOfClass("PointLight"),
 	}
 	instance:SetAttribute("OwnerFaction", 0)
 	instance:SetAttribute("Progress", 0)
@@ -79,9 +85,11 @@ end
 
 -- Aura power per faction of everyone alive and standing in the zone. Aura grows with training; a recent shove
 -- or mog-off loss weakens it for a few seconds.
-local function powersInZone(zone: BasePart): ({ [number]: number }, { [number]: { Player } })
+local function powersInZone(zone: BasePart): ({ [number]: number }, { [number]: { Player } }, { BotService.Bot })
 	local powers: { [number]: number } = {}
 	local members: { [number]: { Player } } = {}
+	local botsHere: { BotService.Bot } = {}
+	local now = Workspace:GetServerTimeNow()
 	for _, player in Players:GetPlayers() do
 		local character = player.Character
 		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
@@ -89,23 +97,9 @@ local function powersInZone(zone: BasePart): ({ [number]: number }, { [number]: 
 		local faction = player:GetAttribute("Faction")
 		if type(faction) == "number" and FactionRules.byId(faction) and humanoid and root and root:IsA("BasePart") and humanoid.Health > 0 then
 			local offset = zone.CFrame:PointToObjectSpace(root.Position)
-			if
-				ZoneGeometry.contains(
-					offset.X,
-					offset.Y,
-					offset.Z,
-					zone.Size.X,
-					zone.Size.Y,
-					zone.Size.Z,
-					HEADROOM
-				)
-			then
+			if ZoneGeometry.contains(offset.X, offset.Y, offset.Z, zone.Size.X, zone.Size.Y, zone.Size.Z, HEADROOM) then
 				local penaltyUntil = player:GetAttribute("PushPenaltyUntil")
-				local weight = ShoveRules.powerMultiplier(
-					Workspace:GetServerTimeNow(),
-					if type(penaltyUntil) == "number" then penaltyUntil else 0,
-					Config.shove
-				)
+				local weight = ShoveRules.powerMultiplier(now, if type(penaltyUntil) == "number" then penaltyUntil else 0, Config.shove)
 				local level = player:GetAttribute("TrainingLevel")
 				local aura = TrainingRules.auraMultiplier(if type(level) == "number" then level else 0, Config.training)
 				powers[faction] = (powers[faction] or 0) + weight * aura
@@ -114,12 +108,31 @@ local function powersInZone(zone: BasePart): ({ [number]: number }, { [number]: 
 			end
 		end
 	end
-	return powers, members
+	-- Bots push like anyone else, but they are never paid and never counted as contributors.
+	for _, bot in BotService.list() do
+		local offset = zone.CFrame:PointToObjectSpace(bot.root.Position)
+		if ZoneGeometry.contains(offset.X, offset.Y, offset.Z, zone.Size.X, zone.Size.Y, zone.Size.Z, HEADROOM) then
+			local weight = ShoveRules.powerMultiplier(now, bot.penaltyUntil, Config.shove)
+			powers[bot.faction] = (powers[bot.faction] or 0) + weight * bot.aura
+			table.insert(botsHere, bot)
+		end
+	end
+	return powers, members, botsHere
 end
 
 local function ownerColor(owner: number): Color3
 	local faction = FactionRules.byId(owner)
 	return if faction then FactionRules.color(faction) else UNOWNED_COLOR
+end
+
+local function setZoneColor(record: ZoneRecord, color: Color3)
+	record.part.Color = color
+	if record.beacon then
+		record.beacon.Color = color
+	end
+	if record.light then
+		record.light.Color = color
+	end
 end
 
 local function show(record: ZoneRecord)
@@ -131,9 +144,9 @@ local function show(record: ZoneRecord)
 		record.part:SetAttribute("Progress", rounded)
 		record.part:SetAttribute("CapturerFaction", state.capturer)
 		if state.owner ~= 0 then
-			record.part.Color = ownerColor(state.owner)
+			setZoneColor(record, ownerColor(state.owner))
 		else
-			record.part.Color = UNOWNED_COLOR:Lerp(PUSH_COLOR, rounded)
+			setZoneColor(record, UNOWNED_COLOR:Lerp(PUSH_COLOR, rounded))
 		end
 	end
 	if record.part:GetAttribute("CapturerFaction") ~= state.capturer then
@@ -141,15 +154,28 @@ local function show(record: ZoneRecord)
 	end
 	if record.part:GetAttribute("OwnerFaction") ~= state.owner then
 		record.part:SetAttribute("OwnerFaction", state.owner)
-		record.part.Color = if state.owner ~= 0 then ownerColor(state.owner) else UNOWNED_COLOR
+		setZoneColor(record, if state.owner ~= 0 then ownerColor(state.owner) else UNOWNED_COLOR)
 	end
 end
 
 -- Pay out a captured zone: the pool is split by contribution among players of the capturing faction.
-local function payOut(record: ZoneRecord, winner: number)
+-- How many real players are fighting on a faction (bots never count).
+local function humansOn(faction: number): number
+	local count = 0
+	for _, player in Players:GetPlayers() do
+		if player:GetAttribute("Faction") == faction and player:GetAttribute("Island") ~= "training" then
+			count += 1
+		end
+	end
+	return count
+end
+
+local function payOut(record: ZoneRecord, winner: number, previousOwner: number)
 	local value = record.part:GetAttribute("Value")
 	local zoneValue = if type(value) == "number" then value else 1
-	local pool = Config.capture.basePool * zoneValue
+	-- Taking a zone from a faction that has no real players (only bots) pays fewer Mog Points.
+	local factor = BotRules.capturePoolFactor(previousOwner, humansOn(previousOwner), Config.bots)
+	local pool = math.floor(Config.capture.basePool * zoneValue * factor)
 	local boxTier = BoxRoll.tierForValue(zoneValue, Config.boxes.tierForValue)
 	local units: { [number]: number } = {}
 	for userId, entry in record.contribs do
@@ -196,6 +222,7 @@ local function tick(dt: number)
 	end
 	for _, record in zones do
 		local powers, members = powersInZone(record.part)
+		local previousOwner = record.state.owner
 		for faction, multiplier in record.boosts do
 			if powers[faction] then
 				powers[faction] = UnitRules.boostedPower(powers[faction], multiplier)
@@ -222,7 +249,7 @@ local function tick(dt: number)
 		if result.captured then
 			print(("[mog-wars] zone %s captured by faction %d"):format(record.part.Name, result.newOwner))
 			warCaptures[result.newOwner] = (warCaptures[result.newOwner] or 0) + 1
-			payOut(record, result.newOwner)
+			payOut(record, result.newOwner, previousOwner)
 		elseif record.state.capturer == 0 and record.state.progress == 0 and leaderId == 0 then
 			record.contribs = {} -- the zone went idle, so old pushing no longer counts
 		end
@@ -273,13 +300,13 @@ end
 
 -- Give a player contribution in the zone they share with `other`, but only while attacking it (the zone is
 -- not already their faction's). Used for shoves and mog-off wins.
-local function credit(player: Player, other: Player, amount: number)
+local function credit(player: Player, other: Player?, amount: number)
 	local faction = player:GetAttribute("Faction")
 	if not active or type(faction) ~= "number" then
 		return
 	end
 	for _, record in zones do
-		if record.state.owner ~= faction and playerInZone(player, record.part) and playerInZone(other, record.part) then
+		if record.state.owner ~= faction and playerInZone(player, record.part) and (other == nil or playerInZone(other, record.part)) then
 			local entry = record.contribs[player.UserId]
 			if not entry or entry.faction ~= faction then
 				entry = { faction = faction, units = 0 }
@@ -296,8 +323,9 @@ function CaptureSystem.creditShove(shover: Player, target: Player)
 	credit(shover, target, Config.capture.shoveAssist)
 end
 
-function CaptureSystem.creditMogOffWin(winner: Player, loser: Player)
-	credit(winner, loser, Config.capture.mogOffWin)
+-- `loser` is nil when the winner beat a bot; `factor` scales the reward (bots pay less).
+function CaptureSystem.creditMogOffWin(winner: Player, loser: Player?, factor: number?)
+	credit(winner, loser, Config.capture.mogOffWin * (factor or 1))
 end
 
 -- Every zone with its position, size and current owner, for the spawn system.
@@ -334,25 +362,43 @@ function CaptureSystem.clearBoosts()
 	end
 end
 
-export type Occupancy = { owner: number, players: { Player } }
+export type Occupancy = { owner: number, players: { Player }, bots: { BotService.Bot } }
 
 -- Who is standing in each zone right now, with the zone's owner, for the mog-off system.
 function CaptureSystem.occupants(): { Occupancy }
 	local list: { Occupancy } = {}
 	for _, record in zones do
-		local _, members = powersInZone(record.part)
+		local _, members, botsHere = powersInZone(record.part)
 		local everyone: { Player } = {}
 		for _, group in members do
 			for _, player in group do
 				table.insert(everyone, player)
 			end
 		end
-		table.insert(list, { owner = record.state.owner, players = everyone })
+		table.insert(list, { owner = record.state.owner, players = everyone, bots = botsHere })
+	end
+	return list
+end
+
+-- Zones with their positions and owners, for the bots to choose from.
+function CaptureSystem.zoneViews(): { BotService.ZoneView }
+	local list: { BotService.ZoneView } = {}
+	for _, record in zones do
+		local value = record.part:GetAttribute("Value")
+		table.insert(list, {
+			part = record.part,
+			x = record.part.Position.X,
+			z = record.part.Position.Z,
+			size = record.part.Size.X,
+			owner = record.state.owner,
+			value = if type(value) == "number" then value else 1,
+		})
 	end
 	return list
 end
 
 function CaptureSystem.init()
+	BotService.setZoneSource(CaptureSystem.zoneViews)
 	for _, instance in CollectionService:GetTagged("Zone") do
 		register(instance)
 	end

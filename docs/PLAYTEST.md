@@ -50,3 +50,20 @@ Nothing has been run yet, so expect to find errors. Write down or paste anything
 - Red text in Output: copy it all to Claude.
 - Nothing appears: check Rojo says Connected and `rojo serve` is still running.
 - Press Stop and Play again after any change.
+
+## Bots (new)
+1. Press **Play** alone. Within about 10 seconds bots start to appear at the four bases, one every second, until 8 fighters stand
+   in the war (you plus 7 bots). Each has a small **BOT** tag above their name and a faction outline.
+2. Watch them run between the glowing zones. Zones are bright cyan with a tall pillar of light; they turn yellow as they fill and
+   take the faction's colour when captured.
+3. Stand in a zone with a bot of another faction close to you for about 2 seconds. A **mog-off** starts with "<name> (BOT)" as the
+   opponent. Tap **F** (or the big button) as fast as you can. As a new player you should win most duels, and the bot should win
+   one now and then.
+4. Press **E** next to a bot to shove it back.
+5. Start 2 clients (Test tab, Players 2). The bot count should go down by one a second until 6 bots are left: 2 players plus 6
+   bots. Start more players to see them leave one at a time.
+6. In Output you should see no "[mog-wars] FAILED" lines. Bots must not appear in the Roblox player list (top right).
+7. Signs: you should see one clear sign for each place (TRAIN beside each portal, TRAINING AREA over the treadmills, SHOP on the
+   kiosk, BACK TO WAR by the return portal), with nothing floating on top of each other.
+8. Go to Training Island: the "Run to a glowing zone" hint must not show there.
+9. Max players: in Game Settings > Players set **Maximum Players** to 16.

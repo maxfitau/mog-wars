@@ -26,6 +26,8 @@ guarantees approval, a rating, visibility or revenue.
 | Daily box with a 7-day streak | on | yes | no | yes | no |
 | Cosmetic shop on Training Island (trails, auras, titles) | on | yes | no | yes | no (no products created yet) |
 | First-session hint and gradual screens | on | yes | no | yes | no |
+| Bots that fill a war to 8 fighters, with a "BOT" tag | on | yes | no | yes | no |
+| Clear signs, glowing zones with light pillars | on | yes | no | yes | no |
 | Seasons, squad bonus, friend placement | off | yes | no | no | no (not at launch) |
 | Barracks offline income | off | yes | no | no | no (not at launch) |
 | Per-rank training stations, prestige, Mog Arena, battle pass, number pop-ups | not built | no | no | no | no |
@@ -47,6 +49,7 @@ done = with evidence, blocked = what is in the way, unknown = nobody checked, us
 | Technical | Every file in `tests/` run and passing; StyLua and Selene clean | unknown: never run; being run on the Mac |
 | Technical | Studio playtest on phone, tablet and desktop sizes | user task |
 | Technical | Avatar type R15 in Game Settings | user task |
+| Technical | Maximum Players set to 16 (Game Settings and Creator Hub) | user task |
 | Technical | A server with many players, performance | unknown |
 | Technical | Soft launch to friends and a parent or guardian for young testers first | user task |
 | Kids and social | First session simple, no free-text input, no trading, no wagering | done by design: gradual screens, fixed titles only, no trading |

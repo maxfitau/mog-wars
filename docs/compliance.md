@@ -183,3 +183,13 @@ should show everything it gives before purchase.
   box only appear after three finished wars. Features that are switched off do nothing on the server, not just in the screens.
 - Seasons, the squad bonus and friend lookups are off at launch, so no friends-list lookups happen until they are switched on. Re-read
   sections 5 and 11 before switching them on.
+
+## 14. Bots (built)
+
+- Bots are clearly labelled with a "BOT" tag above their name and are never presented as real players. They never appear in Roblox's
+  player list or on any ranking, and they do not count in player counts.
+- Bots never earn or take away anything real: they are not paid, never take a real player's spot, and are removed as players join.
+- A bot's mog-off taps go through the same counter and speed cap as a player's, and its speed is chosen to be fair (easier for new
+  players), not to beat children. Messages after a loss stay gentle.
+- Max server size is 16. Set "Maximum Players" to 16 in Game Settings (and the experience's Creator Hub settings); the code
+  also kicks a 17th player as a safety net.

@@ -148,3 +148,11 @@ and was re-run with it off. When a feature is switched on in a later weekly upda
 Skill costs are 1, 2 or 3 Legacy Points by tier (so one branch is about 4 prestiges and the whole tree about 12). Hard caps: Mog Point
 bonus 25 percent, combat advantage about 10 percent, box luck at most +10 percent chance for the better outcomes with the boosted odds
 shown. Faction balancing counts each player as 1 plus 0.25 per prestige level, at most 2.5.
+
+## Bots (built)
+
+Bots fill a war up to 8 fighters and are never paid. Beating a bot pays less (`Config.bots.rewardFactor`, 40 percent): a mog-off
+win against a bot gives 40 percent of the usual contribution, and taking a zone from a faction with no real players pays 40
+percent of the pool (so a lone player cannot farm bots for full rewards). The boxes for a capture are unchanged but still limited
+by the daily cap of 12. The pacing simulation assumes captures against real players or mixed factions, so a player who only
+fights bots earns less than the table says.

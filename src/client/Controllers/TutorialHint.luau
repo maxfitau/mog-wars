@@ -1,5 +1,5 @@
 --!strict
--- First-session hint. Until a player has captured a zone (RevealStage 0), show one line, "Run to a glowing
+-- First-session hint, on War Island only. Until a player has captured a zone (RevealStage 0), show one line, "Run to a glowing
 -- zone and stand in it!", with an arrow that points at the nearest zone. It disappears once they are standing
 -- in a zone (the zone bar takes over) and for good after their first capture. Display only.
 
@@ -21,6 +21,10 @@ local arrow: TextLabel
 
 local function update()
 	local stage = player:GetAttribute("RevealStage")
+	if player:GetAttribute("Island") == "training" then
+		frame.Visible = false -- the hint is only for War Island
+		return
+	end
 	local character = player.Character
 	local root = character and character:FindFirstChild("HumanoidRootPart")
 	local camera = Workspace.CurrentCamera

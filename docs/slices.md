@@ -33,6 +33,7 @@ clients can only ask; the server decides.
 | 21 | Mog Arena tycoon (planned, Update 3, not built) | 16, 20 |
 | 22 | Launch switches and gradual reveal (built) | all |
 | 23 | Two islands: War Island and Training Island (built) | 15, 12 |
+| 24 | Bots, clearer signs and glowing zones (built) | 5, 7, 23 |
 
 **Release plan (from the owner):** everything is built, but launch switches on only the war, ranks, boxes and units, the
 treadmill, the daily streak and the cosmetic shop. Seasons and the squad bonus are built and switched off; they come on as later
@@ -288,3 +289,25 @@ turns that feature on or off.
 **Test:** pure tests in `tests/IslandRules.test.luau` and `tests/MapLayout.test.luau`. In Studio: see `docs/PLAYTEST.md`.
 **Done when:** you can go to Training Island and back instantly, training only counts on the treadmills there, the shop only opens
 there, and nothing in the war can be reached from Training Island.
+
+## 24. Bots, clearer signs and glowing zones (built)
+
+**Build (code written, not yet playtested):**
+- **Bots** (`BotService`, `BotRules`): when fewer than 8 real players are fighting on War Island, the server adds one bot a second,
+  spread across factions, and removes one a second as players join. Bots are not Players (so they never show in Roblox's player
+  list, any ranking or any player count), wear a small "BOT" tag, run between zones, capture and push back, can be shoved, and do
+  mog-offs.
+- **Bot mog-offs:** the server makes the bot's taps at a human-like speed from the player's rank (3 taps a second at NPC rank, plus
+  0.4 per rank, 20 percent slower against a player who has not finished a war), varying each duel, and through the same tap
+  counter and 10-taps-a-second cap. A simulation says a brand-new kid tapping 4 times a second beats a bot about 79 percent of
+  the time (99 percent to win at least once in 3 duels), a rank 5 player about 57 percent, and a Mog God about 41 percent.
+- **Rewards:** a mog-off win against a bot pays 40 percent of the contribution; taking a zone from a faction with no real players
+  pays 40 percent of the pool; bots are never paid.
+- **One sign per place:** floating labels replaced by real signboards on posts (TRAIN beside each portal, TRAINING AREA over the
+  treadmill row, SHOP on the kiosk, BACK TO WAR by the return portal).
+- **Zones glow:** bright cyan Neon, a tall see-through pillar of light and a point light on every zone, recoloured with the
+  zone (yellow as it fills, the owner's colour when captured).
+- The "Run to a glowing zone" hint only shows on War Island.
+**Test:** pure tests in `tests/BotRules.test.luau`. In Studio: see `docs/PLAYTEST.md`, section "Bots".
+**Done when:** a war is never emptier than 8 fighters, bots leave one at a time as players arrive, a new player can win a mog-off
+against a bot within a minute, and no bot ever appears as a player.

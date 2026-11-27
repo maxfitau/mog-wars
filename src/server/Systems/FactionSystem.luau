@@ -75,6 +75,11 @@ local function assign(player: Player)
 	if assigned[player] or assigning[player] then
 		return
 	end
+	if #Players:GetPlayers() > Config.war.playersPerServer then
+		-- The place setting "Maximum Players" should already be 16; this is a safety net.
+		player:Kick("This server is full. Please join another one.")
+		return
+	end
 	assigning[player] = true
 	if Features.friendPlacement then
 		FriendService.refresh(player, FRIEND_LOOKUP_SECONDS) -- yields; the faction is chosen after this

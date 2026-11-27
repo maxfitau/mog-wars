@@ -11,6 +11,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("EconomyConfig"))
 local FactionRules = require(Shared:WaitForChild("FactionRules"))
 local WarRules = require(Shared:WaitForChild("WarRules"))
+local BotService = require(script.Parent:WaitForChild("BotService"))
 local CaptureSystem = require(script.Parent:WaitForChild("CaptureSystem"))
 local DataService = require(script.Parent:WaitForChild("DataService"))
 local SeasonService = require(script.Parent:WaitForChild("SeasonService"))
@@ -77,6 +78,7 @@ end
 local function startWar()
 	warNumber += 1
 	CaptureSystem.resetWar()
+	BotService.onWarStart()
 	Workspace:SetAttribute("WarWinner", 0)
 	publishScores()
 	for _, player in Players:GetPlayers() do

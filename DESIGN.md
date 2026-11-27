@@ -69,6 +69,14 @@ Arrives in Update 2. Not built yet.
 - The arena is kept through prestige.
 - Extra theme variants and decor can be sold; stations cannot. Not built yet.
 
+## Bots
+- A war with fewer than 8 fighters is filled with bots, balanced across the factions. Bots are removed one at a time as real players join.
+- Bots run between zones, capture, push back and do mog-offs with human-like tap speeds: they sometimes win and sometimes lose.
+- Bot difficulty scales to the players' ranks. It is easy against new players, so a new player can win their first mog-off within a minute.
+- Bots show a small "BOT" tag above their name, never appear on leaderboards and do not count in player counts.
+- Beating a bot gives fewer Mog Points than beating a real player.
+- Max server size is 16.
+
 ## Release plan
 Everything is built, but only part of it is switched on (see `src/shared/Features.luau`).
 - Launch: the war, ranks, boxes and units, the treadmill, the daily streak and the cosmetic shop. Seasons and the squad bonus are built but switched off; they are turned on as later weekly updates.

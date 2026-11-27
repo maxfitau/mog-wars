@@ -128,3 +128,11 @@ simulator-economy skill: choose the numbers with a pacing table first, then buil
 
 Tools: run the simulator skill's pacing calculator (`lune run scripts/balance.luau`, needs the free Lune tool) on the new config
 before building, and copy its tested number maths into the game rather than rewriting it.
+
+## Prestige currency and skills (planned, not built)
+
+Legacy Points: 3 per prestige, never sold. Spent on a skill tree of 3 branches by 3 tiers (Grind, Tactics, Swagger). Hard caps from
+the owner: Mog Point bonus at most 25 percent (5 percent per level), all combat advantage together about 10 percent, box luck
+capped (number to be set). Because Grind adds Mog Point gains and prestige also multiplies gains, the pacing table must be re-run
+with both before launch of Update 1. Respec is free once a week, so tree choices are never a trap. Box luck is only ever earned,
+never bought, and the opening screen must show the boosted odds while it is active.

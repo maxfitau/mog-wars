@@ -162,12 +162,17 @@ should show everything it gives before purchase.
 
 ## 12. Number pop-ups, prestige and the Mog Arena (planned, not built)
 
-- **Number pop-ups:** no flashing or strobing, a limit on how many show at once, and a way to turn them down. CRITs and
-  combos are not bought, so they are not paid random items. Keep every number honest: it must match what the server granted.
-- **Prestige:** time based only, never sold, and the confirm screen must show clearly what resets so no child loses progress
-  by accident. The "ascended" broadcast uses fixed wording with the player's Roblox display name and is rate limited, so it
-  cannot be used to spam or show other text.
-- **Mentor bonus:** needs limits so extra accounts cannot farm it (see `docs/design-reconciliation.md`, D4).
-- **Mog Arena:** themes and decor may be sold, stations never (design rule 1). A statue spot must show the player's own avatar,
-  never a real person. Plots hold no free text. The weekly vote needs limits against stuffing and must not become a popularity
-  contest that pressures young players. Check Roblox's current rules before selling anything bought by or for friends.
+- **Number pop-ups:** no flashing or strobing, a limit on how many show at once, and a way to turn them down. CRITs and combos are not
+  bought, so they are not paid random items. Every number must match what the server granted.
+- **Prestige:** time based only. Legacy Points and the skill tree can never be bought or sped up with Robux (design rule 1). The confirm
+  screen must show clearly what resets so no child loses progress by accident. The "ascended" broadcast uses fixed wording with the
+  player's Roblox display name and is rate limited.
+- **Skill tree:** the Tactics branch gives a small combat edge (capped about 10 percent) that is earned by playing, never bought. Keep the cap
+  enforced on the server and tested. The Grind "capped box luck" changes odds, so the opening screen must show the boosted odds while it
+  is active (boxes are never sold, so no paid random item exists, but showing the real odds is the honest design).
+- **Balancing by prestige:** server side only; do not show other players' prestige as a way to rank or pressure them beyond a simple badge.
+- **Mentor bonus:** real friends, or teammates present for at least 10 minutes, with a daily cap, so extra accounts cannot farm it.
+- **Mog Arena:** themes and decor may be sold, stations never (design rule 1). A statue spot must show the player's own avatar, never a real
+  person. Plots hold no free text. The Best Arena vote is one vote per player per week, visitors only, fixed categories and a cosmetic prize,
+  and must not become a popularity contest that pressures young players. Check Roblox's current rules before selling anything bought by or for
+  friends.

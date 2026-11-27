@@ -76,3 +76,7 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 70 | The number pop-ups, prestige and the Mog Arena are in `DESIGN.md` and docs/slices.md (19 to 21) as plans only; the arena is the first update after launch | The owner asked for the plan without building |
 | 71 | The pop-up for a "kill" is written for a mog-off win | The game has no kills; the loser is knocked back (flagged in docs/design-reconciliation.md, D1) |
 | 72 | Big-number maths will use mantissa and exponent storage before any balance can pass about 1e15 | Luau numbers are exact only to about 9e15 (from the simulator-economy skill) |
+| 73 | Release plan: launch = war + simple training area; Update 1 (around week 4 to 5) = prestige + skill tree; Update 2 = Mog Arena | The owner's plan; slices 20 and 21 follow it |
+| 74 | Legacy Points: 3 per prestige, never sold; skill tree of 3 branches by 3 tiers; Mog Point bonus capped 25 percent, combat advantage capped about 10 percent; free respec weekly; factions balance by prestige too | The owner's answers, written as plans only |
+| 75 | Mentor bonus counts only for real friends or teammates in the server at least 10 minutes, with a daily cap | The owner's answer; stops extra accounts farming it |
+| 76 | Recruits come from boxes, the daily streak and rank-ups (never sold) and each trains at one station; prestige themes stay prestige-only and only extra variants and decor are sold | The owner's answers; keeps rule 1 |

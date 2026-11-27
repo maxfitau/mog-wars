@@ -51,23 +51,29 @@ change is. Sections A and rows 1 to 5 of B (ranks, boxes, the Training Arena, sp
 4. Cosmetic shop (slice 12), after checking gifting (B8).
 5. Seasons, friends and weekly events (B7).
 
-## D. Questions the new plans leave open
+## D. Answered by the owner (now in `DESIGN.md`)
 
-These are not decided; nothing was built for them. Say what you want and I will write it into `DESIGN.md`.
+1. "Kill" pop-ups: mog-off win, plus zone captures, shoves that push someone out of a zone, training taps, box openings and rank-ups.
+2. Legacy Points: 3 per prestige, never sold, spent on a skill tree (Grind, Tactics, Swagger); combat advantage capped about 10 percent;
+   Mog Point bonus capped 25 percent; free respec weekly; factions balance by prestige level too.
+3. Release plan: launch = war + simple training area; Update 1 (week 4 to 5) = prestige + skill tree; Update 2 = Mog Arena.
+4. Mentor bonus: real friends, or teammates in the server at least 10 minutes, daily cap.
+5. Recruits: earned from boxes, the daily streak and rank-ups; never sold; each trains at one station.
+6. Prestige themes stay prestige-only; extra theme variants and decor are sold.
+7. Best Arena vote: one vote per player per week, visitors only, fixed categories, cosmetic prize.
+8. Friends training at your arena: the owner bonus builds up while away, capped like barracks.
 
-1. **"Kill":** the game has no kills, only mog-offs where the loser is knocked back. I wrote the pop-up for a mog-off win.
-2. **Legacy Points:** they are kept through prestige, but nothing says what they are or what they buy. Suggestion: earned on each
-   prestige, spent only on cosmetics or arena decor, never for sale and never power.
-3. **When prestige ships:** casual players reach Mog God around day 45, so prestige is a post-launch feature in practice.
-   Suggestion: ship prestige in a version 1.x update before the Mog Arena.
-4. **Mentor bonus:** prestiged players get a bonus for helping low-rank teammates capture. An extra account could farm it.
-   Suggestion: only for teammates who are real friends or who stay in the server for a minimum time, with a daily cap.
-5. **Recruits:** "recruits train while you are offline, replacing barracks" does not say where recruits come from. Suggestion:
-   recruits are earned from boxes and the daily streak (never sold), each trains one station.
-6. **Selling themes:** themes unlock with prestige and "can be sold". Selling a prestige-unlocked theme gives a shortcut to a
-   prestige reward (cosmetic only, so it is allowed under rule 1). Suggestion: the prestige themes stay prestige-only; extra
-   theme variants and decor are the sold items.
-7. **Weekly "Best Arena" vote:** friends and extra accounts can stuff a vote. Suggestion: one vote per player per week, only players
-   who visited the arena, fixed categories, and a cosmetic prize.
-8. **Friends training at your arena for an owner bonus:** says nothing about when the owner is offline. Suggestion: the bonus builds
-   up while the owner is away, capped like the barracks.
+## E. New open questions
+
+1. **Skill costs:** with 3 Legacy Points per prestige, what does each skill cost? Suggestion: tier 1 costs 1, tier 2 costs 2, tier 3 costs 3, so
+   one branch takes about 4 prestiges and the whole tree about 12.
+2. **Box luck cap:** how big? Suggestion: at most +10 percent chance to roll the better outcomes, with the boosted odds shown on the
+   opening screen while it is active.
+3. **Tactics skills:** what do rally banner, scout, mog-off combo and dash do exactly? Suggestions: rally banner = a small push boost for
+   teammates standing near the banner; scout = shows enemy counts in zones on your screen; combo = a bigger knockback after two mog-off
+   wins in a row; dash = a short sprint on a cooldown. All inside the 10 percent cap.
+4. **Balancing by prestige:** suggestion: each player counts as 1 plus 0.25 per prestige level when the server picks the smallest faction.
+5. **What counts as launch:** shop, seasons, squad bonus, boxes, units, ranks and the training treadmill are all built. Do they all ship
+   at launch? Suggestion: yes, except hide anything you do not want players to see yet behind a switch.
+6. **Training at launch:** "simple training area" fits the treadmill that exists now. The per-rank stations are slice 16, with no date.
+   Should they ship before prestige?

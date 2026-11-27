@@ -29,8 +29,16 @@ return function(folder: Folder, territory: any)
 	SkyKit.vines(folder, cx, cz, territory.height, territory.radius, 14)
 	TerrainKit.cylinder(cx, -6, cz, 100, 6, Enum.Material.Sandstone) -- red canyon floor
 	-- canyon walls, 40 high, running north to south on both sides
-	TerrainKit.block(cx - 68, 0, cz, 24, 40, 160, Enum.Material.Sandstone)
-	TerrainKit.block(cx + 68, 0, cz, 24, 40, 160, Enum.Material.Sandstone)
+	-- (layered red rock cliffs: three terraces each side, stepping up, with coloured strata bands on the faces)
+	for _, side in { -1, 1 } do
+		TerrainKit.block(cx + side * 68, 0, cz, 24, 14, 160, Enum.Material.Sandstone)
+		TerrainKit.block(cx + side * 71, 14, cz, 18, 14, 150, Enum.Material.Sandstone)
+		TerrainKit.block(cx + side * 74, 28, cz, 12, 14, 140, Enum.Material.Sandstone)
+		for band, colour in { Color3.fromRGB(215, 100, 60), Color3.fromRGB(160, 62, 44), Color3.fromRGB(235, 140, 70), Color3.fromRGB(130, 52, 40), Color3.fromRGB(205, 90, 56), Color3.fromRGB(170, 70, 48) } do
+			local face = k:box("Strata", side * (56 + 6 * ((band - 1) // 2) - 0.4), (band - 1) * 6.5, 0, 0.8, 5, 150 - ((band - 1) // 2) * 10, colour, Enum.Material.Rock, { collide = false })
+			face.Name = "StrataBand"
+		end
+	end
 	-- the lava river: dug out and filled with cracked lava, a glowing sheet on top
 	TerrainKit.carve(cx, -8, cz, 24, 8, 200)
 	TerrainKit.block(cx, -8, cz, 24, 6, 200, Enum.Material.CrackedLava)

@@ -51,7 +51,7 @@ local function apply(player: Player)
 	-- title and name, in the rank colour
 	local gui = Instance.new("BillboardGui")
 	gui.Name = "RankTag"
-	gui.Size = UDim2.new(0, 170, 0, 50)
+	gui.Size = UDim2.new(0, 230, 0, 54)
 	gui.StudsOffset = Vector3.new(0, 3.2, 0)
 	gui.MaxDistance = 110
 	gui.Adornee = head
@@ -64,7 +64,7 @@ local function apply(player: Player)
 	title.TextColor3 = color
 	title.TextStrokeColor3 = Color3.fromRGB(35, 25, 60)
 	title.TextStrokeTransparency = 0
-	title.Text = string.upper(info.name)
+	title.Text = string.upper(info.name) .. (if player:GetAttribute("StashHunter") == true then "  *STASH HUNTER*" else "")
 	title.Parent = gui
 	local name = Instance.new("TextLabel")
 	name.Position = UDim2.new(0, 0, 0.42, 0)
@@ -106,6 +106,9 @@ local function watch(player: Player)
 		apply(player)
 	end)
 	player:GetAttributeChangedSignal("Rank"):Connect(function()
+		apply(player)
+	end)
+	player:GetAttributeChangedSignal("StashHunter"):Connect(function()
 		apply(player)
 	end)
 	if player.Character then

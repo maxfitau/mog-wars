@@ -24,6 +24,15 @@
 8. Wars are 6 minutes. The last thing you see is a quick 5-second results screen (winning team, MVP of each team), then the next war starts straight away.
 9. A daily reward streak (7 days, aura) and a cosmetic shop (aura colours, trails, titles) stay.
 
+## Quick start (the first 10 seconds, and always knowing what to do)
+- On first load a big card says "MOG POWER UNLOCKED: SHOVE!" with a flash, confetti and a 3-second demo, then you are in the war. Rookie comes after about a minute of play. Each rank unlocks one ability button, earned and never sold: NPC Shove, Rookie Dash (4 second cooldown), Sigma Mog Stare (a short beam that freezes one enemy for 1 second, 8 second cooldown). Each unlock gets the same card. At most three ability buttons, bottom right.
+- A mission bar (top centre, under the scoreboard) always shows ONE goal: "Defend Rizz Ravine!", "Capture Brainrot Bog - 80m", "Steal NPC Village from RED - 120m", with a trail of glowing dots on the ground leading to that flag.
+- An announcer shows banners: "RED is capturing Rizz Ravine!", "YOUR TEAM took Gigachad Gate!", "1 MINUTE LEFT - DOUBLE AURA!".
+- Aura ticks all the time, with small "+N" numbers by the aura counter: +1 every second of the war, +3 a second while you stand on a flag your team is capturing or defending, +1 a second for every territory your team holds. The last 60 seconds are double, with the timer pulsing.
+- The fillers are called **Moglings** ("Mogling Jeff"): blocky little characters in their team colour that run to flags, shove, and dash. The word "bot" is never shown.
+- 12 hidden Aura Stashes (behind waterfalls, on a rooftop, under bridges, in secret rooms) each give +100 aura once per war; "Stashes found n/12" is under your aura counter and finding all 12 earns the Stash Hunter title.
+- Launch pads and ziplines join the islands.
+
 ## HUD (three things)
 - Top left: your aura and rank, with a bar toward the next rank.
 - Top centre: the war timer and the four team scores, and the capture bar when you stand on a flag.

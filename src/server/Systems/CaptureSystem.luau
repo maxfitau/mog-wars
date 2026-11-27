@@ -440,6 +440,9 @@ local function tick(dt: number)
 			))
 			if TerritoryRules.justCaptured(ownerBefore, territory.owner) then
 				print(("[mog-wars] TERRITORY %s captured by faction %d"):format(territory.name, territory.owner))
+				if CaptureSystem.onTerritoryCaptured then
+					CaptureSystem.onTerritoryCaptured(territory.name, territory.owner)
+				end
 				warCaptures[territory.owner] = (warCaptures[territory.owner] or 0) + 1
 				payOut(territory, territory.owner, if ownerBefore ~= 0 then ownerBefore else previousOwner)
 			end
@@ -614,6 +617,9 @@ function CaptureSystem.zoneViews(): { BotService.ZoneView }
 	end
 	return list
 end
+
+-- Something to call when a territory changes hands (PresenceSystem uses it for the announcer banners).
+CaptureSystem.onTerritoryCaptured = nil :: ((string, number) -> ())?
 
 function CaptureSystem.init()
 	BotService.setZoneSource(CaptureSystem.zoneViews)

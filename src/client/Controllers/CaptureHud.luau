@@ -104,7 +104,7 @@ function CaptureHud.init()
 
 	frame = Instance.new("Frame")
 	frame.AnchorPoint = Vector2.new(0.5, 0)
-	frame.Position = UDim2.new(0.5, 0, 0, 66) -- top centre, below the scoreboard row
+	frame.Position = UDim2.new(0.5, 0, 0, 106) -- top centre, below the scoreboard and the mission bar
 	frame.Size = UDim2.new(0.4, 0, 0, 76)
 	frame.BackgroundColor3 = UiTheme.panel
 	frame.BackgroundTransparency = 0.05

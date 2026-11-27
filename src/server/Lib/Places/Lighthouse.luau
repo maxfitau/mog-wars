@@ -1,8 +1,8 @@
 --!strict
--- Locked-In Lighthouse (Diamond, west): a striped lighthouse on a rocky island in a moat (a sand causeway leads in from
--- the east). A spiral staircase winds up INSIDE; the base flag is by the door, the top flag is in the lamp room: a giant
--- golden padlock on a balcony deck, with a turning beam. Secret: a cave in the rock with a free Aura Stash.
--- Palette: red and white stripes, gold, sea blue. Island: dark rock.
+-- Locked-In Lighthouse (Diamond, west): a round, tapered tower on a rocky island, red and white stripes, a spiral staircase
+-- inside, a gallery balcony all round the top, and a giant golden PADLOCK for a lamp room with a turning beam. The base
+-- flag is by the door (east side), the top flag is in the padlock. Rocks round the base are cover. Secret: a cellar down
+-- a ladder with a free Aura Stash. Palette: red and white, gold, sea blue. Island: dark rock.
 
 local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -18,62 +18,78 @@ local RED = Color3.fromRGB(215, 55, 55)
 local WHITE = Color3.fromRGB(245, 245, 245)
 local GOLD = Color3.fromRGB(255, 200, 40)
 local STONE = Color3.fromRGB(105, 95, 115)
-local ISLAND_Y = 0 -- the island top is the ground (Kit is built on it)
-local DECK = 72 -- height of the lamp deck above the island
+local DECK = 72 -- height of the gallery and lamp deck above the island
+local SIDES = 16 -- the tower is a ring of 16 slabs per band, which reads as round
+
+-- The slabs of one round band: width along the ring, height `h`, thickness 2.4, facing outward.
+local function band(k: any, name: string, radius: number, yb: number, h: number, colour: Color3, skipIndex: number?)
+	local width = 2 * radius * math.tan(math.pi / SIDES) * 1.04
+	for index = 0, SIDES - 1 do
+		if index ~= skipIndex then
+			local angle = index * 2 * math.pi / SIDES
+			local piece = k:box(name, math.cos(angle) * (radius - 1.2), yb, math.sin(angle) * (radius - 1.2), width, h, 2.4, colour, Enum.Material.Concrete, { cover = true })
+			piece.CFrame = CFrame.lookAt(piece.Position, piece.Position + Vector3.new(math.cos(angle), 0, math.sin(angle)))
+		end
+	end
+end
 
 return function(folder: Folder, territory: any)
 	local cx, cz = territory.x, territory.z
 	Cover.reserve(cx, cz, 78, 78)
 
-	-- the rocky island itself, a flat top where the tower stands, with roots and waterfalls round the rim
+	-- the rocky island, bare rock round the tower, roots and a waterfall
 	SkyKit.island(cx, cz, territory.height, territory.radius, 70)
 	SkyKit.vines(folder, cx, cz, territory.height, territory.radius, 14)
 	SkyKit.waterfall(folder, Vector3.new(cx + territory.radius - 3, territory.height, cz + 14), Vector3.new(1, 0, 0), 45)
-	TerrainKit.cylinder(cx, -3, cz, 60, 3, Enum.Material.Rock) -- bare rock round the tower
-	-- the secret: a cellar carved into the rock, down a shaft with a ladder (4 studs wide, so the edges are clean)
-	TerrainKit.carve(cx - 26, -16, cz + 10, 16, 12, 16)
-	TerrainKit.carve(cx - 26, -4, cz + 10, 4, 4, 4)
+	TerrainKit.cylinder(cx, -3, cz, 62, 3, Enum.Material.Rock)
+	-- the secret cellar: down a shaft with a ladder (the shaft is 4 studs wide so the edges are clean)
+	TerrainKit.carve(cx - 30, -16, cz + 10, 16, 12, 16)
+	TerrainKit.carve(cx - 30, -4, cz + 10, 4, 4, 4)
 
 	local k = Kit.new(folder, cx, cz, territory.height)
-	-- the tower: eight walls in a ring, five red and white stripes each, a doorway on the east side
-	local stripe = DECK / 5
-	for index = 0, 7 do
-		local angle = index * math.pi / 4
-		local px, pz = math.cos(angle) * 19.5, math.sin(angle) * 19.5
-		for band = 0, 4 do
-			local colour = if band % 2 == 0 then RED else WHITE
-			local yb = band * stripe
-			if index == 0 and band == 0 then
-				-- the door wall's first band: two side pieces and a lintel
-				for _, side in { -1, 1 } do
-					local piece = k:box("TowerWall", px, yb, pz + side * 5.6, 5.2, stripe, 3, colour, Enum.Material.Concrete, { cover = true })
-					piece.CFrame = CFrame.lookAt(piece.Position, piece.Position + Vector3.new(math.cos(angle), 0, math.sin(angle)))
-				end
-				local lintel = k:box("TowerWall", px, yb + 9, pz, 6.2, stripe - 9, 3, colour, Enum.Material.Concrete)
-				lintel.CFrame = CFrame.lookAt(lintel.Position, lintel.Position + Vector3.new(math.cos(angle), 0, math.sin(angle)))
-			else
-				local piece = k:box("TowerWall", px, yb, pz, 16.6, stripe, 3, colour, Enum.Material.Concrete, { cover = true })
-				piece.CFrame = CFrame.lookAt(piece.Position, piece.Position + Vector3.new(math.cos(angle), 0, math.sin(angle)))
-			end
+
+	-- a rocky base: boulders heaped round the foot of the tower
+	for index = 0, 11 do
+		local angle = index / 12 * math.pi * 2 + 0.2
+		local reach = 26 + (index % 3) * 4
+		local size = 12 + (index % 4) * 3
+		if math.abs(math.atan2(math.sin(angle), math.cos(angle))) > 0.55 then -- keep the doorway (east) clear
+			k:ball("BaseBoulder", math.cos(angle) * reach, -2, math.sin(angle) * reach, size, size * 0.7, size, Color3.fromRGB(100 + index * 3, 92, 108), Enum.Material.Rock, { cover = index % 2 == 0 })
 		end
 	end
-	-- the spiral staircase inside, 72 steps up in 3.5 turns, then through a hole in the lamp deck
-	k:spiral("LighthouseStair", -2, 0, 3, 12.5, 0, DECK, 3.5, 0, 1, Color3.fromRGB(150, 130, 110), Enum.Material.WoodPlanks)
-	k:cyl("StairCore", -2, 0, 0, 5, DECK - 2, WHITE, Enum.Material.Concrete)
 
-	-- the lamp deck with a balcony all round, a hole where the stairs come up, and a railing
-	k:box("DeckW", -22, DECK - 2, 0, 14, 2, 58, STONE, Enum.Material.Concrete)
-	k:box("DeckE", 26, DECK - 2, 0, 30, 2, 58, STONE, Enum.Material.Concrete)
-	k:box("DeckN", -2, DECK - 2, -21, 26, 2, 16, STONE, Enum.Material.Concrete)
-	k:box("DeckS", -2, DECK - 2, 21, 26, 2, 16, STONE, Enum.Material.Concrete)
-	k:box("RailN", 6, DECK, -28, 70, 3, 1, GOLD, Enum.Material.Metal, { cover = true })
-	k:box("RailS", 6, DECK, 28, 70, 3, 1, GOLD, Enum.Material.Metal, { cover = true })
-	k:box("RailW", -28.5, DECK, 0, 1, 3, 58, GOLD, Enum.Material.Metal, { cover = true })
-	k:box("RailE", 40.5, DECK, 0, 1, 3, 58, GOLD, Enum.Material.Metal, { cover = true })
+	-- the tapered tower: six bands, red and white, each a little narrower than the one below; a doorway on the east side
+	local bandHeight = DECK / 6
+	for index = 0, 5 do
+		local radius = 20 - index * 1.1
+		local colour = if index % 2 == 0 then RED else WHITE
+		if index == 0 then
+			band(k, "TowerWall", radius, 0, bandHeight, colour, 0) -- slab 0 faces east: left out to make the door
+			local width = 2 * radius * math.tan(math.pi / SIDES) * 1.04
+			local lintel = k:box("TowerLintel", radius - 1.2, 9, 0, width, bandHeight - 9, 2.4, colour, Enum.Material.Concrete)
+			lintel.CFrame = CFrame.lookAt(lintel.Position, lintel.Position + Vector3.xAxis)
+		else
+			band(k, "TowerWall", radius, index * bandHeight, bandHeight, colour)
+		end
+	end
+
+	-- the spiral staircase inside (visible steps; the invisible ramp over them is what you walk on)
+	k:spiral("LighthouseStair", 0, 0, 3.5, 10.5, 0, DECK, 3.5, math.pi, 1, Color3.fromRGB(150, 130, 110), Enum.Material.WoodPlanks)
+	k:cyl("StairCore", 0, 0, 0, 5, DECK - 1, WHITE, Enum.Material.Concrete)
+
+	-- the gallery: a ring-shaped balcony all round the top (a hole in the middle for the stairs), with a gold railing
+	for index = 0, SIDES - 1 do
+		local angle = index * 2 * math.pi / SIDES
+		local deck = k:box("GalleryDeck", math.cos(angle) * 19.5, DECK - 2, math.sin(angle) * 19.5, 11, 2, 15, STONE, Enum.Material.Concrete)
+		deck.CFrame = CFrame.lookAt(deck.Position, deck.Position + Vector3.new(math.cos(angle), 0, math.sin(angle)))
+		local rail = k:box("GalleryRail", math.cos(angle) * 26.6, DECK, math.sin(angle) * 26.6, 10.8, 3, 0.6, GOLD, Enum.Material.Metal, { cover = true })
+		rail.CFrame = CFrame.lookAt(rail.Position, rail.Position + Vector3.new(math.cos(angle), 0, math.sin(angle)))
+	end
 
 	-- the lamp room is a giant golden PADLOCK: a hollow gold body with a shackle, shining a turning beam
+	k:box("PadlockFloor", 20, DECK - 1, 0, 18, 1, 22, GOLD, Enum.Material.Metal)
 	k:room("Padlock", 20, DECK, 0, 18, 22, 22, 1.5, GOLD, Enum.Material.Metal, { W = { w = 8, h = 9 }, E = { w = 8, h = 9 } }, nil, true)
-	k:box("Keyhole", 20, DECK + 7, 11.4, 3, 6, 0.4, Color3.fromRGB(30, 25, 20), Enum.Material.SmoothPlastic, { collide = false })
+	k:box("Keyhole", 20, DECK + 7, 11.4, 3, 6, 0.4, Color3.fromRGB(30, 25, 20), Enum.Material.Slate, { collide = false })
 	k:cyl("ShackleL", 14, DECK + 23, 0, 3, 14, GOLD, Enum.Material.Metal, { collide = false })
 	k:cyl("ShackleR", 26, DECK + 23, 0, 3, 14, GOLD, Enum.Material.Metal, { collide = false })
 	k:box("ShackleTop", 20, DECK + 36, 0, 15, 3, 3, GOLD, Enum.Material.Metal, { collide = false })
@@ -88,29 +104,22 @@ return function(folder: Folder, territory: any)
 	CollectionService:AddTag(beam, "LampBeam")
 	beam:SetAttribute("Territory", territory.id)
 	local pivot = beam.Position
-	local angle = 0
+	local sweep = 0
 	task.spawn(function()
 		while beam.Parent do
 			task.wait(0.1) -- ten small steps a second: one part, cheap
-			angle += math.rad(4)
-			local direction = Vector3.new(math.cos(angle), 0, math.sin(angle))
+			sweep += math.rad(4)
+			local direction = Vector3.new(math.cos(sweep), 0, math.sin(sweep))
 			beam.CFrame = CFrame.lookAt(pivot + direction * 60, pivot + direction * 120)
 		end
 	end)
 
-	-- rocks for cover round the base, the secret cave's boulders, and sea foam
-	for index, spot in { { 28, -14 }, { 30, 10 }, { 14, 28 }, { -10, 30 }, { -30, 0 }, { -6, -30 }, { 22, -26 }, { 25, 26 } } do
-		k:ball("IslandRock", spot[1], 0, spot[2], 7, 5, 7, Color3.fromRGB(95, 88, 108), Enum.Material.Rock, { cover = true })
-		if index % 3 == 0 then
-			k:box("Crate", spot[1] + 5, 0, spot[2], 4, 4, 4, Color3.fromRGB(190, 140, 80), Enum.Material.WoodPlanks, { cover = true })
-		end
+	-- crates and a mooring post at the foot for more cover, and the secret cellar's hatch and ladder
+	for index, spot in { { 30, -16 }, { 31, 12 }, { 16, 32 }, { -12, 32 }, { 22, -30 } } do
+		k:box("Crate", spot[1], 0, spot[2], 4.5, 4.5, 4.5, Color3.fromRGB(190, 140, 80), Enum.Material.WoodPlanks, { cover = true, rotY = index })
 	end
-	k:box("CellarRim", -26, 0, 10, 6, 1.5, 6, STONE, Enum.Material.Cobblestone) -- the hatch frame: a ladder goes down the shaft
-	k:truss("CellarLadder", -25, -16, 10, 17)
-	Common.stash(folder, k:at(-30, -16, 14), territory.id)
-	for index = 0, 5 do
-		local ring = index / 6 * math.pi * 2
-		Common.sparkles(folder, "Foam" .. index, k:at(math.cos(ring) * 68, -ISLAND_Y + 0.5, math.sin(ring) * 68), Color3.new(1, 1, 1), 4, 90)
-	end
+	k:box("CellarRim", -30, 0, 10, 6, 1.5, 6, STONE, Enum.Material.Cobblestone, { collide = false }) -- the hatch frame
+	k:truss("CellarLadder", -29, -16, 10, 17)
+	Common.stash(folder, k:at(-34, -16, 14), territory.id)
 	Common.ambience(folder, k:at(0, 6, 0), Ambience.locked_in_lighthouse, 0.4)
 end

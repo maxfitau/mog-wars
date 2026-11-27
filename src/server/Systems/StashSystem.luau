@@ -1,6 +1,7 @@
 --!strict
--- The free Aura Stash hidden in each territory's secret spot: open it for a little aura (Pace.stash), once a minute per
--- player. Server only: the server checks the distance and the cooldown.
+-- The 12 hidden Aura Stashes. Open one for a big +100 burst of aura, once per war per player. The first time ever a
+-- stash is opened it counts toward "Stashes found n/12" (saved); finding all 12 earns the Stash Hunter title. Server only:
+-- the server checks the distance and that you have not opened this stash yet this war.
 
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
@@ -10,10 +11,11 @@ local Workspace = game:GetService("Workspace")
 local Pace = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Pace"))
 local DataService = require(script.Parent:WaitForChild("DataService"))
 local PopupSystem = require(script.Parent:WaitForChild("PopupSystem"))
+local Stats = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("Stats"))
 
 local StashSystem = {}
 
-local lastOpened: { [Player]: { [Instance]: number } } = {}
+local openedInWar: { [Player]: { [string]: number } } = {}
 
 local function bind(stash: Instance)
 	if not stash:IsA("BasePart") then
@@ -25,26 +27,36 @@ local function bind(stash: Instance)
 	end
 	prompt.Triggered:Connect(function(player: Player)
 		local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-		if not root or not root:IsA("BasePart") or (root.Position - stash.Position).Magnitude > 16 then
+		if not root or not root:IsA("BasePart") or (root.Position - stash.Position).Magnitude > 18 then
 			return
 		end
-		local now = Workspace:GetServerTimeNow()
-		local mine = lastOpened[player] or {}
-		lastOpened[player] = mine
-		if now - (mine[stash] or -1000) < Pace.stash.cooldownSeconds then
+		local stashId = stash:GetAttribute("StashId")
+		if type(stashId) ~= "string" then
 			return
 		end
-		mine[stash] = now
+		local war = Workspace:GetAttribute("WarNumber")
+		local currentWar = if type(war) == "number" then war else 0
+		local mine = openedInWar[player] or {}
+		openedInWar[player] = mine
+		if mine[stashId] == currentWar then
+			return -- already opened this war
+		end
+		mine[stashId] = currentWar
 		local shown = DataService.addAura(player, Pace.stash.aura)
 		if shown > 0 then
+			Stats.add(player, "aura", shown)
 			PopupSystem.send(player, "aura", shown, "")
+		end
+		local isNew, found = DataService.recordStash(player, stashId)
+		if isNew then
+			PopupSystem.send(player, "announce", 1, if found >= 12 then "STASH HUNTER! ALL 12 FOUND!" else ("STASH FOUND %d/12!"):format(found))
 		end
 	end)
 end
 
 function StashSystem.init()
 	Players.PlayerRemoving:Connect(function(player)
-		lastOpened[player] = nil
+		openedInWar[player] = nil
 	end)
 end
 

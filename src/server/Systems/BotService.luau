@@ -6,7 +6,7 @@
 --  * Bots run between zones, stand in them (so they capture and push back like anyone else) and can be shoved.
 --    When a bot meets a player in a zone they can start a mog-off; MogOffSystem makes the bot tap at a
 --    human-like speed that depends on the player's rank (see BotRules).
---  * A small "BOT" tag floats above every bot.
+--  * A "Mogling Jeff" style name tag floats above every Mogling (the fillers are called Moglings; the word "bot" is never shown).
 -- CaptureSystem reads the bots through BotService.list(); it gives this module its zone list through
 -- BotService.setZoneSource (so the two modules never require each other).
 
@@ -38,6 +38,7 @@ export type Bot = {
 	thinkAt: number,
 	moveAt: number,
 	pathing: boolean, -- a pathfinding request is running
+	dashAt: number, -- next time this Mogling may dash toward its flag
 	holdUntil: number, -- combat (strafing, taking cover) drives the movement until this server time
 }
 
@@ -53,7 +54,7 @@ export type ZoneView = {
 	route: { Waypoint }?, -- ramp waypoints to walk through to reach a raised flag
 }
 
-local NAMES = { "Rex", "Blaze", "Nova", "Zed", "Kodo", "Pixel", "Turbo", "Sprout", "Echo", "Mango", "Pip", "Ziggy", "Bolt", "Ember", "Fuzz", "Gizmo" }
+local NAMES = { "Jeff", "Brad", "Chadley", "Kevin", "Nova", "Zed", "Pixel", "Turbo", "Sprout", "Mango", "Pip", "Ziggy", "Bolt", "Ember", "Fuzz", "Gizmo" }
 
 local BotService = {}
 
@@ -119,7 +120,88 @@ local function humanStats(): (number, { [number]: number }, number, number)
 	return humans, perFaction, if humans > 0 then rankSum / humans else 1, #Players:GetPlayers()
 end
 
+-- A simple blocky body (R6 layout: Head, Torso, arms, legs, joints) built entirely from parts and Roblox's built-in head
+-- shape: nothing is downloaded, so there is no avatar asset to fail to load.
+local function buildBlockyBody(): Model
+	local model = Instance.new("Model")
+	local function part(name: string, size: Vector3, color: Color3): Part
+		local item = Instance.new("Part")
+		item.Name = name
+		item.Size = size
+		item.Color = color
+		item.Material = Enum.Material.SmoothPlastic
+		item.TopSurface = Enum.SurfaceType.Smooth
+		item.BottomSurface = Enum.SurfaceType.Smooth
+		item.Parent = model
+		return item
+	end
+	local skin = Color3.fromRGB(205, 220, 190)
+	local root = part("HumanoidRootPart", Vector3.new(2, 2, 1), skin)
+	root.Transparency = 1
+	local torso = part("Torso", Vector3.new(2, 2, 1), Color3.fromRGB(120, 130, 150))
+	local head = part("Head", Vector3.new(2, 1, 1), skin)
+	local mesh = Instance.new("SpecialMesh")
+	mesh.MeshType = Enum.MeshType.Head
+	mesh.Scale = Vector3.new(1.25, 1.25, 1.25)
+	mesh.Parent = head
+	local face = Instance.new("Decal")
+	face.Name = "face"
+	face.Texture = "rbxasset://textures/face.png"
+	face.Face = Enum.NormalId.Front
+	face.Parent = head
+	local armR = part("Right Arm", Vector3.new(1, 2, 1), skin)
+	local armL = part("Left Arm", Vector3.new(1, 2, 1), skin)
+	local legR = part("Right Leg", Vector3.new(1, 2, 1), Color3.fromRGB(80, 70, 90))
+	local legL = part("Left Leg", Vector3.new(1, 2, 1), Color3.fromRGB(80, 70, 90))
+	local function joint(name: string, part0: Part, part1: Part, c0: CFrame, c1: CFrame)
+		local motor = Instance.new("Motor6D")
+		motor.Name = name
+		motor.Part0 = part0
+		motor.Part1 = part1
+		motor.C0 = c0
+		motor.C1 = c1
+		motor.Parent = part0
+	end
+	local quarter = math.pi / 2
+	joint("RootJoint", root, torso, CFrame.Angles(-quarter, 0, math.pi), CFrame.Angles(-quarter, 0, math.pi))
+	joint("Neck", torso, head, CFrame.new(0, 1, 0), CFrame.new(0, -0.5, 0))
+	joint("Right Shoulder", torso, armR, CFrame.new(1, 0.5, 0) * CFrame.Angles(0, quarter, 0), CFrame.new(-0.5, 0.5, 0) * CFrame.Angles(0, quarter, 0))
+	joint("Left Shoulder", torso, armL, CFrame.new(-1, 0.5, 0) * CFrame.Angles(0, -quarter, 0), CFrame.new(0.5, 0.5, 0) * CFrame.Angles(0, -quarter, 0))
+	joint("Right Hip", torso, legR, CFrame.new(1, -1, 0) * CFrame.Angles(0, quarter, 0), CFrame.new(0.5, 1, 0) * CFrame.Angles(0, quarter, 0))
+	joint("Left Hip", torso, legL, CFrame.new(-1, -1, 0) * CFrame.Angles(0, -quarter, 0), CFrame.new(-0.5, 1, 0) * CFrame.Angles(0, -quarter, 0))
+	local humanoid = Instance.new("Humanoid")
+	humanoid.RigType = Enum.HumanoidRigType.R6
+	humanoid.Parent = model
+	model.PrimaryPart = root
+	return model
+end
+
+-- Swing a Mogling's arms and legs while it walks (a simple procedural walk, no animation assets).
+local function swingLimbs()
+	local t = os.clock()
+	for _, bot in bots do
+		local torso = bot.model:FindFirstChild("Torso")
+		if torso and bot.humanoid.Parent then
+			local moving = bot.humanoid.MoveDirection.Magnitude > 0.1
+			local swing = if moving then math.sin(t * 11) * 0.8 else 0
+			local function set(name: string, angle: number)
+				local motor = torso:FindFirstChild(name)
+				if motor and motor:IsA("Motor6D") then
+					motor.Transform = CFrame.Angles(0, 0, angle)
+				end
+			end
+			set("Right Hip", swing)
+			set("Left Hip", -swing)
+			set("Right Shoulder", -swing)
+			set("Left Shoulder", swing)
+		end
+	end
+end
+
 local function createModel(): Model?
+	if Features.blockyMoglings then
+		return buildBlockyBody()
+	end
 	local ok, result = pcall(function()
 		return Players:CreateHumanoidModelFromDescription(Instance.new("HumanoidDescription"), Enum.HumanoidRigType.R15)
 	end)
@@ -133,12 +215,12 @@ local function createModel(): Model?
 	return nil
 end
 
-local function addTag(model: Model, faction: number)
+local function addTag(model: Model, faction: number, displayName: string)
 	local head = model:FindFirstChild("Head")
 	if head and head:IsA("BasePart") then
 		local gui = Instance.new("BillboardGui")
-		gui.Name = "BotTag"
-		gui.Size = UDim2.new(0, 56, 0, 22)
+		gui.Name = "MoglingTag"
+		gui.Size = UDim2.new(0, 130, 0, 24)
 		gui.StudsOffset = Vector3.new(0, 3.4, 0) -- above the name that Roblox shows
 		gui.MaxDistance = 60
 		gui.Adornee = head
@@ -150,7 +232,7 @@ local function addTag(model: Model, faction: number)
 		label.TextColor3 = Color3.new(1, 1, 1)
 		label.Font = Enum.Font.FredokaOne
 		label.TextScaled = true
-		label.Text = "BOT"
+		label.Text = displayName
 		label.Parent = gui
 		local corner = Instance.new("UICorner")
 		corner.CornerRadius = UDim.new(0, 8)
@@ -180,13 +262,19 @@ local function spawnBot(faction: number)
 	end
 	nextId -= 1
 	local name = NAMES[(-nextId - 1) % #NAMES + 1]
-	model.Name = "Bot_" .. name
-	humanoid.DisplayName = name
+	model.Name = "Mogling_" .. name
+	humanoid.DisplayName = "Mogling " .. name
+	humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None -- our own name tag is shown instead
 	humanoid.WalkSpeed = Config.bots.walkSpeed
 	model:SetAttribute("IsBot", true)
 	model:SetAttribute("Faction", faction)
 	CollectionService:AddTag(model, "Bot")
-	addTag(model, faction)
+	addTag(model, faction, "Mogling " .. name)
+	local bodyTorso = model:FindFirstChild("Torso")
+	local factionInfo = FactionRules.byId(faction)
+	if Features.blockyMoglings and bodyTorso and bodyTorso:IsA("BasePart") and factionInfo then
+		bodyTorso.Color = FactionRules.color(factionInfo) -- a Mogling wears its team colour
+	end
 	model:PivotTo(CFrame.new(baseSpot(faction, -nextId)))
 	model.Parent = Workspace
 	pcall(function()
@@ -208,6 +296,7 @@ local function spawnBot(faction: number)
 		thinkAt = 0,
 		moveAt = 0,
 		holdUntil = 0,
+		dashAt = 0,
 		pathing = false,
 	}
 	table.insert(bots, bot)
@@ -347,6 +436,15 @@ local function think()
 					bot.moveAt = 0
 				end
 				local target = bot.target
+				if target and Features.dash and now >= bot.dashAt then -- Moglings dash toward far flags now and then
+					local gap = Vector3.new(target.Position.X - bot.root.Position.X, 0, target.Position.Z - bot.root.Position.Z)
+					if gap.Magnitude > 35 then
+						bot.root.AssemblyLinearVelocity = gap.Unit * 60 + Vector3.new(0, bot.root.AssemblyLinearVelocity.Y, 0)
+						bot.dashAt = now + 5 + random() * 5
+					else
+						bot.dashAt = now + 2
+					end
+				end
 				local route = bot.route
 				if route and bot.routeIndex > 0 then
 					-- walk the waypoints in order, moving on when close to the current one
@@ -449,6 +547,12 @@ end
 function BotService.init() end
 
 function BotService.start()
+	task.spawn(function()
+		while true do
+			task.wait(0.1)
+			swingLimbs()
+		end
+	end)
 	task.spawn(function()
 		while true do
 			task.wait(Config.bots.manageSeconds)

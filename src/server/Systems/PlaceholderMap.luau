@@ -18,6 +18,8 @@ local Territories = require(Shared:WaitForChild("Territories"))
 local IslandTerrain = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("IslandTerrain"))
 local Cover = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("Cover"))
 local SkyKit = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("SkyKit"))
+local Common = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("Places"):WaitForChild("Common"))
+local SkyLinks = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("SkyLinks"))
 local Builder = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("Builder"))
 local TerritoryScenery = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("TerritoryScenery"))
 
@@ -149,6 +151,15 @@ function PlaceholderMap.start()
 			local from = Vector3.new(a.x, a.y, a.z) + flat * (a.r - 4)
 			local to = Vector3.new(b.x, b.y, b.z) - flat * (b.r - 4)
 			SkyKit.bridge(bridges, from, to, 10)
+			local stashId = if link[1] == "base1" then "bridge_west" elseif link[1] == "cooked_canyon" and link[2] == "rizz_ravine" then "bridge_east" else nil
+			if stashId then
+				-- a hidden stash on a little platform hanging beside the middle of the bridge, a short drop from the deck
+				local middle = from:Lerp(to, 0.5)
+				local side = Vector3.new(-flat.Z, 0, flat.X)
+				local ledge = Builder.part("HiddenLedge", Vector3.new(8, 1, 8), middle + side * 9 - Vector3.new(0, 7, 0), Color3.fromRGB(150, 105, 62), bridges)
+				ledge.Material = Enum.Material.WoodPlanks
+				Common.stash(bridges, ledge.Position + Vector3.new(0, 0.5, 0), link[1], stashId)
+			end
 			if Features.speedPads then
 				for _, t in { 0.33, 0.66 } do
 					local middle = from:Lerp(to, t)
@@ -165,6 +176,9 @@ function PlaceholderMap.start()
 		end
 	end
 	SkyKit.decor() -- circling airships and floating mini rocks
+	if Features.launchPads or Features.ziplines then
+		SkyLinks.build(islands, Features.launchPads, Features.ziplines) -- launch pads and ziplines between the islands
+	end
 
 	-- The flags: one glowing zone per flag, tagged "Zone". CaptureSystem runs one capture bar per flag and groups
 	-- them into territories by the "Territory" attribute. Each flag also gets a tall see-through pillar of light

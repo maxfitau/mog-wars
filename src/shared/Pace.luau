@@ -16,6 +16,13 @@ Pace.speed = {
 	launchPad = { horizontal = 75, vertical = 48 }, -- the pad by each base that throws you toward the action
 }
 
+-- Rank-unlocked abilities, one button each, earned in the first session and never sold.
+Pace.abilities = {
+	shove = { rank = 1 }, -- NPC: the big button (cooldown is EconomyConfig.shove)
+	dash = { rank = 2 }, -- Rookie: a quick burst (cooldown and speed in Pace.speed.dash)
+	stare = { rank = 3, cooldownSeconds = 8, range = 50, freezeSeconds = 1 }, -- Sigma: Mog Stare freezes one enemy
+}
+
 Pace.capture = {
 	secondsPerFlag = { gold = 4, diamond = 6, ultra = 8 }, -- one player alone, per flag
 	extraPlayerBonus = 0.25, -- each extra teammate on the flag adds this much speed
@@ -28,8 +35,14 @@ Pace.overtime = {
 	musicSpeed = 1.25,
 }
 
+Pace.presence = {
+	base = 1, -- aura every second just for being in the war
+	onFlag = 3, -- ... every second while you stand on a flag you are capturing or defending (instead of the base)
+	perTerritory = 1, -- ... plus this much for every territory your team holds
+}
+
 Pace.rewards = {
-	flagTickAura = 1, -- aura every second you stand on a flag you are capturing
+	flagTickAura = 0, -- (the old +1 tick on a capturing flag: replaced by Pace.presence)
 	flagCapturedAura = 25, -- everyone helping when a flag flips
 }
 
@@ -54,9 +67,14 @@ Pace.pickups = {
 	},
 }
 
+Pace.zipline = {
+	speed = 62, -- studs per second along the cable
+	cooldownSeconds = 1.5,
+}
+
 Pace.stash = {
-	aura = 25, -- a free Aura Stash in a territory's secret spot gives this much aura ...
-	cooldownSeconds = 60, -- ... once a minute per player
+	aura = 100, -- a hidden Aura Stash gives this big burst of aura ... (12 are hidden across the map)
+	cooldownSeconds = 60, -- (unused: a stash now opens once per war per player)
 }
 
 Pace.results = {
@@ -67,6 +85,6 @@ Pace.results = {
 	mvpPerAssist = 1.5, -- ... and this per assist
 }
 
-Pace.sounds = { whoosh = "", pickup = "", dash = "", overtimeMusic = "" } -- empty until you have licensed ids
+Pace.sounds = { whoosh = "", pickup = "", dash = "", overtimeMusic = "", unlock = "", announcer = "" } -- empty until you have licensed ids
 
 return Pace

@@ -37,7 +37,7 @@ function AuraHud.init()
 
 	local panel = Instance.new("Frame")
 	panel.Position = UDim2.new(0, 16, 0, 56)
-	panel.Size = UDim2.new(0, 270, 0, 70)
+	panel.Size = UDim2.new(0, 270, 0, 88)
 	panel.BackgroundColor3 = UiTheme.panel
 	panel.Parent = gui
 	UiTheme.round(panel, UDim.new(0, 20))
@@ -100,8 +100,25 @@ function AuraHud.init()
 	barLabel.Text = ""
 	barLabel.Parent = track
 
+	local stashLabel = Instance.new("TextLabel")
+	stashLabel.Position = UDim2.new(0, 12, 0, 62)
+	stashLabel.Size = UDim2.new(1, -24, 0, 18)
+	stashLabel.BackgroundTransparency = 1
+	stashLabel.Font = UiTheme.font
+	stashLabel.TextScaled = true
+	stashLabel.TextXAlignment = Enum.TextXAlignment.Left
+	stashLabel.TextColor3 = Color3.fromRGB(255, 215, 90)
+	stashLabel.TextStrokeColor3 = UiTheme.outline
+	stashLabel.TextStrokeTransparency = 0
+	stashLabel.Text = ""
+	stashLabel.Parent = panel
+
 	local last = -1
 	local function refresh()
+		local found, total = player:GetAttribute("StashesFound"), player:GetAttribute("StashesTotal")
+		if type(found) == "number" and type(total) == "number" then
+			stashLabel.Text = if player:GetAttribute("StashHunter") == true then "STASH HUNTER! 12/12" else ("Stashes found %d/%d"):format(found, total)
+		end
 		local auraValue = player:GetAttribute("Aura")
 		local aura = if type(auraValue) == "number" then auraValue else 0
 		local rank, floor, ceiling = RankRules.progress(Config, aura)
@@ -127,6 +144,7 @@ function AuraHud.init()
 	end
 	player:GetAttributeChangedSignal("Aura"):Connect(refresh)
 	player:GetAttributeChangedSignal("Rank"):Connect(refresh)
+	player:GetAttributeChangedSignal("StashesFound"):Connect(refresh)
 	refresh()
 end
 

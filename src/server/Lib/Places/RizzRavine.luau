@@ -28,6 +28,7 @@ return function(folder: Folder, territory: any)
 	SkyKit.vines(folder, cx, cz, territory.height, territory.radius, 16)
 	SkyKit.waterfall(folder, Vector3.new(cx - territory.radius + 3, territory.height, cz + 30), Vector3.new(-1, 0, 0), 45)
 	SkyKit.waterfall(folder, Vector3.new(cx + territory.radius - 3, territory.height, cz - 30), Vector3.new(1, 0, 0), 45)
+	SkyKit.waterfallStash(folder, Vector3.new(cx + territory.radius - 3, territory.height, cz - 30), Vector3.new(1, 0, 0), territory.id, "rizz_waterfall")
 
 	-- the ravine: pink limestone cliffs 24 high on the north and south, a pink floor between, grassy caps on top
 	TerrainKit.block(cx, -2, cz, 72, 2, 64, Enum.Material.Limestone) -- ravine floor

@@ -80,7 +80,7 @@ local function nameOf(fighter: Fighter): string
 	if fighter.player then
 		return fighter.player.DisplayName
 	end
-	return (if fighter.bot then fighter.bot.name else "Bot") .. " (BOT)"
+	return (if fighter.bot then fighter.bot.name else "Mogling") .. " (Mogling)"
 end
 
 local function fighterOfPlayer(player: Player): Fighter?

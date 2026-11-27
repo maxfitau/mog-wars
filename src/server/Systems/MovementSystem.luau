@@ -22,6 +22,7 @@ local MovementSystem = {}
 type Boost = { id: string, bonus: number, untilTime: number }
 
 local boosts: { [Player]: { Boost } } = {}
+local frozenUntil: { [Player]: number } = {}
 local lastDash: { [Player]: number } = {}
 local lastPad: { [Player]: number } = {}
 local remotes: { [string]: RemoteEvent } = {}
@@ -61,11 +62,12 @@ function MovementSystem.refresh(player: Player)
 	end
 	local horse = player:GetAttribute("HorseMultiplier")
 	local speed = base.walk * (1 + bonus) * (if type(horse) == "number" then horse else 1)
-	if humanoid.WalkSpeed ~= 0 then -- a stunned player (walk speed 0) stays stunned
-		humanoid.WalkSpeed = speed
+	local frozen = (frozenUntil[player] or 0) > t -- frozen by a Mog Stare
+	if humanoid.WalkSpeed ~= 0 or frozen then -- a stunned player (walk speed 0) stays stunned
+		humanoid.WalkSpeed = if frozen then 0 else speed
 	end
 	humanoid.UseJumpPower = true
-	humanoid.JumpPower = base.jump
+	humanoid.JumpPower = if frozen then 0 else base.jump
 	player:SetAttribute("SpeedBonus", bonus)
 end
 
@@ -84,6 +86,17 @@ function MovementSystem.boost(player: Player, id: string, bonus: number, seconds
 	if not found then
 		table.insert(list, { id = id, bonus = bonus, untilTime = untilTime })
 	end
+	MovementSystem.refresh(player)
+	task.delay(seconds + 0.05, function()
+		if player.Parent == Players then
+			MovementSystem.refresh(player)
+		end
+	end)
+end
+
+-- Freeze a player in place (no walking, no jumping) for a moment: the Mog Stare.
+function MovementSystem.freeze(player: Player, seconds: number)
+	frozenUntil[player] = now() + seconds
 	MovementSystem.refresh(player)
 	task.delay(seconds + 0.05, function()
 		if player.Parent == Players then
@@ -227,8 +240,9 @@ function MovementSystem.init()
 		remotes[name] = remote
 	end
 	remotes.DashRequest.OnServerEvent:Connect(function(player: Player, dx: any, dz: any)
-		if not Features.dash then
-			return -- dashing is switched off in the simple game
+		local rank = player:GetAttribute("Rank")
+		if not Features.dash or not Features.abilities or type(rank) ~= "number" or rank < Pace.abilities.dash.rank then
+			return -- dash is a Rookie ability
 		end
 		if type(dx) ~= "number" or type(dz) ~= "number" or dx ~= dx or dz ~= dz then
 			return
@@ -252,6 +266,7 @@ function MovementSystem.init()
 	Players.PlayerAdded:Connect(onPlayer)
 	Players.PlayerRemoving:Connect(function(player)
 		boosts[player] = nil
+		frozenUntil[player] = nil
 		lastDash[player] = nil
 		lastPad[player] = nil
 		launchDebounce[player] = nil

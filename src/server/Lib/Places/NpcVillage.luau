@@ -148,6 +148,7 @@ return function(folder: Folder, territory: any)
 	house(k, 60, 55, "W", false, Color3.fromRGB(80, 170, 100))
 	house(k, -22, 70, "N", true, Color3.fromRGB(200, 80, 70))
 	house(k, 22, 70, "N", false, Color3.fromRGB(70, 120, 200))
+	Common.stash(folder, k:at(-56, 12, 10), territory.id, "npc_rooftop") -- a stash on the roof deck of the two-storey house
 	-- chimney smoke
 	Common.smoke(folder, "ChimneySmoke", k:at(-60, 14, 10), Color3.fromRGB(235, 235, 235), 3, 6)
 	Common.smoke(folder, "ChimneySmoke", k:at(60, 14, 10), Color3.fromRGB(235, 235, 235), 3, 6)

@@ -28,9 +28,12 @@ function IslandTerrain.lighting()
 	pcall(function()
 		(Lighting :: any).Technology = Enum.Technology.Future
 	end)
-	pcall(function()
+	local decorationOff = pcall(function()
 		terrain.Decoration = false -- no tall terrain grass blades: a short, soft green instead
 	end)
+	if not decorationOff or terrain.Decoration then
+		warn("[mog-wars] Terrain.Decoration could not be turned off from a script. In Studio select Workspace > Terrain and untick Decoration (once, then save the place).")
+	end
 	Lighting.ClockTime = 16.5
 	Lighting.GeographicLatitude = 25
 	Lighting.Brightness = 3

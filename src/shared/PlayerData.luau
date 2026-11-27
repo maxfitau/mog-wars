@@ -24,6 +24,8 @@ export type Data = {
 	receipts: { [string]: number }, -- Robux purchase ids already applied, with when (never grant twice)
 	weapons: { [string]: boolean }, -- weapons unlocked from boxes (rank unlocks need no entry)
 	aura: number, -- total aura earned, ever. Your rank comes from this and never goes down
+	unlocksSeen: { [string]: boolean }, -- unlock cards already shown ("shove", "dash", "stare")
+	stashes: { [string]: boolean }, -- hidden Aura Stashes found, ever (12 in all)
 	lifetimeWars: number, -- wars the player took part in (used to reveal screens gradually)
 	lifetimeCaptures: number, -- zone captures the player was paid for
 	season: { week: number, points: { [string]: number }, prevWeek: number, prevPoints: { [string]: number }, claimed: number },
@@ -31,14 +33,14 @@ export type Data = {
 
 local PlayerData = {}
 
-PlayerData.CURRENT_VERSION = 11
+PlayerData.CURRENT_VERSION = 12
 PlayerData.MAX_RECEIPT_ENTRIES = 400
 PlayerData.MAX_UNITS = 1000
 PlayerData.MAX_BOXES_PER_TIER = 1000
 PlayerData.MAX_POINTS = 1_000_000_000 -- far above anything reachable; stops runaway or overflowing values
 
 function PlayerData.template(): Data
-	return { version = PlayerData.CURRENT_VERSION, points = 0, rank = 1, warsToday = 0, lastWarDay = 0, boxes = {}, units = {}, cosmetics = {}, boxDay = 0, boxesToday = 0, streakDay = 0, lastClaimDay = 0, barracksSince = 0, trainingLevel = 0, trainingProgress = 0, trainingDay = 0, trainingToday = 0, equipped = {}, receipts = {}, weapons = {}, aura = 0, lifetimeWars = 0, lifetimeCaptures = 0, season = { week = 0, points = {}, prevWeek = 0, prevPoints = {}, claimed = 0 } }
+	return { version = PlayerData.CURRENT_VERSION, points = 0, rank = 1, warsToday = 0, lastWarDay = 0, boxes = {}, units = {}, cosmetics = {}, boxDay = 0, boxesToday = 0, streakDay = 0, lastClaimDay = 0, barracksSince = 0, trainingLevel = 0, trainingProgress = 0, trainingDay = 0, trainingToday = 0, equipped = {}, receipts = {}, weapons = {}, aura = 0, unlocksSeen = {}, stashes = {}, lifetimeWars = 0, lifetimeCaptures = 0, season = { week = 0, points = {}, prevWeek = 0, prevPoints = {}, claimed = 0 } }
 end
 
 local function isWholeNumber(value: any): boolean
@@ -211,6 +213,15 @@ function PlayerData.takeUnit(data: Data, unit: string): boolean
 	return true
 end
 
+-- Remember that an unlock card was shown / a stash was found. Return false if the id is bad or already recorded.
+function PlayerData.markSeen(map: { [string]: boolean }, id: string): boolean
+	if type(id) ~= "string" or id == "" or #id > 40 or map[id] then
+		return false
+	end
+	map[id] = true
+	return true
+end
+
 -- Unlock a weapon. Returns false if the id is bad or it is already unlocked.
 function PlayerData.unlockWeapon(data: Data, id: string): boolean
 	if type(id) ~= "string" or id == "" or data.weapons[id] then
@@ -288,6 +299,11 @@ function PlayerData.migrate(data: any): boolean
 		data.aura = 0 -- ranks are now earned by total aura; a rank already earned is kept
 		data.version = 11
 	end
+	if data.version == 11 then
+		data.unlocksSeen = {}
+		data.stashes = {}
+		data.version = 12
+	end
 	return true
 end
 
@@ -356,6 +372,8 @@ function PlayerData.isValid(data: any): boolean
 		and PlayerData.receiptsValid(data.receipts)
 		and PlayerData.seasonValid(data.season)
 		and PlayerData.cosmeticsValid(data.weapons)
+		and PlayerData.cosmeticsValid(data.unlocksSeen)
+		and PlayerData.cosmeticsValid(data.stashes)
 		and isWholeNumber(data.aura)
 		and data.aura >= 0
 		and isWholeNumber(data.lifetimeWars)

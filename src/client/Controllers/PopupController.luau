@@ -88,6 +88,36 @@ local function show(text: string, amount: number, color: Color3?)
 	tween:Play()
 end
 
+-- The small "+3" ticks by the aura counter (top left), so the constant trickle never covers the middle of the screen.
+local tickCount = 0
+local function auraTick(amount: number)
+	if tickCount >= 8 then
+		return
+	end
+	tickCount += 1
+	local tick = Instance.new("TextLabel")
+	tick.Size = UDim2.new(0, 70, 0, 22)
+	tick.Position = UDim2.new(0, 22 + math.random(0, 190), 0, 150)
+	tick.BackgroundTransparency = 1
+	tick.Font = UiTheme.font
+	tick.TextScaled = true
+	tick.Text = ("+%d"):format(amount)
+	tick.TextColor3 = Color3.fromRGB(150, 235, 255)
+	tick.TextStrokeColor3 = UiTheme.outline
+	tick.TextStrokeTransparency = 0
+	tick.Parent = gui
+	local tween = TweenService:Create(tick, TweenInfo.new(0.9, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		Position = tick.Position - UDim2.new(0, 0, 0, 26),
+		TextTransparency = 1,
+		TextStrokeTransparency = 1,
+	})
+	tween.Completed:Connect(function()
+		tickCount -= 1
+		tick:Destroy()
+	end)
+	tween:Play()
+end
+
 -- A big banner at the top of the screen (one at a time).
 local function showBanner(text: string, color: Color3, seconds: number)
 	bannerToken += 1
@@ -223,6 +253,8 @@ function PopupController.init()
 		if kind == "points" then
 			show(("+%s Mog Points"):format(number), amount)
 			flyTo(Color3.fromRGB(255, 205, 50), math.clamp(math.floor(math.log(amount + 1, 4)) + 1, 1, 4), 30)
+		elseif kind == "aura" and amount <= 12 then
+			auraTick(amount)
 		elseif kind == "aura" then
 			show(("+%s"):format(number), amount, if amount >= 25 then nil else Color3.fromRGB(150, 235, 255))
 			if amount >= 10 then

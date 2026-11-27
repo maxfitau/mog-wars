@@ -18,6 +18,7 @@ local BotService = require(script.Parent:WaitForChild("BotService"))
 local CaptureSystem = require(script.Parent:WaitForChild("CaptureSystem"))
 local DataService = require(script.Parent:WaitForChild("DataService"))
 local SeasonService = require(script.Parent:WaitForChild("SeasonService"))
+local PopupSystem = require(script.Parent:WaitForChild("PopupSystem"))
 
 local WarSystem = {}
 
@@ -154,6 +155,11 @@ function WarSystem.start()
 				local overtime = Features.overtime and endsAt - Workspace:GetServerTimeNow() <= Pace.overtime.seconds -- the last 60 seconds: all aura x2
 				if Workspace:GetAttribute("Overtime") ~= overtime then
 					Workspace:SetAttribute("Overtime", overtime)
+					if overtime then
+						for _, player in Players:GetPlayers() do
+							PopupSystem.send(player, "announce", 1, "1 MINUTE LEFT - DOUBLE AURA!")
+						end
+					end
 				end
 			end
 			if Workspace:GetServerTimeNow() >= endsAt then

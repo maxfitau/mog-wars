@@ -144,7 +144,12 @@ check("unlockWeapon records a weapon once", PlayerData.unlockWeapon(weaponPlayer
 local v10: any = PlayerData.template()
 v10.version = 10
 v10.aura = nil
-check("migrate upgrades version 10 and adds total aura", PlayerData.migrate(v10) and PlayerData.isValid(v10) and v10.aura == 0 and v10.version == 11)
+check("migrate upgrades version 10 and adds total aura", PlayerData.migrate(v10) and PlayerData.isValid(v10) and v10.aura == 0 and v10.version == PlayerData.CURRENT_VERSION)
+check("version 12 adds unlock cards and stashes", next(v10.unlocksSeen) == nil and next(v10.stashes) == nil)
+do
+	local seen = PlayerData.template()
+	check("an unlock card or stash is recorded once", PlayerData.markSeen(seen.stashes, "gate") == true and PlayerData.markSeen(seen.stashes, "gate") == false and PlayerData.markSeen(seen.stashes, "") == false)
+end
 local auraBad = PlayerData.template()
 auraBad.aura = -3
 check("negative aura is invalid", not PlayerData.isValid(auraBad))

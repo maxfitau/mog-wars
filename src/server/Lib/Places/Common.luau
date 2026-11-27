@@ -51,16 +51,20 @@ function Common.ambience(folder: Instance, position: Vector3, soundId: string, v
 	sound:Play()
 end
 
--- The free Aura Stash in a secret spot: open it to refill your aura charge and ego and get a little aura.
-function Common.stash(folder: Instance, position: Vector3, territoryId: string): Part
-	local crate = Builder.part("AuraStash", Vector3.new(4, 3, 3), position + Vector3.new(0, 1.5, 0), Color3.fromRGB(255, 205, 60), folder)
+-- A hidden Aura Stash: walk up and hold the prompt for a big burst of aura (once per war per player). `stashId` must be
+-- unique (12 are hidden across the map; finding them all earns the Stash Hunter title). The crate is NOT solid, so
+-- nobody can get stuck on it in a narrow tunnel, and the prompt works from 10 studs away.
+function Common.stash(folder: Instance, position: Vector3, territoryId: string, stashId: string?): Part
+	local crate = Builder.part("AuraStash", Vector3.new(3.4, 2.6, 2.6), position + Vector3.new(0, 1.3, 0), Color3.fromRGB(255, 205, 60), folder)
 	crate.Material = Enum.Material.Neon
-	crate.CanCollide = true
+	crate.CanCollide = false
+	crate.CanQuery = true
 	crate:SetAttribute("Territory", territoryId)
+	crate:SetAttribute("StashId", stashId or territoryId)
 	local prompt = Instance.new("ProximityPrompt")
 	prompt.ActionText = "Open Aura Stash"
 	prompt.ObjectText = "Secret!"
-	prompt.HoldDuration = 0.3
+	prompt.HoldDuration = 0.2
 	prompt.MaxActivationDistance = 10
 	prompt.RequiresLineOfSight = false
 	prompt.Parent = crate

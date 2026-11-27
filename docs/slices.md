@@ -349,3 +349,8 @@ One sentence: run to a flag, stand on it to win it for your team, and your aura 
 Every territory is its own floating island (see DESIGN.md), joined by rope bridges; four team islands; airships and floating rocks; the fall respawn; ambient NPCs (Lib/AmbientNpc); and the new Diamond territory Chud Chambers under the Gate island.
 **Test:** `tests/Territories.test.luau`, `tests/SpawnRules.test.luau`, `tests/MapLayout.test.luau`; see `docs/PLAYTEST.md`.
 **Done when:** every island can be reached from a team island in about 20 seconds, every staircase and ladder works, and both Chud flags can be captured.
+
+## Slice 31: Fast start
+Unlock cards (Shove at NPC, Dash at Rookie, Mog Stare at Sigma), a mission bar with a ground trail, announcer banners, a constant +X aura counter (+1 war, +3 flag, +1 per territory), Moglings with blocky bodies, 12 hidden Aura Stashes with a counter and the Stash Hunter title, launch pads and ziplines, rebuilt Lighthouse and Canyon; the AssetCheck debug scripts are removed.
+**Test:** `tests/Pace.test.luau`, `tests/LaunchRules.test.luau`, `tests/RankRules.test.luau`, `tests/PlayerData.test.luau`; see `docs/PLAYTEST.md`.
+**Done when:** a brand-new player gets the Shove card, always sees one mission, reaches Rookie in about a minute and sees a steady trickle of small +X numbers.

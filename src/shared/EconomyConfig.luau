@@ -199,12 +199,12 @@ local config: Config = {
 	},
 	ranks = {
 		{ name = "NPC", cost = 0 },
-		{ name = "Rookie", cost = 400 }, -- aura needed to reach this rank from the one before; ranks are earned by total aura
-		{ name = "Sigma", cost = 900 },
-		{ name = "Chadlite", cost = 1900 },
-		{ name = "Chad", cost = 3800 },
-		{ name = "Gigachad", cost = 12000 },
-		{ name = "Mog God", cost = 31000 },
+		{ name = "Rookie", cost = 150 }, -- aura needed to reach this rank from the one before; ranks are earned by total aura
+		{ name = "Sigma", cost = 1050 },
+		{ name = "Chadlite", cost = 3800 },
+		{ name = "Chad", cost = 20000 },
+		{ name = "Gigachad", cost = 55000 },
+		{ name = "Mog God", cost = 120000 },
 	},
 	boxes = {
 		dailyCap = 12, -- most boxes a player can earn from captures in one UTC day

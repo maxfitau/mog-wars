@@ -56,6 +56,7 @@ return function(folder: Folder, territory: any)
 	TerrainKit.cylinder(cx, -3, cz, 108, 3, Enum.Material.Cobblestone) -- a stone plaza under the castle
 	SkyKit.vines(folder, cx, cz, height, 125, 20)
 	SkyKit.waterfall(folder, Vector3.new(cx + 124, height, cz + 22), Vector3.new(1, 0, 0), 55)
+	SkyKit.waterfallStash(folder, Vector3.new(cx + 124, height, cz + 22), Vector3.new(1, 0, 0), territory.id, "gate_waterfall")
 	SkyKit.waterfall(folder, Vector3.new(cx - 124, height, cz - 30), Vector3.new(-1, 0, 0), 48)
 
 	-- the head: jaws either side of a 24-wide mouth tunnel, a floor over the tunnel, the throne room above it

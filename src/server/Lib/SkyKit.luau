@@ -6,6 +6,7 @@ local Workspace = game:GetService("Workspace")
 
 local Builder = require(script.Parent:WaitForChild("Builder"))
 local TerrainKit = require(script.Parent:WaitForChild("TerrainKit"))
+local Common = require(script.Parent:WaitForChild("Places"):WaitForChild("Common"))
 
 local SkyKit = {}
 
@@ -66,6 +67,15 @@ function SkyKit.waterfall(folder: Instance, rim: Vector3, outward: Vector3, heig
 	mist.Size = NumberSequence.new(6, 14)
 	mist.Transparency = NumberSequence.new(0.6, 1)
 	mist.EmissionDirection = Enum.NormalId.Top
+end
+
+-- A hidden stash on a little ledge BEHIND a waterfall: drop off the island edge through the water onto it.
+function SkyKit.waterfallStash(folder: Instance, rim: Vector3, outward: Vector3, territoryId: string, stashId: string)
+	local flat = Vector3.new(outward.X, 0, outward.Z).Unit
+	local position = rim + flat * 4 - Vector3.new(0, 8, 0)
+	local ledge = Builder.part("HiddenLedge", Vector3.new(9, 1, 7), position, Color3.fromRGB(110, 100, 120), folder)
+	ledge.Material = Enum.Material.Rock
+	Common.stash(folder, position + Vector3.new(0, 0.5, 0), territoryId, stashId)
 end
 
 -- A wooden rope bridge from `from` to `to` (the deck's surface runs through both points). Walkable up to about 30 degrees.

@@ -49,6 +49,25 @@ end
 
 -- Mirror the Training Arena state to attributes for the client and for CaptureSystem (read only):
 -- TrainingLevel, TrainingProgress (0 to 1 into the current level) and TrainingLeft (seconds left today).
+local STASH_TOTAL = 12
+local UNLOCK_IDS = { shove = true, dash = true, stare = true }
+
+local function syncUnlocks(player: Player, data: PlayerData.Data)
+	local seen = {}
+	for id in data.unlocksSeen do
+		table.insert(seen, id)
+	end
+	table.sort(seen)
+	player:SetAttribute("UnlocksSeen", table.concat(seen, ","))
+	local found = 0
+	for _ in data.stashes do
+		found += 1
+	end
+	player:SetAttribute("StashesFound", found)
+	player:SetAttribute("StashesTotal", STASH_TOTAL)
+	player:SetAttribute("StashHunter", found >= STASH_TOTAL)
+end
+
 local function syncTraining(player: Player, data: PlayerData.Data)
 	local settings = Config.training
 	local day = PlayerData.dayNumber(os.time())
@@ -126,6 +145,7 @@ local function load(player: Player)
 	profile.Data.rank = math.max(profile.Data.rank, RankRules.rankForAura(Config, profile.Data.aura))
 	player:SetAttribute("Rank", profile.Data.rank)
 	player:SetAttribute("Aura", profile.Data.aura)
+	syncUnlocks(player, profile.Data :: any)
 	syncInventory(player, profile.Data :: any)
 	if profile.Data.barracksSince == 0 then
 		profile.Data.barracksSince = os.time() -- the barracks starts building from the first visit
@@ -415,6 +435,31 @@ end
 
 -- Something to call when a player earns a new rank (set by PopupSystem wiring in RankVisuals).
 DataService.onRankUp = nil :: ((Player, number) -> ())?
+
+-- The player has seen the unlock card for an ability ("shove", "dash" or "stare"). Saved, so it shows only once.
+function DataService.markUnlockSeen(player: Player, id: string): boolean
+	local data = DataService.get(player)
+	if not data or not UNLOCK_IDS[id] then
+		return false
+	end
+	local isNew = PlayerData.markSeen(data.unlocksSeen, id)
+	if isNew then
+		syncUnlocks(player, data)
+	end
+	return isNew
+end
+
+-- A hidden Aura Stash was opened for the first time ever? Returns whether it is new and how many are found now.
+function DataService.recordStash(player: Player, stashId: string): (boolean, number)
+	local data = DataService.get(player)
+	if not data then
+		return false, 0
+	end
+	local isNew = PlayerData.markSeen(data.stashes, stashId)
+	syncUnlocks(player, data)
+	local found = player:GetAttribute("StashesFound")
+	return isNew, if type(found) == "number" then found else 0
+end
 
 -- Wait (up to `seconds`) for a player's data to finish loading. Returns the data or nil.
 function DataService.waitFor(player: Player, seconds: number): PlayerData.Data?

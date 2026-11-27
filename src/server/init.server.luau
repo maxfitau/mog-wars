@@ -19,13 +19,15 @@ add("CombatSystem", Features.combat)
 add("PickupSystem", Features.pickups)
 add("BoxSystem", Features.boxes)
 add("UnitSystem", Features.units)
+add("ZiplineSystem", Features.ziplines)
+add("AbilitySystem", Features.abilities)
 add("RewardsSystem", Features.dailyStreak)
 add("SeasonService", true) -- guarded inside by Features.seasons
 add("TrainingSystem", Features.trainingIsland)
 add("ShopSystem", Features.cosmeticShop)
 add("TravelSystem", Features.trainingIsland)
-add("TerritorySystem", true)
-add("AssetCheckSystem", true)
+add("TerritorySystem", Features.territoryTrickle)
+add("PresenceSystem", true)
 add("WarSystem", true)
 
 type System = { init: () -> (), start: () -> () }

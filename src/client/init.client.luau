@@ -13,6 +13,10 @@ local function add(name: string, on: boolean)
 		table.insert(order, name)
 	end
 end
+add("ZiplineController", Features.ziplines)
+add("AbilityController", Features.abilities)
+add("UnlockCard", Features.abilities)
+add("MissionHud", true)
 add("ShopHud", Features.cosmeticShop)
 add("RewardsHud", Features.dailyStreak)
 add("CombatController", Features.combat)
@@ -23,7 +27,6 @@ add("UnitsHud", Features.units)
 add("TrainingHud", Features.trainingIsland)
 add("TravelHud", Features.trainingIsland)
 add("SeasonHud", Features.seasons)
-add("AssetCheckController", true)
 add("RevealController", Features.discoveryCards) -- last: it shows each screen only once the player has reached it
 
 -- Each controller is loaded, initialised and started on its own, so one error does not stop the others;

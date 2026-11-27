@@ -329,3 +329,8 @@ nearest 1-flag territory. Studio-only `AssetCheck` hunts the "ContentId 20378549
 Three blasters (Splatter, Splash Cannon, Long Shot), health 100, 25 damage hits, splat = 3s respawn at the faction corner with a 2s shield. Server-side shots (`CombatSystem`): rate limit, direction check, ammo, fire interval, server raycast. Splat pays 10 aura + a few Mog Points (half for bots), assists, streak announcements, kill feed, defend bonus. Contested flags hold still. Mog-off duels are off in wars (`Features.mogOffsInWar`). Bots shoot, strafe and take cover. Weapons unlock by rank or from Gold/Diamond boxes (save version 10).
 **Test:** `tests/CombatRules.test.luau`, `tests/PlayerData.test.luau`, `tests/BoxRoll.test.luau`; see `docs/PLAYTEST.md`, "Combat".
 **Done when:** you can splat a bot in 4 hits, a splat pays once per 20 seconds per victim, shielded players cannot be hurt or shoot, and a contested flag does not move.
+
+## Slice 27: Visual polish for War Island
+Terrain island (sand rim, grass, hills, dirt paths, water), bright lighting, real materials, paintball cover, round capture circles with a growing fill, flag poles with cloth flags, thin beams only when neutral or contested, floating tier-coloured name signs, castle walls and houses, a rotating lighthouse beam, and the restyled HUD (coin counter with bounce, faction boxes with territories held, capture bar with % and CONTESTED).
+**Test:** Studio only (nothing here is pure logic); see `docs/PLAYTEST.md`, "Visual polish".
+**Done when:** every item in the polish checklist looks right on PC and on a phone emulator.

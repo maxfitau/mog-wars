@@ -126,3 +126,9 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 119 | A flag with two or more factions alive inside is CONTESTED and its bar holds still | The owner's rule: kill the defenders to capture |
 | 120 | Shot rays pass through parts you cannot walk through (CanCollide off) | Signs, zones and steam never block a shot |
 | 121 | Sounds are empty settings (`Weapons.combat.sounds`) | No licensed audio ids yet; hit feel comes from the hitmarker, shake and flash |
+| 122 | War Island is Terrain (water, sand, grass, hills, paths) with its surface at y = 0 | Real look, and every height in Territories.luau stays valid |
+| 123 | `Lighting.Technology = Future` must be set once in Studio (a script cannot set it); everything else about the lighting is set by code | Roblox restriction |
+| 124 | The capture zone part stays an invisible square (logic unchanged); the visible round circle, pole and cloth are child parts | No change to the capture maths or the tests |
+| 125 | The circle "fills like a pie" as a disc growing from the middle in the capturing faction's colour | A true pie slice needs a mesh or image; a growing disc is cheap and reads the same |
+| 126 | Faction icons are round badges with the faction's first letter | No licensed or uploaded art needed yet |
+| 127 | Floating name signs are BillboardGuis at the landmark (they replaced the post-and-board signs) | The owner's request; one sign per territory |

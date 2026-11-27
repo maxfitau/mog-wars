@@ -14,6 +14,9 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local FactionRules = require(Shared:WaitForChild("FactionRules"))
 local MapLayout = require(Shared:WaitForChild("MapLayout"))
 local Territories = require(Shared:WaitForChild("Territories"))
+local IslandTerrain = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("IslandTerrain"))
+local Cover = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("Cover"))
+local Builder = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("Builder"))
 local TerritoryScenery = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("TerritoryScenery"))
 
 local PlaceholderMap = {}
@@ -86,7 +89,9 @@ function PlaceholderMap.start()
 	end
 
 	local plate = MapLayout.baseplateSize
-	makePart("Baseplate", Vector3.new(plate, 2, plate), Vector3.new(0, -1, 0), Color3.fromRGB(90, 100, 110))
+	local _ = plate
+	IslandTerrain.lighting()
+	IslandTerrain.build() -- real terrain: grass, sand, water, hills and paths (the surface is at y = 0)
 
 	-- One safe home base per faction. Spawn pads share the faction's team colour, so Roblox sends each player
 	-- to their own base first; SpawnSystem then moves them to the front line during a war.
@@ -113,8 +118,7 @@ function PlaceholderMap.start()
 		local zone = makePart(Territories.partName(territory, entry.index), Vector3.new(flag.size, 1, flag.size), Vector3.new(flag.x, flag.y + 0.5, flag.z), glow)
 		zone.CanCollide = false -- players walk straight onto it
 		zone.CanQuery = false -- paintballs pass through
-		zone.Transparency = 0.15
-		zone.Material = Enum.Material.Neon -- glows
+		zone.Transparency = 1 -- the zone part is only the invisible capture area; the circle below is what you see
 		zone:SetAttribute("Value", Territories.tiers[territory.tier].value)
 		zone:SetAttribute("Territory", territory.id)
 		zone:SetAttribute("TerritoryName", territory.name)
@@ -122,24 +126,47 @@ function PlaceholderMap.start()
 		zone:SetAttribute("FlagIndex", entry.index)
 		zone:SetAttribute("FlagCount", #territory.flags)
 
-		local beacon = makePart("Beacon", Vector3.new(3, 70, 3), Vector3.new(flag.x, flag.y + 35.5, flag.z), glow)
+		-- the round capture circle: a white ring, a dark base, and a fill that grows from the middle as it is captured
+		local function disc(name: string, diameter: number, thickness: number, lift: number, color: Color3, transparency: number): Part
+			local part = Builder.cylinder(name, diameter, thickness, Vector3.new(flag.x, flag.y + lift, flag.z), color, zone)
+			part.CanCollide = false
+			part.CanQuery = false
+			part.CanTouch = false
+			part.Transparency = transparency
+			part.Material = Enum.Material.SmoothPlastic
+			return part
+		end
+		disc("Ring", flag.size, 0.2, 0.1, Color3.new(1, 1, 1), 0.1)
+		disc("Base", flag.size * 0.9, 0.25, 0.14, Color3.fromRGB(60, 50, 95), 0.45)
+		disc("Fill", 0.1, 0.3, 0.2, Color3.new(1, 1, 1), 1)
+
+		-- the flag pole with a cloth flag that takes the owner's colour
+		local pole = Builder.cylinder("Pole", 0.7, 16, Vector3.new(flag.x, flag.y + 8, flag.z), Color3.fromRGB(235, 235, 240), zone)
+		pole.Material = Enum.Material.Metal
+		pole.CanCollide = false
+		pole.CanQuery = false
+		local cloth = Builder.part("Cloth", Vector3.new(7, 4.5, 0.25), Vector3.new(flag.x + 3.7, flag.y + 13.6, flag.z), Color3.new(1, 1, 1), zone)
+		cloth.Material = Enum.Material.Fabric
+		cloth.CanCollide = false
+		cloth.CanQuery = false
+		local knob = Builder.ball("PoleTop", Vector3.new(1.4, 1.4, 1.4), Vector3.new(flag.x, flag.y + 16.3, flag.z), Color3.fromRGB(255, 205, 60), zone)
+		knob.CanCollide = false
+		knob.CanQuery = false
+
+		-- one thin beam per flag, only visible while it is neutral or contested
+		local beacon = makePart("Beacon", Vector3.new(0.9, 45, 0.9), Vector3.new(flag.x, flag.y + 22.5, flag.z), Color3.new(1, 1, 1))
 		beacon.CanCollide = false
 		beacon.CanQuery = false
 		beacon.CanTouch = false
-		beacon.Transparency = 0.55
+		beacon.Transparency = 0.5
 		beacon.Material = Enum.Material.Neon
 		beacon.Parent = zone
-
-		local light = Instance.new("PointLight")
-		light.Color = glow
-		light.Brightness = 3
-		light.Range = 30
-		light.Parent = zone
 		CollectionService:AddTag(zone, "Zone")
 	end
 
-	-- The six territories' scenery and name signs (simple placeholder shapes).
+	-- The six territories' scenery and floating name signs, and paintball cover.
 	TerritoryScenery.build()
+	Cover.build()
 
 	-- The portal to Training Island, at the top (north) edge. One sign beside it.
 	for index, portal in MapLayout.warPortals do

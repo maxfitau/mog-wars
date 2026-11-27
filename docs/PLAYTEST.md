@@ -111,3 +111,15 @@ Needs a Studio playtest (cloud tests cover only the rules). Start a War Island s
 12. **Training Island**: you cannot shoot or be shot there.
 ## What to tune first
 `src/shared/Weapons.luau`: `botSpreadDeg` (bot accuracy), `botFireIntervalMin/Max`, `damage`, `fireInterval`, `splatPoints`, `splatAura`, `shieldSeconds`, `respawnSeconds`, `aimAssistDegrees`, `farmCooldownSeconds`. Re-run `python3 tools/pacing.py` after changing rewards.
+
+## Visual polish: what to look for (needs Studio)
+First, once: Lighting > Technology = Future (a script can't set it). Then play on War Island.
+1. **Island**: green grass top, sand beach rim, blue water all around, a few hills near the edge, brown dirt paths from each base toward the middle. FAIL: a flat grey slab, or falling through the ground.
+2. **Sky and light**: bright sunny day, soft haze, no grey fog.
+3. **Cover**: crates, walls, barrels and bushes near each flag, on the paths and in front of each base. Shots stop on them. FAIL: you can walk through a crate, or bots never hide behind them.
+4. **Capture circle**: white ring on the ground at every flag (no neon square). Stand in it: the inside fills from the middle in your colour. When owned, the ring and the flag cloth take the owner's colour. FAIL: a square, or the fill never shrinks when the other team pushes it back.
+5. **Beam**: one thin beam per flag, shown only when the flag is neutral or contested. FAIL: giant pillars, or a beam on an owned and quiet flag.
+6. **Landmarks**: Gigachad Gate (castle walls, towers with purple banners, face with sunglasses, walk through the mouth), Rizz Ravine (cliffs, rope bridge, pink heart, sparkles), Lighthouse (striped, golden padlock, beam that turns slowly), NPC Village (grey statue + 4 small houses), Brainrot Bog (pink brain in green mud, bubbles), Cooked Canyon (rock walls, lava, pan with egg, steam).
+7. **Name signs**: floating panel over each territory, coloured Gold / Diamond / Ultra. FAIL: signs overlapping or unreadable from the middle.
+8. **HUD**: Mog Points panel with a gold coin and a bounce when it goes up; war panel with four faction boxes (badge, "N terr.", score); capture bar fills in the capturing colour with a % and turns orange "CONTESTED" when enemies are inside. All in the rounded Fredoka font with white outlines.
+9. **Phone** (Studio device emulator, a low-end phone): steady frame rate, nothing flickers; HUD not covered by thumbs.

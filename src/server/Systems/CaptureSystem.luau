@@ -56,6 +56,10 @@ type ZoneRecord = {
 	boosts: { [number]: number }, -- tank boost per faction in this zone (set by UnitSystem)
 	beacon: BasePart?, -- the tall glowing pillar over the zone, recoloured with it
 	light: PointLight?,
+	ring: BasePart?, -- the round capture circle: outline, and the fill that grows like a pie
+	fill: BasePart?,
+	cloth: BasePart?, -- the flag cloth, in the owner's colour
+	diameter: number,
 }
 
 local zones: { [BasePart]: ZoneRecord } = {}
@@ -108,6 +112,10 @@ local function register(instance: Instance)
 		boosts = {},
 		beacon = instance:FindFirstChild("Beacon") :: BasePart?,
 		light = instance:FindFirstChildOfClass("PointLight"),
+		ring = instance:FindFirstChild("Ring") :: BasePart?,
+		fill = instance:FindFirstChild("Fill") :: BasePart?,
+		cloth = instance:FindFirstChild("Cloth") :: BasePart?,
+		diameter = if flagInfo then flagInfo.size * 0.9 else 16,
 	}
 	table.insert(territory.flags, zones[instance])
 	instance:SetAttribute("TerritoryOwner", 0)
@@ -185,8 +193,46 @@ local function setZoneColor(record: ZoneRecord, color: Color3)
 	end
 end
 
+local WHITE = Color3.new(1, 1, 1)
+
+-- The look of one flag: white ring when neutral, faction ring when owned, a fill that grows from the middle in the
+-- capturing faction's colour, a cloth flag in the owner's colour, and a thin beam only while neutral or contested.
+local function paint(record: ZoneRecord)
+	local state = record.state
+	local ownerTint = if state.owner ~= 0 then ownerColor(state.owner) else WHITE
+	if record.ring then
+		record.ring.Color = ownerTint
+	end
+	if record.cloth then
+		record.cloth.Color = ownerTint
+	end
+	local fill = record.fill
+	if fill then
+		local progress = math.clamp(state.progress, 0, 1)
+		if progress > 0.01 and state.capturer ~= 0 then
+			local d = math.max(0.1, record.diameter * progress)
+			fill.Size = Vector3.new(0.3, d, d)
+			fill.Color = ownerColor(state.capturer)
+			fill.Transparency = 0.15
+		elseif state.owner ~= 0 then
+			fill.Size = Vector3.new(0.3, record.diameter, record.diameter)
+			fill.Color = ownerTint
+			fill.Transparency = 0.55
+		else
+			fill.Transparency = 1
+		end
+	end
+	if record.beacon then
+		local contested = record.part:GetAttribute("Contested") == true
+		local show = contested or state.owner == 0
+		record.beacon.Transparency = if show then 0.45 else 1
+		record.beacon.Color = if state.capturer ~= 0 then ownerColor(state.capturer) elseif state.owner ~= 0 then ownerTint else WHITE
+	end
+end
+
 local function show(record: ZoneRecord)
 	local state = record.state
+	paint(record)
 	-- Round so attributes only replicate when the bar visibly moves.
 	local rounded = math.floor(state.progress * 100 + 0.5) / 100
 	if rounded ~= record.shownProgress then

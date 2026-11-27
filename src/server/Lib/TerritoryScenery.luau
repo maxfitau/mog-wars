@@ -16,6 +16,43 @@ local STONE = Color3.fromRGB(125, 125, 140)
 local PURPLE = Color3.fromRGB(140, 60, 210)
 local ROCK = Color3.fromRGB(150, 110, 90)
 
+local TIER_COLORS = {
+	gold = Color3.fromRGB(240, 170, 20),
+	diamond = Color3.fromRGB(50, 170, 235),
+	ultra = Color3.fromRGB(170, 70, 235),
+}
+
+-- Real materials instead of plain plastic, chosen from each part's name (anything not listed stays as it is).
+local MATERIALS: { { string, Enum.Material } } = {
+	{ "Tower", Enum.Material.Cobblestone }, { "CastleWall", Enum.Material.Cobblestone }, { "Merlon", Enum.Material.Cobblestone },
+	{ "Jaw", Enum.Material.Slate }, { "UpperHead", Enum.Material.Slate }, { "Nose", Enum.Material.Slate }, { "Brow", Enum.Material.Slate },
+	{ "Banner", Enum.Material.Fabric }, { "HeadRamp", Enum.Material.Concrete },
+	{ "Cliff", Enum.Material.Rock }, { "Ramp", Enum.Material.WoodPlanks }, { "Bridge", Enum.Material.WoodPlanks },
+	{ "Rope", Enum.Material.Fabric }, { "Stripe", Enum.Material.Concrete }, { "TopPlatform", Enum.Material.Concrete },
+	{ "Leg", Enum.Material.Slate }, { "Torso", Enum.Material.Slate }, { "Arm", Enum.Material.Slate }, { "Head", Enum.Material.Slate },
+	{ "PanLeg", Enum.Material.Rock }, { "RockWall", Enum.Material.Rock }, { "Pan", Enum.Material.Metal },
+	{ "DeadTree", Enum.Material.Wood }, { "BrainPad", Enum.Material.SmoothPlastic },
+}
+
+local function applyMaterials(folder: Folder)
+	for _, part in folder:GetDescendants() do
+		if part:IsA("BasePart") and part.Material == Enum.Material.Plastic then
+			if string.find(part.Name, "Ramp$") then
+				part.Material = Enum.Material.WoodPlanks
+			end
+			for _, entry in MATERIALS do
+				if part.Material ~= Enum.Material.Plastic then
+					break
+				end
+				if string.sub(part.Name, 1, #entry[1]) == entry[1] then
+					part.Material = entry[2]
+					break
+				end
+			end
+		end
+	end
+end
+
 local TerritoryScenery = {}
 
 local function solid(part: Part): Part
@@ -71,6 +108,13 @@ local function gigachadGate(folder: Folder, territory: Territories.Territory)
 		block("Tower", side * 30, 14, -14, 10, 28, 10, STONE)
 		decor(Builder.part("Banner", Vector3.new(5, 14, 0.5), Vector3.new(cx + side * 30, 17, cz - 8.6), PURPLE, folder))
 		decor(Builder.part("BannerHead", Vector3.new(4, 14, 0.5), Vector3.new(cx + side * 17, 22, cz + 20.4), PURPLE, folder))
+	end
+	-- stone castle walls running out from each tower, with battlement blocks along the top
+	for _, side in { -1, 1 } do
+		block("CastleWall", side * 52, 9, -14, 30, 18, 4, STONE)
+		for index = 0, 5 do
+			block("Merlon", side * (40 + index * 5.6), 19.5, -14, 3, 3, 4, STONE)
+		end
 	end
 	-- a long ramp up the back of the head from the north edge of the map
 	Builder.ramp("HeadRamp", Vector3.new(cx, 0, cz - 135), Vector3.new(cx, 34, cz - 22), 10, Color3.fromRGB(165, 165, 180), folder)
@@ -128,6 +172,16 @@ local function lighthouse(folder: Folder, territory: Territories.Territory)
 	beam.Transparency = 0.6
 	beam.CanCollide = false
 	beam.CanQuery = false
+	local pivot = Vector3.new(territory.x, lockY, territory.z)
+	local angle = 0
+	task.spawn(function()
+		while beam.Parent do
+			task.wait(0.1) -- 10 small steps a second: one part, cheap
+			angle += math.rad(4)
+			local direction = Vector3.new(math.cos(angle), 0, math.sin(angle))
+			beam.CFrame = CFrame.lookAt(pivot + direction * 55, pivot + direction * 120)
+		end
+	end)
 	local light = Instance.new("PointLight")
 	light.Color = Color3.fromRGB(255, 240, 150)
 	light.Range = 45
@@ -166,6 +220,15 @@ local function npcVillage(folder: Folder, territory: Territories.Territory)
 	dots.Text = "..."
 	dots.Parent = gui
 	decor(Builder.ball("BubbleTail", Vector3.new(4, 4, 2), Vector3.new(cx + 9, 31, cz + 8), Color3.new(1, 1, 1), folder))
+	-- four small cube houses around the statue
+	for index, offset in { { -30, -25 }, { 30, -25 }, { -30, 30 }, { 30, 30 } } do
+		local hx, hz = cx + offset[1], cz + offset[2]
+		local wall = solid(Builder.part("House" .. index, Vector3.new(9, 8, 9), Vector3.new(hx, 4, hz), Color3.fromRGB(235, 220, 185), folder))
+		wall.Material = Enum.Material.WoodPlanks
+		local roof = solid(Builder.part("HouseRoof" .. index, Vector3.new(11, 2, 11), Vector3.new(hx, 9, hz), Color3.fromRGB(200, 80, 70), folder))
+		roof.Material = Enum.Material.Slate
+		decor(Builder.part("HouseDoor" .. index, Vector3.new(2.4, 4, 0.3), Vector3.new(hx, 2, hz + 4.6), Color3.fromRGB(110, 70, 45), folder))
+	end
 	Builder.ramp("StatueRamp", Vector3.new(cx - 85, 0, cz), Vector3.new(cx - 9, top, cz), 10, Color3.fromRGB(175, 175, 185), folder)
 end
 
@@ -174,8 +237,8 @@ local function brainrotBog(folder: Folder, territory: Territories.Territory)
 	local cx, cz = territory.x, territory.z
 	local top = territory.flags[1].y
 	local pool = Builder.cylinder("SwampPool", 64, 0.4, Vector3.new(cx, 0.2, cz), Color3.fromRGB(70, 190, 60), folder)
-	pool.Material = Enum.Material.Neon
-	pool.Transparency = 0.25
+	pool.Material = Enum.Material.Mud
+	pool.Transparency = 0
 	pool.CanCollide = false
 	-- the brain: two big hemispheres with darker folds, mostly under the goo (you can walk through it)
 	local pink = Color3.fromRGB(255, 130, 175)
@@ -264,11 +327,54 @@ function TerritoryScenery.build()
 		if build then
 			build(folder, territory)
 		end
-		-- one sign per territory: facing outward near the middle of the map, otherwise toward the middle
-		local sx, sz = territory.sign.x, territory.sign.z
-		local fromMiddle = math.sqrt(sx * sx + sz * sz)
-		local facing = if fromMiddle < 70 then Vector3.new(sx * 3, 0, sz * 3) else Vector3.new(0, 0, 0)
-		Builder.sign("Sign_" .. territory.id, territory.name, Vector3.new(sx, 0, sz), facing, 28, 6, Color3.fromRGB(110, 70, 190), folder)
+		applyMaterials(folder)
+		-- one floating name sign per territory, coloured by tier, readable from across the map
+		local top = 0
+		for _, flag in territory.flags do
+			top = math.max(top, flag.y)
+		end
+		local anchor = Builder.part("SignAnchor", Vector3.new(1, 1, 1), Vector3.new(territory.x, math.max(top + 24, 46), territory.z), Color3.new(1, 1, 1), folder)
+		anchor.Transparency = 1
+		anchor.CanCollide = false
+		anchor.CanQuery = false
+		anchor.CanTouch = false
+		local tier = Territories.tiers[territory.tier]
+		local gui = Instance.new("BillboardGui")
+		gui.Size = UDim2.new(0, 260, 0, 70)
+		gui.MaxDistance = 450
+		gui.AlwaysOnTop = false
+		gui.Parent = anchor
+		local panel = Instance.new("Frame")
+		panel.Size = UDim2.new(1, 0, 1, 0)
+		panel.BackgroundColor3 = TIER_COLORS[territory.tier] or Color3.new(1, 1, 1)
+		panel.Parent = gui
+		local corner = Instance.new("UICorner")
+		corner.CornerRadius = UDim.new(0, 18)
+		corner.Parent = panel
+		local stroke = Instance.new("UIStroke")
+		stroke.Color = Color3.new(1, 1, 1)
+		stroke.Thickness = 4
+		stroke.Parent = panel
+		local nameLabel = Instance.new("TextLabel")
+		nameLabel.BackgroundTransparency = 1
+		nameLabel.Size = UDim2.new(1, -12, 0.62, 0)
+		nameLabel.Position = UDim2.new(0, 6, 0, 2)
+		nameLabel.Font = Enum.Font.FredokaOne
+		nameLabel.TextScaled = true
+		nameLabel.TextColor3 = Color3.new(1, 1, 1)
+		nameLabel.TextStrokeColor3 = Color3.fromRGB(35, 25, 60)
+		nameLabel.TextStrokeTransparency = 0
+		nameLabel.Text = territory.name
+		nameLabel.Parent = panel
+		local tierLabel = Instance.new("TextLabel")
+		tierLabel.BackgroundTransparency = 1
+		tierLabel.Size = UDim2.new(1, -12, 0.3, 0)
+		tierLabel.Position = UDim2.new(0, 6, 0.66, 0)
+		tierLabel.Font = Enum.Font.FredokaOne
+		tierLabel.TextScaled = true
+		tierLabel.TextColor3 = Color3.fromRGB(35, 25, 60)
+		tierLabel.Text = ("%s  -  %d flag%s"):format(tier.label, #territory.flags, if #territory.flags == 1 then "" else "s")
+		tierLabel.Parent = panel
 	end
 end
 

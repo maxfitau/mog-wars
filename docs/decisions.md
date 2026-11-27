@@ -65,3 +65,5 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 59 | Only three cosmetic slots are built: trail, aura and title; titles are fixed words from the catalog | Banners, emotes, unit skins and box animations need art; fixed words keep the game safe for children |
 | 60 | Box cosmetics (trail_spark, aura_frost, aura_gold) are never sold, and shop cosmetics never drop from boxes; a test checks both | Keeps boxes earned-only and avoids any paid random item |
 | 61 | Items with product id 0 show "Not on sale yet" and cannot be bought | Nothing can be sold before a real product exists |
+| 62 | The Training Arena plan (a station per rank, older stations give less aura, rank-only unlock) is in `DESIGN.md` and docs/slices.md slice 16; nothing of it is built yet | The owner asked to update the plan without building |
+| 63 | The battle pass is planned as slice 17, cosmetic only | The owner says it is mandatory at some point; design rule 1 means it can never sell power |

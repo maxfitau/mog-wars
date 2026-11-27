@@ -24,7 +24,9 @@ clients can only ask; the server decides.
 | 12 | Cosmetic shop | 4 |
 | 13 | Polish: tutorial, effects, sounds, mobile | 5 |
 | 14 | Launch prep | all |
-| 15 | Training Arena (added from `DESIGN.md`) | 8 |
+| 15 | Training Arena: treadmill (built) | 8 |
+| 16 | Training stations by rank (planned, not built) | 15, 8 |
+| 17 | Battle pass, cosmetic only (planned, not built) | 12 |
 
 ## 1. Capture one territory by standing in it
 
@@ -141,3 +143,33 @@ Aura power now comes from training, not rank. A small panel shows level, progres
 stand on the belt and walk against it, watch the bar fill and the level rise, stop and watch it stop, check a
 capture is faster at a higher level, and check the daily time runs out.
 **Done when:** only moving on a belt counts, the cap holds, and the capture speed matches the aura level.
+
+## 16. Training stations by rank (planned, not built)
+
+The plan comes from `DESIGN.md`. Each rank unlocks a station with its own mini-game; older stations keep working
+but give less aura; unlocking is by rank only, never Robux (cosmetic station skins can be sold).
+
+| Rank | Station | Mini-game | Needs from earlier systems |
+|---|---|---|---|
+| Rookie | Treadmill | Tap to run | The built treadmill uses walking against a belt; change it to tapping |
+| Sigma | Sigma Walk Runway | Rhythm poses, others can hype | A rhythm checker, a "hype" action other players can send |
+| Chadlite | Spot Me Bench | Timing bar; a friend spotting doubles the aura | The friend lookup (`FriendService`) from the squad work |
+| Chad | Mewing Meditation | Hold-and-release meter | A hold-and-release input and meter check |
+| Gigachad | Stare-Down Dojo | Practise mog-off duels against dummies | `MogOffRules` against a scripted dummy, no real opponent |
+| Mog God | Aura Summit | Passive aura on a peak, boosted by other players' emotes | Emote events, strict limits on boosts |
+
+**Settle before building:** how much aura each station gives and how much less older ones give; whether the
+daily training cap is shared or per station; whether NPC rank (the start) can train at all (the plan says
+Rookie unlocks the treadmill, the built treadmill works for everyone); how an emote or hype boost is limited so
+extra accounts cannot farm it; how a friend spot is checked on the server. All timing and meters are judged on
+the server.
+**Done when:** each station is rank-gated on the server, older stations give less, and no Robux path unlocks one.
+
+## 17. Battle pass, cosmetic only (planned, not built)
+
+The owner says a battle pass is mandatory at some point. It is the "cosmetic season pass" already on the money list in
+`DESIGN.md`, so it follows design rule 1: **cosmetic rewards only** (trails, auras, titles, banners, emotes,
+station skins), never points, boxes, units, aura, training speed or anything that wins wars. Ideas to settle:
+a free track and a paid track; progress from season points (slice 11b) or wars played; every reward shown before
+purchase; no countdown pressure; Roblox's current rules read first. Build after the cosmetic shop is tested with
+real purchases.

@@ -141,3 +141,12 @@ gifting, on purchases by minors, and on anything that lets players trade or hand
 can enable scams and pressure between young players. A safe version is a cosmetic gift the buyer picks for a
 friend who is online, with no ability to trade it onward. The season pass should likewise be cosmetic only and
 should show everything it gives before purchase.
+
+## 10. Training stations and the battle pass (planned, not built)
+
+- **Stations:** unlocked by rank only. Selling a station unlock or training time would be pay-to-win (rule 1);
+  only cosmetic station skins may be sold. Aura boosts from other players' emotes and hypes need strict server
+  limits so extra accounts cannot farm them, and nobody should be pressured to hype or be hyped.
+- **Friend spotting:** uses the friends list on the server and adds no new way to chat or contact.
+- **Battle pass:** cosmetic rewards only, everything it gives shown before purchase, no countdown pressure, and
+  Roblox's current rules on paid passes read first. It must not be a path to points, boxes, units, aura or training.

@@ -26,6 +26,8 @@ change is. Sections A and rows 1 to 5 of B (ranks, boxes, the Training Arena, sp
 | 6 | Faction 4 is "Aura Cartel" | Renamed "Aura Collective" (the word "cartel" suggests drug crime, see compliance) | Your call. One line in `src/shared/FactionRules.luau` | Tiny |
 | 7 | Weekly faction season, join a friend's faction, squad capture bonus, weekly events | Not built | Add after the build order is done (new slices) | Large |
 | 8 | Money list: gifting, private servers, cosmetic season pass | Shop built for trails, auras and titles (decisions 58 to 61); gifting, season pass, banners, emotes, skins and box animations not built | Check Roblox rules on gifting before building it (see compliance section 9) | Check first |
+| 10 | Training Arena section: a station per rank (Treadmill, Sigma Walk Runway, Spot Me Bench, Mewing Meditation, Stare-Down Dojo, Aura Summit), older ones give less aura, rank-only unlock | Only the treadmill exists, and it is walk-against-the-belt for every rank; rank does not unlock anything yet | Planned as slice 16 in `docs/slices.md`. Not built yet, as asked | Large |
+| 11 | Battle pass is mandatory at some point (the owner's note); `DESIGN.md` lists a cosmetic season pass | Not built | Planned as slice 17, cosmetic only | Large |
 | 9 | Build order puts the Training Arena before streak, barracks and the shop | Streak and barracks are built first | Fine to leave, but build the arena next | None |
 
 ## C. Already matches

@@ -57,7 +57,7 @@ check("team speed is capped at double", teamPower(5) == 2 and teamPower(12) == 2
 check("two players capture a Gold flag faster", secondsToCapture(Pace.capture.secondsPerFlag.gold, teamPower(2)) < gold)
 
 -- rewards and pickups
-check("+1 aura tick and +25 flag aura", Pace.rewards.flagTickAura == 1 and Pace.rewards.flagCapturedAura == 25)
+check("the old flag tick is off (replaced by Pace.presence) and +25 flag aura", Pace.rewards.flagTickAura == 0 and Pace.rewards.flagCapturedAura == 25)
 check("hit +2, mog +10, assist +5", Weapons.combat.hitAura == 2 and Weapons.combat.mogAura == 10 and Weapons.combat.mogAura * Weapons.combat.assistFraction == 5)
 local weights = 0
 for _, kind in Pace.pickups.kinds do

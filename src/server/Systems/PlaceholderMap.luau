@@ -13,6 +13,7 @@ local Workspace = game:GetService("Workspace")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local FactionRules = require(Shared:WaitForChild("FactionRules"))
 local MapLayout = require(Shared:WaitForChild("MapLayout"))
+local Features = require(Shared:WaitForChild("Features"))
 local Territories = require(Shared:WaitForChild("Territories"))
 local IslandTerrain = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("IslandTerrain"))
 local Cover = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("Cover"))
@@ -88,8 +89,6 @@ function PlaceholderMap.start()
 		end
 	end
 
-	local plate = MapLayout.baseplateSize
-	local _ = plate
 	IslandTerrain.lighting()
 	IslandTerrain.build() -- real terrain: grass, sand, water, hills and paths (the surface is at y = 0)
 
@@ -109,26 +108,35 @@ function PlaceholderMap.start()
 		spawn.Parent = Workspace
 	end
 
-	-- Fast movement: a launch pad in front of each base (throws you toward the middle) and speed pads on the path
-	-- from each base to the middle (+50 percent speed for 3 seconds). MovementSystem makes them work.
-	local Pace = require(Shared:WaitForChild("Pace"))
-	for index, base in MapLayout.bases do
-		local length = math.sqrt(base.x * base.x + base.z * base.z)
-		local dirX, dirZ = -base.x / length, -base.z / length
-		local launch = makePart("LaunchPad_" .. index, Vector3.new(9, 1, 9), Vector3.new(base.x + dirX * 14, 0.5, base.z + dirZ * 14), Color3.fromRGB(255, 120, 200))
-		launch.Material = Enum.Material.Neon
-		launch.CanCollide = false
-		launch.CanQuery = false
-		launch:SetAttribute("Launch", Vector3.new(dirX * Pace.speed.launchPad.horizontal, Pace.speed.launchPad.vertical, dirZ * Pace.speed.launchPad.horizontal))
-		CollectionService:AddTag(launch, "LaunchPad")
-		for _, t in { 0.3, 0.55, 0.78 } do
-			local pad = makePart("SpeedPad", Vector3.new(7, 0.6, 12), Vector3.new(base.x * (1 - t), 0.3, base.z * (1 - t)), Color3.fromRGB(70, 220, 255))
-			pad.CFrame = CFrame.lookAt(pad.Position, Vector3.new(0, 0.3, 0))
-			pad.Material = Enum.Material.Neon
-			pad.CanCollide = false
-			pad.CanQuery = false
-			pad.Transparency = 0.15
-			CollectionService:AddTag(pad, "SpeedPad")
+	-- Speed pads on the dirt paths from each base to its nearest territory (+50 percent speed for 3 seconds);
+	-- MovementSystem makes them work. Launch pads (combat respawns) only exist when combat is switched on.
+	if Features.speedPads then
+		for pathIndex = 1, 4 do
+			local path = IslandTerrain.paths[pathIndex]
+			for _, t in { 0.3, 0.62 } do
+				local x = path[1][1] + (path[2][1] - path[1][1]) * t
+				local z = path[1][2] + (path[2][2] - path[1][2]) * t
+				local pad = makePart("SpeedPad", Vector3.new(7, 0.6, 12), Vector3.new(x, 0.3, z), Color3.fromRGB(70, 220, 255))
+				pad.CFrame = CFrame.lookAt(pad.Position, Vector3.new(path[2][1], 0.3, path[2][2]))
+				pad.Material = Enum.Material.Neon
+				pad.CanCollide = false
+				pad.CanQuery = false
+				pad.Transparency = 0.15
+				CollectionService:AddTag(pad, "SpeedPad")
+			end
+		end
+	end
+	if Features.combat then
+		local Pace = require(Shared:WaitForChild("Pace"))
+		for index, base in MapLayout.bases do
+			local length = math.sqrt(base.x * base.x + base.z * base.z)
+			local dirX, dirZ = -base.x / length, -base.z / length
+			local launch = makePart("LaunchPad_" .. index, Vector3.new(9, 1, 9), Vector3.new(base.x + dirX * 14, 0.5, base.z + dirZ * 14), Color3.fromRGB(255, 120, 200))
+			launch.Material = Enum.Material.Neon
+			launch.CanCollide = false
+			launch.CanQuery = false
+			launch:SetAttribute("Launch", Vector3.new(dirX * Pace.speed.launchPad.horizontal, Pace.speed.launchPad.vertical, dirZ * Pace.speed.launchPad.horizontal))
+			CollectionService:AddTag(launch, "LaunchPad")
 		end
 	end
 
@@ -164,20 +172,22 @@ function PlaceholderMap.start()
 		disc("Fill", 0.1, 0.3, 0.2, Color3.new(1, 1, 1), 1)
 
 		-- the flag pole with a cloth flag that takes the owner's colour
-		local pole = Builder.cylinder("Pole", 0.7, 16, Vector3.new(flag.x, flag.y + 8, flag.z), Color3.fromRGB(235, 235, 240), zone)
+		local poleHeight = flag.pole or 16
+		local pole = Builder.cylinder("Pole", 0.7, poleHeight, Vector3.new(flag.x, flag.y + poleHeight / 2, flag.z), Color3.fromRGB(235, 235, 240), zone)
 		pole.Material = Enum.Material.Metal
 		pole.CanCollide = false
 		pole.CanQuery = false
-		local cloth = Builder.part("Cloth", Vector3.new(7, 4.5, 0.25), Vector3.new(flag.x + 3.7, flag.y + 13.6, flag.z), Color3.new(1, 1, 1), zone)
+		local cloth = Builder.part("Cloth", Vector3.new(7, 4.5, 0.25), Vector3.new(flag.x + 3.7, flag.y + poleHeight - 2.4, flag.z), Color3.new(1, 1, 1), zone)
 		cloth.Material = Enum.Material.Fabric
 		cloth.CanCollide = false
 		cloth.CanQuery = false
-		local knob = Builder.ball("PoleTop", Vector3.new(1.4, 1.4, 1.4), Vector3.new(flag.x, flag.y + 16.3, flag.z), Color3.fromRGB(255, 205, 60), zone)
+		local knob = Builder.ball("PoleTop", Vector3.new(1.4, 1.4, 1.4), Vector3.new(flag.x, flag.y + poleHeight + 0.3, flag.z), Color3.fromRGB(255, 205, 60), zone)
 		knob.CanCollide = false
 		knob.CanQuery = false
 
 		-- one thin beam per flag, only visible while it is neutral or contested
-		local beacon = makePart("Beacon", Vector3.new(0.9, 45, 0.9), Vector3.new(flag.x, flag.y + 22.5, flag.z), Color3.new(1, 1, 1))
+		local beamHeight = flag.beam or 45
+		local beacon = makePart("Beacon", Vector3.new(0.9, beamHeight, 0.9), Vector3.new(flag.x, flag.y + beamHeight / 2, flag.z), Color3.new(1, 1, 1))
 		beacon.CanCollide = false
 		beacon.CanQuery = false
 		beacon.CanTouch = false
@@ -190,6 +200,11 @@ function PlaceholderMap.start()
 	-- The six territories' scenery and floating name signs, and cover for Mog fights.
 	TerritoryScenery.build()
 	Cover.build()
+
+	if not Features.trainingIsland then
+		print("[mog-wars] map built: War Island (6 territories, 10 flags); Training Island is switched off")
+		return
+	end
 
 	-- The portal to Training Island, at the top (north) edge. One sign beside it.
 	for index, portal in MapLayout.warPortals do

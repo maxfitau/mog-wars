@@ -114,7 +114,8 @@ export type Config = {
 		horse: { sellValue: number, speedMultiplier: number },
 	},
 	dailyStreak: {
-		rewards: { string }, -- box tier for streak day 1 to 7
+		rewards: { string }, -- box tier for streak day 1 to 7 (old, unused while boxes are off)
+		auraRewards: { number }, -- aura for streak day 1 to 7
 	},
 	barracks: {
 		baseRatePerHour: number,
@@ -153,10 +154,10 @@ local config: Config = {
 		auraPerStride = 10, -- one second on a treadmill is 10 aura; territory rewards are paid in the same aura points
 	},
 	shove = {
-		cooldownSeconds = 6, -- time before the same player can shove again
-		range = 8, -- studs; the nearest enemy inside this range is the target
+		cooldownSeconds = 1.5, -- time before the same player can shove again
+		range = 9, -- studs; the nearest enemy inside this range is the target
 		knockbackStuds = 14, -- how far the target is pushed back
-		penaltySeconds = 3, -- the target pushes at reduced strength for this long
+		penaltySeconds = 1.5, -- the target pushes at reduced strength for this long
 		penaltyMultiplier = 0.5, -- aura power while shoved (half)
 		minRequestInterval = 0.2, -- requests faster than this are ignored, whatever their result
 	},
@@ -194,16 +195,16 @@ local config: Config = {
 		auraPerRank = 0.03, -- bot aura power grows this much per average player rank (small)
 		manageSeconds = 1, -- how often the server adds or removes ONE bot
 		thinkSeconds = 0.5, -- how often bots choose where to run
-		walkSpeed = 16,
+		walkSpeed = 20,
 	},
 	ranks = {
 		{ name = "NPC", cost = 0 },
-		{ name = "Rookie", cost = 500 },
-		{ name = "Sigma", cost = 1150 },
-		{ name = "Chadlite", cost = 2150 },
-		{ name = "Chad", cost = 3750 },
-		{ name = "Gigachad", cost = 14000 },
-		{ name = "Mog God", cost = 34000 },
+		{ name = "Rookie", cost = 400 }, -- aura needed to reach this rank from the one before; ranks are earned by total aura
+		{ name = "Sigma", cost = 900 },
+		{ name = "Chadlite", cost = 1900 },
+		{ name = "Chad", cost = 3800 },
+		{ name = "Gigachad", cost = 12000 },
+		{ name = "Mog God", cost = 31000 },
 	},
 	boxes = {
 		dailyCap = 12, -- most boxes a player can earn from captures in one UTC day
@@ -258,7 +259,8 @@ local config: Config = {
 		horse = { sellValue = 100, speedMultiplier = 1.3 }, -- 30 percent faster movement for one player
 	},
 	dailyStreak = {
-		rewards = { "gold", "gold", "gold", "diamond", "diamond", "diamond", "ultra" }, -- the daily box, day 1 to 7, then the cycle repeats
+		rewards = { "gold", "gold", "gold", "diamond", "diamond", "diamond", "ultra" }, -- (old daily box tiers, unused while boxes are off)
+		auraRewards = { 40, 60, 80, 120, 160, 220, 400 }, -- the daily reward: aura, day 1 to 7, then the cycle repeats
 	},
 	barracks = {
 		baseRatePerHour = 6,

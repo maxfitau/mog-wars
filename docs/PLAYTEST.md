@@ -1,3 +1,20 @@
+# The simple game: what you are looking for (read this first)
+Needs Studio. Run `git pull`, restart Rojo, press Play. The Output should say "[mog-wars] server started (N systems loaded)" with no "FAILED" lines. Switched-off features (combat, Training Island, boxes, units, pickups, dash, discovery cards, overtime, seasons, prestige, arena) must not show up anywhere.
+1. **HUD is three things.** Top left: aura and rank with a bar. Top centre: war timer and four team boxes (capture bar appears below when you stand on a flag). Bottom right: a big orange SHOVE! button. Also a small Shop button top right (and a Daily reward button only while one is waiting). FAIL: any boxes, units, training, rank-up, kill feed or TRAIN button.
+2. **New player.** On spawn a big yellow arrow points to the nearest Gold flag and says "Stand here to capture!". It goes away when you stand on a flag. FAIL: no arrow, or it points at a Diamond or Ultra flag.
+3. **Capture.** Stand on a flag: the ring fills in your team colour, "+1" aura pops up each second, "+25" and FLAG CAPTURED! when it flips. A Gold flag takes about 4 seconds alone; a teammate makes it faster. FAIL: slower than that, or no pop-ups.
+4. **Territory bonus.** Own every flag of a territory: a big +100 (Gold), +300 (Diamond) or +1,000 (Ultra) aura pop-up.
+5. **Shove.** Press E, click, or tap SHOVE!: a short knockback with a BONK! pop-up, then 1.5 seconds before you can shove again (the button greys out). Bots shove you now and then: you see BONKED! FAIL: no knockback, or a longer cooldown.
+6. **Rank.** Your aura total only goes up. Rookie at 400, Sigma at 1,300, Chadlite at 3,200, Chad at 7,000, Gigachad at 19,000, Mog God at 50,000. When you pass one: RANK UP! banner, a new glow and a coloured title and name over your head. FAIL: rank goes down, or it changes how strong you are.
+7. **Speed.** You run fast (22). Cyan speed pads on the dirt paths give a short boost.
+8. **War and results.** Wars are 6 minutes. At the end a 5-second results panel shows the winning team, your aura and flags, and each team's MVP; the next war starts straight away.
+9. **Bots.** With fewer than 8 fighters, bots fill in, spread over the 4 teams, run to flags, climb the stairs and shove.
+10. **Daily reward and shop.** A Daily reward button appears the first time each day (+aura, 7-day streak); the Shop button opens aura colours, trails and titles.
+11. **Territories.** Walk through each one: you can go INSIDE the landmark (Gate throne room and towers, Rizz heart on the bridge, Lighthouse spiral stairs, Village houses and statue scaffolding, Brain tunnels, Canyon pan and lava), find a hidden spot with a glowing Aura Stash (+25 aura), and name signs fade in only when you are close.
+**What to tune first:** capture speed (`Pace.capture`), shove (`EconomyConfig.shove`), aura rewards (`Pace.rewards`, `Territories.tiers`), rank amounts (`EconomyConfig.ranks`), war length (`EconomyConfig.war`), bots (`EconomyConfig.bots`).
+
+---
+# Older notes (some features below are switched off now)
 # How to playtest in Studio (Mac)
 
 Nothing has been run yet, so expect to find errors. Write down or paste anything red to Claude.

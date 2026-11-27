@@ -7,14 +7,19 @@
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+local Features = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Features"))
+
 local PopupSystem = {}
 
 local remote: RemoteEvent? = nil
 
-local KINDS = { points = true, aura = true, box = true, mogged = true, announce = true, combo = true, rush = true, knockout = true, capture = true, pickup = true }
+local KINDS = { points = true, aura = true, box = true, mogged = true, announce = true, combo = true, rush = true, knockout = true, capture = true, pickup = true, bonk = true, rankup = true }
 
 -- Show a pop-up to one player. Bad kinds and non-positive or non-finite amounts are ignored.
 function PopupSystem.send(player: Player, kind: string, amount: number, detail: string)
+	if (kind == "points" and not Features.mogPoints) or (kind == "box" and not Features.boxes) then
+		return -- the old currency and loot boxes are switched off in the simple game
+	end
 	if remote == nil or not KINDS[kind] or amount ~= amount or amount <= 0 or amount == math.huge then
 		return
 	end

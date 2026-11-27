@@ -92,9 +92,9 @@ function ShopHud.init()
 	gui.Parent = player:WaitForChild("PlayerGui")
 
 	toggle = Instance.new("TextButton")
-	toggle.AnchorPoint = Vector2.new(0, 0.5)
-	toggle.Position = UDim2.new(0, 16, 0.5, 104)
-	toggle.Size = UDim2.new(0, 90, 0, 40)
+	toggle.AnchorPoint = Vector2.new(1, 0)
+	toggle.Position = UDim2.new(1, -16, 0, 12) -- small, top right
+	toggle.Size = UDim2.new(0, 84, 0, 36)
 	toggle.BackgroundColor3 = Color3.fromRGB(60, 90, 200)
 	toggle.TextColor3 = Color3.new(1, 1, 1)
 	toggle.Font = Enum.Font.GothamBold

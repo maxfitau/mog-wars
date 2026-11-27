@@ -1,6 +1,6 @@
 --!strict
--- First-session hint, on War Island only. Until a player has captured a zone (RevealStage 0), show one line, "Run to a glowing
--- zone and stand in it!", with an arrow that points at the nearest zone. It disappears once they are standing
+-- The only tutorial: a big arrow that points at the nearest GOLD flag with "Stand here to capture!". It shows until the
+-- player is standing on a flag (the capture bar takes over) and for good after their first capture. It disappears once they are standing
 -- in a zone (the zone bar takes over) and for good after their first capture. Display only.
 
 local CollectionService = game:GetService("CollectionService")
@@ -21,10 +21,6 @@ local arrow: TextLabel
 
 local function update()
 	local stage = player:GetAttribute("RevealStage")
-	if player:GetAttribute("Island") == "training" then
-		frame.Visible = false -- the hint is only for War Island
-		return
-	end
 	local character = player.Character
 	local root = character and character:FindFirstChild("HumanoidRootPart")
 	local camera = Workspace.CurrentCamera
@@ -47,7 +43,7 @@ local function update()
 			end
 			table.insert(zones, { x = zone.Position.X, z = zone.Position.Z })
 			table.insert(parts, zone)
-			if zone:GetAttribute("FlagCount") == 1 and zone:GetAttribute("OwnerFaction") == 0 then
+			if zone:GetAttribute("Value") == 1 and zone:GetAttribute("OwnerFaction") ~= player:GetAttribute("Faction") then -- a Gold flag that is not ours yet
 				table.insert(easyZones, { x = zone.Position.X, z = zone.Position.Z })
 				table.insert(easyParts, zone)
 			end
@@ -73,8 +69,8 @@ function TutorialHint.init()
 
 	frame = Instance.new("Frame")
 	frame.AnchorPoint = Vector2.new(0.5, 0)
-	frame.Position = UDim2.new(0.5, 0, 0, 16)
-	frame.Size = UDim2.new(0.6, 0, 0, 92)
+	frame.Position = UDim2.new(0.5, 0, 0, 70)
+	frame.Size = UDim2.new(0.6, 0, 0, 100)
 	frame.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
 	frame.BackgroundTransparency = 0.2
 	frame.Visible = false
@@ -82,18 +78,18 @@ function TutorialHint.init()
 	local corner = Instance.new("UICorner")
 	corner.Parent = frame
 	local limit = Instance.new("UISizeConstraint")
-	limit.MinSize = Vector2.new(240, 92)
-	limit.MaxSize = Vector2.new(520, 92)
+	limit.MinSize = Vector2.new(240, 100)
+	limit.MaxSize = Vector2.new(520, 100)
 	limit.Parent = frame
 
 	arrow = Instance.new("TextLabel")
 	arrow.BackgroundTransparency = 1
 	arrow.Position = UDim2.new(0, 10, 0, 10)
-	arrow.Size = UDim2.new(0, 72, 0, 72)
+	arrow.Size = UDim2.new(0, 84, 0, 84)
 	arrow.Text = "▲"
 	arrow.TextColor3 = Color3.fromRGB(255, 220, 90)
 	arrow.TextScaled = true
-	arrow.Font = Enum.Font.GothamBold
+	arrow.Font = Enum.Font.FredokaOne
 	arrow.Parent = frame
 
 	local text = Instance.new("TextLabel")
@@ -103,9 +99,9 @@ function TutorialHint.init()
 	text.TextWrapped = true
 	text.TextXAlignment = Enum.TextXAlignment.Left
 	text.TextColor3 = Color3.new(1, 1, 1)
-	text.Font = Enum.Font.GothamBold
+	text.Font = Enum.Font.FredokaOne
 	text.TextScaled = true
-	text.Text = "Run to a glowing zone and stand in it!"
+	text.Text = "Stand here to capture!"
 	text.Parent = frame
 end
 

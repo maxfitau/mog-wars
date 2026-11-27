@@ -1,129 +1,51 @@
-# Mog Wars — Design Brief (v0.1)
+# Mog Wars — Design Brief (v0.2, the simple game)
 
-## One-line pitch
-A live territory war on a meme map: train your aura, drop into the war, capture land with your faction, open loot boxes, and rank up from NPC to Mog God.
+## One sentence
+**Run to a flag, stand on it to win it for your team, and your aura goes up. Get the most aura to go from NPC to Mog God.**
 
 ## Design rules (in priority order)
-1. Not pay-to-win. Nothing purchasable gives an advantage over another player. No paid boxes, points, units or stat boosts.
-2. High playtime. The core loop is fun in under 30 seconds; short, medium and long goals stack on top.
-3. High retention. Progress always saves; something grows while players are away; daily rewards; weekly events; friends inside.
-4. Good monetisation. Cosmetics and status only. Small, repeatable buys beat one big pass.
+1. Not pay-to-win. Nothing purchasable gives an advantage over another player. Rank only changes your glow, title and name colour, never your power.
+2. High playtime. The core loop is fun in under 30 seconds and a little kid can understand it at a glance.
+3. High retention. Progress always saves; a daily reward streak; aura and rank to climb.
+4. Good monetisation. Cosmetics only: aura colours, trails and titles. Small, repeatable buys.
 5. High click-through rate. Clear, bright icon and thumbnail; the game delivers what the thumbnail promises.
 
 ## Theme guardrails
 "Mog" is an absurd meme (cartoon Chad faces, jawline jokes). No "blackpill" or incel language, no ranking of real looks. Ranks measure aura earned by winning. Don't use "Risk" anywhere (trademark).
 
-## Core loop
-1. Join → spawn straight onto your faction's front line in a war already running.
-2. Capture zones: stand in a zone; your aura power speeds up the capture. Enemies push it back. Shove ability on a cooldown.
-3. Mog-offs: when two enemies meet in a zone, a 5-second tapping duel; the loser is knocked back.
-4. Capture → Mog Points based on your contribution + a box (Gold / Diamond / Ultra by territory value).
-5. Box → random unit (tank speeds up capture, horse speeds up movement), one war of use. Keep it or sell it for Mog Points.
-6. Spend Mog Points to rank up: NPC → Rookie → Sigma → Chadlite → Chad → Gigachad → Mog God.
-7. Between wars, train in the Training Arena to raise aura power (see the Training Arena section).
+## The game
+1. Join: you are placed on one of 4 auto-balanced teams (Jawline Legion, Mewing Order, Sigma Syndicate, Aura Collective) and spawn on War Island. Bots fill every war to at least 8 fighters; they are removed one at a time as real players join.
+2. A big arrow points to the nearest Gold flag: "Stand here to capture!". That is the whole tutorial.
+3. Stand on a flag to capture it. More teammates on the flag capture it faster (each extra +25%, up to double). Gold flags take 4 seconds, Diamond 6, Ultra 8 (one player alone).
+4. A team owns a territory when it holds ALL of its flags.
+5. **Shove** is the only way to fight: one big button on mobile, E or click on PC. A short knockback with a funny "BONK!" pop-up, 1.5 second cooldown. Bots shove too.
+6. Aura goes up all the time, with big number pop-ups: +1 every second you stand on a flag you are capturing, +25 for every flag captured, a bonus when a territory is captured (Gold +100, Diamond +300, Ultra +1000), and a small trickle every minute while your team holds territories.
+7. Ranks are earned by total aura, automatically: NPC, Rookie, Sigma, Chadlite, Chad, Gigachad, Mog God. A rank never goes down. It changes only your glow, title and name colour.
+8. Wars are 6 minutes. The last thing you see is a quick 5-second results screen (winning team, MVP of each team), then the next war starts straight away.
+9. A daily reward streak (7 days, aura) and a cosmetic shop (aura colours, trails, titles) stay.
+
+## HUD (three things)
+- Top left: your aura and rank, with a bar toward the next rank.
+- Top centre: the war timer and the four team scores, and the capture bar when you stand on a flag.
+- Bottom right: the big shove button.
+(Plus the small Shop button, a Daily reward button that only shows while a reward is waiting, and the "Stand here to capture!" arrow for new players.)
 
 ## Territories
-Six territories, ten capture flags, all on War Island. Names, positions, flag counts and rewards live in one settings file (src/shared/Territories.luau). Each territory has ONE giant landmark matching its name, big enough to see from across the map, and the flags are on the landmark. Built from simple parts (blocks, spheres, wedges) in bright colours, no Toolbox models.
-- Centre: Gigachad Gate. Ultra. Landmark: a giant stone face with a square jaw and sunglasses; the gate is its mouth, so players walk through it. 3 flags: both towers and the top of the head.
-- Inner ring: Rizz Ravine. Diamond. Landmark: a giant pink heart in the middle of the rope bridge, with sparkles. 2 flags, one on each cliff.
-- Inner ring: Locked-In Lighthouse. Diamond. Landmark: the lamp is a giant golden padlock that shines a beam. 2 flags, at the base and at the top.
-- Outer ring, Gold, 1 flag each:
-  - NPC Village: a giant blocky grey NPC statue with a blank face and a "..." speech bubble. Flag on its head.
-  - Brainrot Bog: a giant pink brain half-sunk in bubbling green goo. Flag stuck in the brain.
-  - Cooked Canyon: a giant frying pan with a fried egg over the lava river, with steam. Flag in the yolk.
-- Faction spawns in the 4 corners. The portal to Training Island is at the top edge.
-- Each flag is captured by standing near it. A faction owns a territory only when it holds ALL its flags. The HUD shows e.g. "Gigachad Gate: 2/3 flags".
-- On capture, everyone who helped gets rewards by contribution: Gold +100 aura, Diamond +300 aura, Ultra +1,000 aura (aura means aura points), plus Mog Points and a box of that territory's tier.
-- A faction that holds a territory gets a small aura trickle every minute (more for harder territories).
+Six territories, ten capture flags, all on War Island. Names, positions, flag counts and rewards live in one settings file (`src/shared/Territories.luau`). Each is a big landmark you can see from anywhere on the island, with an inside (rooms, tunnels, stairs, rooftops), flags in exciting spots, its own colours, ground and particles, a secret spot with a free Aura Stash (a little aura), and plenty of cover. Built from simple parts and Terrain; no Toolbox models.
+- Centre: **Gigachad Gate** (Ultra, 3 flags). A giant stone face with sunglasses; its mouth is a tunnel you walk through; inside the head is a throne room; two towers with spiral stairs and a flag on each roof.
+- **Rizz Ravine** (Diamond, 2 flags). A deep pink ravine with a rope bridge, a flag on each cliff top, and a giant hollow balloon-heart over the bridge with jump pads either side.
+- **Locked-In Lighthouse** (Diamond, 2 flags). A striped lighthouse on a rocky island in a moat; a spiral staircase inside; the base flag is by the door and the top flag is in a golden-padlock lamp room with a turning beam.
+- **NPC Village** (Gold, 1 flag). A blocky village of enterable houses and a giant grey NPC statue climbed by wooden scaffolding; the flag is on its head; a secret room under the well.
+- **Brainrot Bog** (Gold, 1 flag). A foggy green swamp with lily pads and dead trees; a giant hollow pink brain with fleshy tunnels; the flag is in its centre; a hollow log is the secret.
+- **Cooked Canyon** (Gold, 1 flag). A red canyon with a lava river and rock jumps up to a giant frying pan; the flag is in the egg yolk; a cave behind a lava fall is the secret.
+- Faction spawns are in the 4 corners. Dirt paths, with speed pads on them, join the bases to the territories.
+- Small name signs over each landmark fade in only when you are close.
 
-## Combat (Mog combat)
-War Island fights are cartoon and kid-friendly, with no gore, and fully Mog themed. Your aura is your weapon: you fire glowing AURA BLASTS in your faction colour, and a hit leaves only a short aura sparkle. Health is your EGO bar (100) and ammo is your AURA CHARGE (auto recharge). A hit takes 34 ego (3 hits to mog someone); the server decides every shot. Getting mogged turns you grey with a blank NPC face and a "..." bubble: banner REDUCED TO NPC, then a 2-second respawn at your faction corner on a launch pad that throws you toward the action, with a 2-second shield (no shooting while shielded). Pop-ups say MOGGED!; the kill feed says "Kodo mogged Nova"; streaks are DOUBLE MOG, TRIPLE MOG and MOG GOD STREAK x5; mogging someone gives AURA RUSH (+20% speed for 2 seconds).
-Weapons, all earned by playing and never sold, none strictly better: Aura Blaster (starter, medium range), Flex Blast (close range: the character flexes and a 3-blast cone shockwave goes out; Rookie or boxes), Side-Eye Sniper (long range: a narrow stare beam, one strong shot, small zoom; Sigma or boxes). Rank and prestige damage bonus is capped at +10%. Bots carry the Aura Blaster, strafe, take cover and aim slightly worse; bot mogs pay half.
-A flag cannot be captured while an enemy is alive inside it (CONTESTED). Defending your own zone gives a small bonus per mog. Mog-off duels are off during wars (kept behind a setting for an event). Shove stays.
-
-## Pace (fast and rewarding)
-Everything is tuned in `src/shared/Pace.luau` and `src/shared/Weapons.luau`. Walk speed 22 and jump 55 on War Island (Training Island stays normal). Speed pads on the paths give +50% speed for 3 seconds; a short dash (double-tap a direction on PC, a DASH button on mobile) has a 4-second cooldown. Wars are 6 minutes; the last 60 seconds are OVERTIME (all aura x2, faster music, a pulsing red timer). Flags capture in 4 seconds (Gold), 6 (Diamond) or 8 (Ultra) for one player; each extra teammate adds 25%, up to double. Free pickups appear around the map about every 30 seconds and are never sold: Protein Shake (speed), Aura Refill (ego and aura charge), Main Character Mode (double aura for 15 seconds, golden glow and a spotlight).
-Constant small wins: +1 aura every second on a flag you are capturing, +2 per hit, +10 per mog, +5 per assist, +25 per flag captured, the tier reward per territory. Hits within 3 seconds build a combo (x2, x3 ... up to x5) on the aura you earn, with rising-pitch sounds once you add sound ids. A 5-second results screen (your totals and each faction's MVP) leads straight into the next war.
-
-## Islands
-One place, two islands (no separate places).
-- War Island: everyone spawns here, straight into the war. It has the territories, the capture zones, the faction bases and a portal by each base.
-- Training Island: all training stations in one area, plus the shop. Space is kept free for the prestige altar and the Mog Arena plots.
-- A big "Train" button on the HUD and a portal on War Island teleport you to Training Island instantly. A "Back to War" button and portal on Training Island drop you on your faction's front line.
-- Placeholder terrain for now; art comes later. The UI is bright, chunky, with a rounded font and big buttons.
-
-## Training Arena
-Train in the Training Arena to raise aura power. Each rank unlocks a new training station with its own mini-game:
-- Rookie: Treadmill. Tap to run.
-- Sigma: Sigma Walk Runway. Rhythm poses; other players can hype you.
-- Chadlite: Spot Me Bench. A timing bar; a friend spotting you doubles the aura gained.
-- Chad: Mewing Meditation. A hold-and-release meter.
-- Gigachad: Stare-Down Dojo. Practise mog-off duels against dummies.
-- Mog God: Aura Summit. Passive aura on a peak, boosted by other players' emotes.
-
-Rules: older stations still work but give less aura. Stations unlock by rank only, never with Robux. Cosmetic station skins can be sold. At launch only the Treadmill exists; the other stations arrive in Update 1 (players reach Sigma within days, so they need them early).
-
-## Number pop-ups
-Floating numbers appear for every tap, zone capture, shove that pushes someone out of a zone, mog-off win (the "kill" moment: the loser is knocked back), training tap, box opening and rank-up. Bigger events get bigger numbers: +12, +1.2K, +4.7M. Bigger numbers get bigger text and colour tiers (white, gold, purple). Occasional CRITs give 2-5x. Chains of actions build combo multipliers. Numbers scale exponentially and use short suffixes (K, M, B, T, Qa). Each prestige multiplies gains so the climb gets faster. Not built yet.
-
-## Prestige
-The Prestige altar unlocks at Mog God and is optional. A confirm screen shows what resets (rank, Mog Points, aura, station unlocks) and what is kept (cosmetics, Legacy Points, faction, friends, streak, arena). Everyone in the server sees an "ascended" broadcast.
-- Legacy Points: 3 earned on each prestige. Never sold.
-- Legacy Points are spent on a prestige skill tree with 3 branches of 3 tiers. A tier 1 skill costs 1 Legacy Point, tier 2 costs 2, tier 3 costs 3:
-  - Grind: Mog Point bonus (+5% per level, max 25%); bigger offline arena earnings; box luck, capped at +10% chance to roll the better outcomes, with the boosted odds shown on the opening screen while it is active.
-  - Tactics: pick ONE of two per tier: faster respawn OR longer shove; rally banner OR scout; mog-off combo OR dash. Total combat advantage is capped at around 10%.
-    - Rally banner: a small push boost for teammates standing near it.
-    - Scout: shows enemy counts in zones on your screen.
-    - Mog-off combo: a bigger knockback after two mog-off wins in a row.
-    - Dash: a short sprint on a cooldown.
-  - Swagger: prestige aura colours, titles and emotes; a legend statue in the hub.
-- Free respec once a week.
-- Factions auto-balance by prestige level as well as player count: when the server picks the smallest faction, each player counts as 1 plus 0.25 per prestige level, at most 2.5.
-- Mentor bonus: prestiged players get a bonus for helping low-rank teammates capture. It only counts for real friends, or for teammates who have been in the server at least 10 minutes, and it has a daily cap.
-Arrives in Update 2. Not built yet.
-
-## Mog Arena (tycoon) - Update 3, not version 1
-- Each player gets a plot in the training area.
-- Rank unlocks station types. Players buy, upgrade and place stations with Mog Points.
-- Prestige unlocks themes (P1 Neon Gym, P3 Volcano Dojo, P5 Space Summit) and special builds (throne, trophy wall, statue spot). These themes stay prestige-only.
-- Recruits train in the arena while the player is offline. This replaces barracks. Recruits are earned from boxes, the daily streak and rank-ups, never sold. Each recruit trains at one station.
-- Friends can train at your arena for a small owner bonus. The bonus builds up while the owner is away, capped like barracks.
-- Weekly "Best Arena" vote: one vote per player per week, only from players who visited that arena, fixed categories, a cosmetic prize.
-- The arena is kept through prestige.
-- Extra theme variants and decor can be sold; stations cannot. Not built yet.
-
-## Bots
-- A war with fewer than 8 fighters is filled with bots, balanced across the factions. Bots are removed one at a time as real players join.
-- Bots run between zones, capture, push back and do mog-offs with human-like tap speeds: they sometimes win and sometimes lose.
-- Bot difficulty scales to the players' ranks. It is easy against new players, so a new player can win their first mog-off within a minute.
-- Bots show a small "BOT" tag above their name, never appear on leaderboards and do not count in player counts.
-- Beating a bot gives fewer Mog Points than beating a real player.
-- Max server size is 16.
-
-## Release plan
-Everything is built, but only part of it is switched on (see `src/shared/Features.luau`).
-- Launch: the war, ranks, boxes and units, the treadmill, the daily streak and the cosmetic shop. Seasons and the squad bonus are built but switched off; they are turned on as later weekly updates.
-- Update 1: per-rank training stations.
-- Update 2: prestige and the skill tree.
-- Update 3: the Mog Arena tycoon.
-
-## First session
-The first session must be simple enough for a young kid: a new player only sees "stand in the zone, watch the bar fill". Other screens appear gradually as they play: after the first capture (points, war timer), after the first finished war (shove, ranks, training), after two wars (boxes, units), after three wars (daily box, shop).
+## Switched off (built, hidden, behind flags in `src/shared/Features.luau`)
+Weapons and combat (aura blasters, ego, mogging, kill feed), mog-off duels, Training Island and every training station, loot boxes, units (tanks and horses), pickups, dash, discovery cards, overtime, seasons, the old Mog Points currency, the squad bonus, prestige and the skill tree, and the Mog Arena tycoon. Flip a flag to bring a feature back; nothing was deleted. The older designs for them are in `docs/` and in the git history.
 
 ## Version 1 scope
-One map per server, 8–12 territories, 2–4 factions auto-balanced (Jawline Legion, Mewing Order, Sigma Syndicate, Aura Cartel), 10–15 minute rounds that reset, join mid-round anytime. Boxes are earned only, never sold. Not in version 1: the extra training stations (Update 1), prestige (Update 2) and the Mog Arena (Update 3).
-
-## Retention
-Daily box with a 7-day streak, barracks earn points offline (switched off at launch; replaced by the Mog Arena's offline recruits in Update 3), weekly faction season, join a friend's faction, squad capture bonus.
+One map per server, 6 territories, 4 auto-balanced teams, 6-minute wars that reset, join mid-war anytime. Max server size 16.
 
 ## Money (cosmetic only)
-Aura effects, extra arena theme variants and decor, station skins, faction banners, victory emotes, unit skins, box-opening animations, titles, private servers, cosmetic season pass, gifting.
-
-## Build order
-1. Map with territories; capture one by standing in it.
-2. Factions, auto-balance, round timer and reset.
-3. Mog Points + saving.
-4. Ranks + rank-up.
-5. Boxes, units, selling.
-6. Training Arena + aura power.
-7. Daily streak, offline barracks, cosmetics shop.
+Aura colours, trails, titles, and later extra cosmetics. Never power.

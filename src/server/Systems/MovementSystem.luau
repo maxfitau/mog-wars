@@ -15,6 +15,7 @@ local Workspace = game:GetService("Workspace")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Pace = require(Shared:WaitForChild("Pace"))
+local Features = require(Shared:WaitForChild("Features"))
 
 local MovementSystem = {}
 
@@ -219,6 +220,9 @@ function MovementSystem.init()
 		remotes[name] = remote
 	end
 	remotes.DashRequest.OnServerEvent:Connect(function(player: Player, dx: any, dz: any)
+		if not Features.dash then
+			return -- dashing is switched off in the simple game
+		end
 		if type(dx) ~= "number" or type(dz) ~= "number" or dx ~= dx or dz ~= dz then
 			return
 		end

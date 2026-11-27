@@ -140,3 +140,12 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 133 | Mogged players keep their joints (grey, standing) for the 2 second respawn | A cartoon "reduced to NPC" instead of falling apart |
 | 134 | Q frees the mouse on PC (T = Train / back to war); the mouse is otherwise locked to the crosshair while armed | The owner could not click the Train button on Mac |
 | 135 | Overtime music, pickup, whoosh, dash and combo sounds are empty ids until licensed ones are added | No licensed audio yet |
+| 136 | The game is cut to one sentence; every other feature stays in the code behind flags in `Features.lua`, with its systems and screens not loaded while off | The owner: too complicated for little kids; nothing deleted so it can come back |
+| 137 | Ranks come from total aura (a new saved field, version 11), rise automatically and never fall; amounts are cumulative 400 / 1,300 / 3,200 / 7,000 / 19,000 / 50,000 | "Earned by total aura"; the thresholds are a first guess (about 450 aura a war for an engaged player gives Chad in about 5 days and Mog God in about 5 weeks at 3 wars a day) |
+| 138 | Rank only changes the glow, a title and name colour over the head (our own name tag replaces Roblox's) | Rule 1: never power |
+| 139 | The daily streak pays aura (40, 60, 80, 120, 160, 220, 400) instead of boxes | Boxes are off |
+| 140 | With combat off, a flag with two teams on it is a normal tug-of-war (the bigger team pushes the other back) instead of CONTESTED | Shove is the only fight, so a standstill would never end |
+| 141 | Front-line spawns use each flag's `approach` point on open ground, because most flags are now raised or indoors | Players must never spawn inside a landmark |
+| 142 | Bots use Roblox pathfinding to reach flags (stairs, doors, jumps) | The ramps are gone; interiors need real routes |
+| 143 | Mog Points are still saved but never shown, awarded in pop-ups or spent; the shop is the only place Robux is used | Aura is the only number a kid sees |
+| 144 | The Shop button (top right) and the Daily reward button (only while a reward is waiting) are the only screens besides the three HUD pieces; the moments (village stare, brain pulse, geysers, heart burst, lamp sweep, gate flex) are not built yet | The shop and daily reward must stay reachable; moments are parked to keep the game simple |

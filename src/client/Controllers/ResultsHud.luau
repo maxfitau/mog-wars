@@ -72,11 +72,11 @@ function ResultsHud.start()
 		local current = token
 		local winnerFaction = if type(winner) == "number" then FactionRules.byId(winner) else nil
 		title.Text = if winnerFaction then string.upper(winnerFaction.name) .. " WIN!" else "DRAW!"
-		mineLabel.Text = ("You: +%s aura   %d mogs   %d flags"):format(NumberFormat.format(tonumber(mine.aura) or 0), tonumber(mine.mogs) or 0, tonumber(mine.flags) or 0)
+		mineLabel.Text = ("You: +%s aura   %d flags"):format(NumberFormat.format(tonumber(mine.aura) or 0), tonumber(mine.flags) or 0)
 		for id, row in rows do
 			local entry = factions[id]
 			if type(entry) == "table" then
-				row.Text = ("%s  MVP: %s  (%d mogs, %d flags)"):format(string.sub(FactionRules.factions[id].name, 1, 14), tostring(entry.mvp), tonumber(entry.mogs) or 0, tonumber(entry.flags) or 0)
+				row.Text = ("%s  MVP: %s  (%d flags)"):format(string.sub(FactionRules.factions[id].name, 1, 14), tostring(entry.mvp), tonumber(entry.flags) or 0)
 			end
 		end
 		panel.Visible = true

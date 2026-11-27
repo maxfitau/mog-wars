@@ -234,6 +234,13 @@ function PopupController.init()
 			showBanner(if type(detail) == "string" then string.upper(detail) else "STREAK", Color3.fromRGB(255, 190, 60), 1.8)
 		elseif kind == "combo" then
 			showCombo(amount)
+		elseif kind == "bonk" then
+			-- the funny shove pop-up: BONK! for the shover (amount 1) or for whoever got bonked (amount 2)
+			showBanner(if amount >= 2 then "BONKED!" else "BONK!", Color3.fromRGB(255, 160, 40), 0.8)
+			punch()
+		elseif kind == "rankup" then
+			showBanner(("RANK UP! %s"):format(if type(detail) == "string" then string.upper(detail) else ""), Color3.fromRGB(255, 215, 60), 2.4)
+			punch()
 		elseif kind == "rush" then
 			show("AURA RUSH!", 1000, Color3.fromRGB(120, 255, 170))
 		elseif kind == "knockout" then

@@ -20,6 +20,7 @@ export type Flag = {
 	pole: number?, -- flag pole height (shorter indoors)
 	beam: number?, -- height of the thin beam shown while the flag is neutral or contested
 	noSpawn: boolean?, -- true if players must never be spawned beside this flag (for example inside a hollow brain)
+	approach: { x: number, z: number }?, -- open ground by the territory where front-line spawns land (raised or indoor flags use this)
 }
 
 export type Territory = {
@@ -54,9 +55,9 @@ Territories.list = {
 		-- (reached from the two spiral-staircase towers by covered corridors). One flag on top of each tower, one in the
 		-- throne room.
 		flags = {
-			{ name = "Left Tower", x = -75, z = 0, y = 60, size = 14, pole = 9, beam = 22 },
-			{ name = "Right Tower", x = 75, z = 0, y = 60, size = 14, pole = 9, beam = 22 },
-			{ name = "Throne Room", x = 0, z = 0, y = 26, size = 22, pole = 10, beam = 14 },
+			{ name = "Left Tower", x = -75, z = 0, y = 60, size = 14, pole = 9, beam = 22, approach = { x = -75, z = 68 } },
+			{ name = "Right Tower", x = 75, z = 0, y = 60, size = 14, pole = 9, beam = 22, approach = { x = 75, z = 68 } },
+			{ name = "Throne Room", x = 0, z = 0, y = 26, size = 22, pole = 10, beam = 14, approach = { x = 0, z = 80 } },
 		},
 	},
 	{
@@ -67,8 +68,8 @@ Territories.list = {
 		z = -70,
 		-- A deep pink-rock ravine with a rope bridge; a flag on top of each cliff; a hollow heart on the bridge.
 		flags = {
-			{ name = "North Cliff", x = 215, z = -112, y = 24, size = 20, pole = 14, beam = 30 },
-			{ name = "South Cliff", x = 215, z = -28, y = 24, size = 20, pole = 14, beam = 30 },
+			{ name = "North Cliff", x = 215, z = -112, y = 24, size = 20, pole = 14, beam = 30, approach = { x = 100, z = -112 } },
+			{ name = "South Cliff", x = 215, z = -28, y = 24, size = 20, pole = 14, beam = 30, approach = { x = 100, z = -28 } },
 		},
 	},
 	{
@@ -79,8 +80,8 @@ Territories.list = {
 		z = 45,
 		-- A striped lighthouse on a rocky island, spiral stairs inside, and a giant golden padlock for a lamp room.
 		flags = {
-			{ name = "Lighthouse Base", x = -148, z = 45, y = 12, size = 16, pole = 12, beam = 30 },
-			{ name = "Lighthouse Top", x = -165, z = 45, y = 84, size = 14, pole = 9, beam = 16 },
+			{ name = "Lighthouse Base", x = -148, z = 45, y = 12, size = 16, pole = 12, beam = 30, approach = { x = -98, z = 45 } },
+			{ name = "Lighthouse Top", x = -165, z = 45, y = 84, size = 14, pole = 9, beam = 16, approach = { x = -98, z = 45 } },
 		},
 	},
 	{
@@ -91,7 +92,7 @@ Territories.list = {
 		z = -170,
 		-- A blocky village of enterable houses and a giant grey NPC statue climbed by scaffolding. Flag on its head.
 		flags = {
-			{ name = "Statue Head", x = -100, z = -190, y = 84, size = 14, pole = 9, beam = 20 },
+			{ name = "Statue Head", x = -100, z = -190, y = 84, size = 14, pole = 9, beam = 20, approach = { x = -100, z = -98 } },
 		},
 	},
 	{
@@ -102,7 +103,7 @@ Territories.list = {
 		z = 190,
 		-- A foggy green swamp and a giant HOLLOW pink brain. Flag in the middle of its fleshy tunnels.
 		flags = {
-			{ name = "Brain Core", x = -110, z = 190, y = 0, size = 18, pole = 9, beam = 12, noSpawn = true },
+			{ name = "Brain Core", x = -110, z = 190, y = 0, size = 18, pole = 9, beam = 12, noSpawn = true, approach = { x = -110, z = 140 } },
 		},
 	},
 	{
@@ -113,7 +114,7 @@ Territories.list = {
 		z = 190,
 		-- A red canyon with a lava river, rock jumps up to a giant frying pan, and the flag in the yolk.
 		flags = {
-			{ name = "The Yolk", x = 120, z = 190, y = 18, size = 22, pole = 12, beam = 26 },
+			{ name = "The Yolk", x = 120, z = 190, y = 18, size = 22, pole = 12, beam = 26, approach = { x = 88, z = 112 } },
 		},
 	},
 } :: { Territory }

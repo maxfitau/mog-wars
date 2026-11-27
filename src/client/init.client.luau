@@ -4,15 +4,27 @@
 local Controllers = script:WaitForChild("Controllers")
 local Features = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Features"))
 
-local order = { "CaptureHud", "PointsHud", "WarHud", "ShoveController", "MogOffController", "RankHud", "BoxHud", "UnitsHud", "RewardsHud", "TrainingHud", "ShopHud", "CombatController", "KillFeed", "ResultsHud" }
-if Features.seasons then
-	table.insert(order, "SeasonHud") -- switched off at launch
+-- Only the screens for switched-on features are loaded (see src/shared/Features.luau). The HUD is three things:
+-- aura and rank (top left), the war timer and team scores with the capture bar (top centre), and the shove button
+-- (bottom right). The shop and the daily reward are the only other screens.
+local order = { "AuraHud", "WarHud", "CaptureHud", "ShoveController", "PopupController", "ResultsHud", "TutorialHint", "SignFader" }
+local function add(name: string, on: boolean)
+	if on then
+		table.insert(order, name)
+	end
 end
-table.insert(order, "PopupController")
-table.insert(order, "AssetCheckController")
-table.insert(order, "TravelHud")
-table.insert(order, "TutorialHint")
-table.insert(order, "RevealController") -- last: it shows each screen only once the player has reached it
+add("ShopHud", Features.cosmeticShop)
+add("RewardsHud", Features.dailyStreak)
+add("CombatController", Features.combat)
+add("KillFeed", Features.combat)
+add("MogOffController", Features.mogOffs)
+add("BoxHud", Features.boxes)
+add("UnitsHud", Features.units)
+add("TrainingHud", Features.trainingIsland)
+add("TravelHud", Features.trainingIsland)
+add("SeasonHud", Features.seasons)
+add("AssetCheckController", true)
+add("RevealController", Features.discoveryCards) -- last: it shows each screen only once the player has reached it
 
 -- Each controller is loaded, initialised and started on its own, so one error does not stop the others;
 -- look for "[mog-wars] FAILED" in the Output window.

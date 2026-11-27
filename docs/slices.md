@@ -339,3 +339,8 @@ Terrain island (sand rim, grass, hills, dirt paths, water), bright lighting, rea
 Speed 22/55 on War Island, speed pads, dash, launch pads, AURA RUSH; 6-minute wars with overtime (all aura x2), flag capture in 4/6/8 seconds with a team bonus; free pickups (Protein Shake, Aura Refill, Main Character Mode); +1/+2/+10/+5/+25 aura pop-ups with a combo, streak banners, coins to the counter, screen punch; a 5-second results screen with MVPs. Combat renamed and restyled: aura blasts, Flex Blast cone, Side-Eye beam, ego and aura charge, REDUCED TO NPC.
 **Test:** `tests/Pace.test.luau`, `tests/CombatRules.test.luau`; see `docs/PLAYTEST.md`, "Combat and pace".
 **Done when:** a Gold flag takes about 4 seconds, the last minute is OVERTIME, no pop-up covers the crosshair, and no old placeholder combat wording is left anywhere.
+
+## Slice 29: The simple game
+One sentence: run to a flag, stand on it to win it for your team, and your aura goes up; get the most aura to go from NPC to Mog God. Everything else is switched off behind flags in `src/shared/Features.luau` (combat, mog-offs, Training Island, boxes, units, pickups, dash, discovery cards, overtime, seasons, prestige, arena). Ranks are earned by total aura (save version 11). The HUD is three things. Shove is the only way to fight (BONK!, 1.5 s cooldown, bots shove too). New territory layouts with interiors, secrets and pathfinding bots.
+**Test:** `tests/Features.test.luau`, `tests/RankRules.test.luau`, `tests/PlayerData.test.luau`, `tests/Territories.test.luau`; see `docs/PLAYTEST.md`.
+**Done when:** a new player sees only the three HUD pieces and an arrow, captures a Gold flag in about 4 seconds, and every switched-off feature is invisible.

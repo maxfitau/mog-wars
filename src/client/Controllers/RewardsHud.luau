@@ -1,5 +1,5 @@
 --!strict
--- Daily box and barracks panel, bottom left. Display only: the server owns the clock and the data and
+-- The daily reward: a small button that appears (top right, under the Shop button) only while a reward is waiting. Display only: the server owns the clock and the data and
 -- mirrors DailyReady, DailyDay and BarracksPending onto the player. The buttons just ask.
 
 local Players = game:GetService("Players")
@@ -19,7 +19,7 @@ local toast: TextLabel
 local toastUntil = 0
 
 local MESSAGES: { [string]: string } = {
-	already_claimed = "Come back tomorrow for the next box!",
+	already_claimed = "Come back tomorrow for the next reward!",
 	boxes_full = "Open some boxes first.",
 	nothing_to_collect = "Nothing in the barracks yet.",
 	not_loaded = "Still loading your data.",
@@ -35,18 +35,10 @@ end
 local function update()
 	local ready = attr("DailyReady", false) == true
 	local day = attr("DailyDay", 1)
-	local tier = Config.dailyStreak.rewards[day]
-	local tierName = if tier and Config.boxes.tiers[tier] then Config.boxes.tiers[tier].displayName else "box"
-	if ready then
-		dailyButton.Text = ("Daily box: day %d (%s)"):format(day, tierName)
-		dailyButton.BackgroundColor3 = Color3.fromRGB(70, 180, 100)
-	else
-		dailyButton.Text = ("Claimed! Tomorrow: day %d"):format(day)
-		dailyButton.BackgroundColor3 = Color3.fromRGB(90, 90, 100)
-	end
-	local pending = attr("BarracksPending", 0)
-	barracksButton.Text = ("Barracks: +%d points"):format(pending)
-	barracksButton.BackgroundColor3 = if pending > 0 then Color3.fromRGB(190, 130, 50) else Color3.fromRGB(90, 90, 100)
+	local reward = Config.dailyStreak.auraRewards[day] or 0
+	dailyButton.Visible = ready -- nothing on screen once it has been claimed
+	dailyButton.Text = ("Daily reward! +%d aura"):format(reward)
+	dailyButton.BackgroundColor3 = Color3.fromRGB(70, 180, 100)
 	toast.Visible = Workspace:GetServerTimeNow() < toastUntil
 end
 
@@ -64,9 +56,9 @@ function RewardsHud.init()
 	local function makeButton(offset: number): TextButton
 		local button = Instance.new("TextButton")
 		button.Text = "" -- never show Roblox's default placeholder text
-		button.AnchorPoint = Vector2.new(0, 1)
-		button.Position = UDim2.new(0, 16, 1, offset)
-		button.Size = UDim2.new(0, 250, 0, 38)
+		button.AnchorPoint = Vector2.new(1, 0)
+		button.Position = UDim2.new(1, -16, 0, offset)
+		button.Size = UDim2.new(0, 250, 0, 40)
 		button.TextColor3 = Color3.new(1, 1, 1)
 		button.Font = Enum.Font.GothamBold
 		button.TextScaled = true
@@ -75,9 +67,9 @@ function RewardsHud.init()
 		corner.Parent = button
 		return button
 	end
-	dailyButton = makeButton(-62)
-	barracksButton = makeButton(-16)
-	barracksButton.Visible = Features.barracks -- switched off at launch
+	dailyButton = makeButton(56)
+	barracksButton = makeButton(100)
+	barracksButton.Visible = false -- barracks are switched off
 	dailyButton.Activated:Connect(function()
 		claim:FireServer()
 	end)
@@ -104,8 +96,7 @@ function RewardsHud.init()
 	result.OnClientEvent:Connect(function(ok: any, reason: any, action: any, detail: any, amount: any)
 		if ok == true then
 			if action == "daily" then
-				local tier = Config.boxes.tiers[tostring(detail)]
-				toast.Text = ("Day %d: you got a %s!"):format(if type(amount) == "number" then amount else 1, if tier then tier.displayName else "box")
+				toast.Text = ("Day %d: +%s aura!"):format(if type(amount) == "number" then amount else 1, tostring(detail))
 			else
 				toast.Text = ("Collected %d Mog Points from the barracks!"):format(if type(amount) == "number" then amount else 0)
 			end

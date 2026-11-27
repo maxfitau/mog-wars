@@ -101,10 +101,11 @@ function WarHud.init()
 	gui.ResetOnSpawn = false
 	gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
 
-	-- top left, to the right of Roblox's own buttons and above the chat: one slim row, so it never covers anything else
+	-- top centre: one slim row (timer and the four team scores), with the capture bar just below it
 	local frame = Instance.new("Frame")
-	frame.Position = UDim2.new(0, 190, 0, 4)
-	frame.Size = UDim2.new(0, 480, 0, 54)
+	frame.AnchorPoint = Vector2.new(0.5, 0)
+	frame.Position = UDim2.new(0.5, 0, 0, 6)
+	frame.Size = UDim2.new(0, 440, 0, 54)
 	frame.BackgroundColor3 = UiTheme.panel
 	frame.BackgroundTransparency = 0.1
 	frame.Parent = gui

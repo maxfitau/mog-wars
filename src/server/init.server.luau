@@ -5,7 +5,28 @@
 local Systems = script:WaitForChild("Systems")
 
 -- Order matters: factions create the Teams first, then the map builds matching spawns, then captures start.
-local order = { "DataService", "PopupSystem", "FriendService", "FactionSystem", "PlaceholderMap", "BotService", "CaptureSystem", "SpawnSystem", "ShoveSystem", "MogOffSystem", "MovementSystem", "CombatSystem", "PickupSystem", "RankSystem", "BoxSystem", "UnitSystem", "RewardsSystem", "SeasonService", "TrainingSystem", "ShopSystem", "TravelSystem", "TerritorySystem", "AssetCheckSystem", "WarSystem" }
+local Features = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Features"))
+
+-- Only the systems for switched-on features are loaded (see src/shared/Features.luau).
+local order = { "DataService", "PopupSystem", "FriendService", "FactionSystem", "PlaceholderMap", "BotService", "CaptureSystem", "SpawnSystem", "ShoveSystem", "MovementSystem", "RankVisuals", "StashSystem" }
+local function add(name: string, on: boolean)
+	if on then
+		table.insert(order, name)
+	end
+end
+add("MogOffSystem", Features.mogOffs)
+add("CombatSystem", Features.combat)
+add("PickupSystem", Features.pickups)
+add("BoxSystem", Features.boxes)
+add("UnitSystem", Features.units)
+add("RewardsSystem", Features.dailyStreak)
+add("SeasonService", true) -- guarded inside by Features.seasons
+add("TrainingSystem", Features.trainingIsland)
+add("ShopSystem", Features.cosmeticShop)
+add("TravelSystem", Features.trainingIsland)
+add("TerritorySystem", true)
+add("AssetCheckSystem", true)
+add("WarSystem", true)
 
 type System = { init: () -> (), start: () -> () }
 

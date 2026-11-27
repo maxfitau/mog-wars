@@ -12,6 +12,7 @@ local Config = require(Shared:WaitForChild("EconomyConfig"))
 local FactionRules = require(Shared:WaitForChild("FactionRules"))
 local WarRules = require(Shared:WaitForChild("WarRules"))
 local Pace = require(Shared:WaitForChild("Pace"))
+local Features = require(Shared:WaitForChild("Features"))
 local Stats = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("Stats"))
 local BotService = require(script.Parent:WaitForChild("BotService"))
 local CaptureSystem = require(script.Parent:WaitForChild("CaptureSystem"))
@@ -86,7 +87,7 @@ local function finishWar()
 				entry.mogs += tally.mogs
 				entry.flags += tally.flags
 				entry.aura += tally.aura
-				local score = tally.mogs * Pace.results.mvpPerMog + tally.flags * Pace.results.mvpPerFlag + tally.assists * Pace.results.mvpPerAssist
+				local score = tally.aura * Pace.results.mvpPerAura + tally.mogs * Pace.results.mvpPerMog + tally.flags * Pace.results.mvpPerFlag + tally.assists * Pace.results.mvpPerAssist
 				if score > bestScore then
 					bestScore = score
 					entry.mvp = player.DisplayName
@@ -150,7 +151,7 @@ function WarSystem.start()
 			task.wait(0.5)
 			if phase == "War" then
 				publishScores()
-				local overtime = endsAt - Workspace:GetServerTimeNow() <= Pace.overtime.seconds -- the last 60 seconds: all aura x2
+				local overtime = Features.overtime and endsAt - Workspace:GetServerTimeNow() <= Pace.overtime.seconds -- the last 60 seconds: all aura x2
 				if Workspace:GetAttribute("Overtime") ~= overtime then
 					Workspace:SetAttribute("Overtime", overtime)
 				end

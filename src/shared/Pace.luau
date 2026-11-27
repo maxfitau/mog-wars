@@ -49,9 +49,15 @@ Pace.pickups = {
 	},
 }
 
+Pace.stash = {
+	aura = 25, -- a free Aura Stash in a territory's secret spot gives this much aura ...
+	cooldownSeconds = 60, -- ... once a minute per player
+}
+
 Pace.results = {
 	seconds = 5, -- the results screen (the wait between wars is the same length)
-	mvpPerMog = 3, -- MVP score: this per mog ...
+	mvpPerAura = 0.1, -- MVP score: this per aura earned this war ...
+	mvpPerMog = 3, -- ... this per mog (combat only) ...
 	mvpPerFlag = 5, -- ... this per flag captured ...
 	mvpPerAssist = 1.5, -- ... and this per assist
 }

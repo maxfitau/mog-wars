@@ -122,7 +122,10 @@ local function load(player: Player)
 	end
 	profiles[player] = profile
 	player:SetAttribute("Points", profile.Data.points)
+	-- a rank already earned is kept; total aura can only raise it
+	profile.Data.rank = math.max(profile.Data.rank, RankRules.rankForAura(Config, profile.Data.aura))
 	player:SetAttribute("Rank", profile.Data.rank)
+	player:SetAttribute("Aura", profile.Data.aura)
 	syncInventory(player, profile.Data :: any)
 	if profile.Data.barracksSince == 0 then
 		profile.Data.barracksSince = os.time() -- the barracks starts building from the first visit
@@ -369,34 +372,49 @@ function DataService.auraMultiplier(player: Player): number
 	return multiplier
 end
 
--- Small aura gains (the +1 ticks) are collected here until they add up to a whole treadmill stride.
+-- Small treadmill-only remainder (only used when Training Island is switched on).
 local auraRemainder: { [Player]: number } = setmetatable({}, { __mode = "k" }) :: any
 
--- Add aura (aura points; 10 aura = one second on a treadmill). Used for captures, hits, mogs, the +1 ticks and the
--- territory trickle: it goes straight into the aura level and is NOT limited by the daily treadmill time.
--- Overtime and Main Character Mode multiply it. Returns the aura shown to the player (after the multiplier), or 0
--- if data is not loaded. At the top aura level the number still pops up but there is nothing left to fill.
+-- Add aura. Aura is your score: it only goes up, and your rank (NPC to Mog God) comes from the total. Used for captures,
+-- the +1 ticks, the territory bonus and trickle, and the daily reward. Overtime and Main Character Mode (both off in
+-- the simple game) can multiply it. Returns the aura shown to the player (after any multiplier), or 0 if data is not
+-- loaded. A new rank is announced with a "rankup" pop-up.
 function DataService.addAura(player: Player, aura: number): number
 	local data = DataService.get(player)
 	if not data or aura ~= aura or aura <= 0 or aura == math.huge then
 		return 0
 	end
 	local shown = math.floor(aura * DataService.auraMultiplier(player) + 0.5)
-	local settings = Config.training
-	if data.trainingLevel >= settings.maxLevel then
-		return shown
+	data.aura += shown
+	player:SetAttribute("Aura", data.aura)
+	local newRank = RankRules.rankForAura(Config, data.aura)
+	if newRank > data.rank then
+		data.rank = newRank
+		player:SetAttribute("Rank", newRank)
+		if DataService.onRankUp then
+			DataService.onRankUp(player, newRank)
+		end
 	end
-	local total = (auraRemainder[player] or 0) + shown
-	local strides = math.floor(total / settings.auraPerStride)
-	auraRemainder[player] = total - strides * settings.auraPerStride
-	if strides >= 1 then
-		local level, progress = TrainingRules.addStrides(data.trainingLevel, data.trainingProgress, strides, settings)
-		data.trainingLevel = level
-		data.trainingProgress = progress
-		syncTraining(player, data)
+	if Features.treadmill then
+		-- (Training Island is off in the simple game; with it on, aura also fills training levels)
+		local settings = Config.training
+		if data.trainingLevel < settings.maxLevel then
+			local total = (auraRemainder[player] or 0) + shown
+			local strides = math.floor(total / settings.auraPerStride)
+			auraRemainder[player] = total - strides * settings.auraPerStride
+			if strides >= 1 then
+				local level, progress = TrainingRules.addStrides(data.trainingLevel, data.trainingProgress, strides, settings)
+				data.trainingLevel = level
+				data.trainingProgress = progress
+				syncTraining(player, data)
+			end
+		end
 	end
 	return shown
 end
+
+-- Something to call when a player earns a new rank (set by PopupSystem wiring in RankVisuals).
+DataService.onRankUp = nil :: ((Player, number) -> ())?
 
 -- Wait (up to `seconds`) for a player's data to finish loading. Returns the data or nil.
 function DataService.waitFor(player: Player, seconds: number): PlayerData.Data?
@@ -501,19 +519,19 @@ function DataService.claimDaily(player: Player): (boolean, string, string, numbe
 		return false, "not_loaded", "", 0
 	end
 	local today = PlayerData.dayNumber(os.time())
-	local ok, reason, day = StreakRules.claim(data.streakDay, data.lastClaimDay, today, #Config.dailyStreak.rewards)
+	local ok, reason, day = StreakRules.claim(data.streakDay, data.lastClaimDay, today, #Config.dailyStreak.auraRewards)
 	if not ok then
 		return false, reason or "bad_input", "", 0
 	end
-	local tier = Config.dailyStreak.rewards[day]
-	if tier == nil or Config.boxes.tiers[tier] == nil or not PlayerData.addBox(data, tier) then
-		return false, "boxes_full", "", 0 -- nothing has changed yet, so the claim is still available
+	local reward = Config.dailyStreak.auraRewards[day]
+	if reward == nil then
+		return false, "bad_input", "", 0
 	end
 	data.streakDay = day
 	data.lastClaimDay = today
-	syncInventory(player, data)
 	syncRewards(player, data)
-	return true, "", tier, day
+	DataService.addAura(player, reward)
+	return true, "", tostring(reward), day
 end
 
 -- Collect the barracks income. All or nothing. Returns ok, a stable reason and the points paid.

@@ -1,3 +1,5 @@
+> **The simple game (current):** aura is the only number. Ranks come from total aura (`EconomyConfig.ranks`, cumulative 400 / 1,300 / 3,200 / 7,000 / 19,000 / 50,000). The old Mog Points ladder, boxes, units and barracks below are switched off (see `src/shared/Features.luau`), and `tools/pacing.py` still simulates that old ladder, so ignore its output until it is rewritten for aura. Tune ranks from real play: note how much aura an engaged player earns in a war.
+
 # Mog Wars economy
 
 All numbers live in `src/shared/EconomyConfig.luau`. This file explains why. To re-check pacing after any

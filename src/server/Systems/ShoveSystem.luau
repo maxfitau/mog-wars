@@ -15,6 +15,7 @@ local Config = require(Shared:WaitForChild("EconomyConfig"))
 local ShoveRules = require(Shared:WaitForChild("ShoveRules"))
 local BotService = require(script.Parent:WaitForChild("BotService"))
 local CaptureSystem = require(script.Parent:WaitForChild("CaptureSystem"))
+local PopupSystem = require(script.Parent:WaitForChild("PopupSystem"))
 
 local ShoveSystem = {}
 
@@ -87,6 +88,7 @@ local function handle(player: Player, knockbackRemote: RemoteEvent)
 		local bx, bz = ShoveRules.direction(origin.X, origin.Z, targetBot.root.Position.X, targetBot.root.Position.Z)
 		BotService.weaken(targetBot, now + Config.shove.penaltySeconds)
 		BotService.knockback(targetBot, bx, bz, Config.shove.knockbackStuds)
+		PopupSystem.send(player, "bonk", 1, "")
 		return -- no contribution for shoving a bot
 	end
 	local target = if targetId then byId[targetId] else nil
@@ -101,7 +103,59 @@ local function handle(player: Player, knockbackRemote: RemoteEvent)
 
 	local dx, dz = ShoveRules.direction(origin.X, origin.Z, targetRoot.Position.X, targetRoot.Position.Z)
 	knockbackRemote:FireClient(target, dx, dz, Config.shove.knockbackStuds)
+	PopupSystem.send(player, "bonk", 1, "") -- BONK! for the shover ...
+	PopupSystem.send(target, "bonk", 2, "") -- ... and for whoever got bonked
 	CaptureSystem.creditShove(player, target)
+end
+
+local botNextShove: { [number]: number } = {}
+
+-- Bots shove too: now and then, a bot with an enemy close by gives a BONK (never more often than the cooldown).
+local function botShoves(knockbackRemote: RemoteEvent)
+	local now = Workspace:GetServerTimeNow()
+	if Workspace:GetAttribute("WarPhase") ~= "War" then
+		return
+	end
+	for _, bot in BotService.list() do
+		if now >= (botNextShove[bot.id] or 0) and bot.humanoid.WalkSpeed > 0 then
+			local best: Player? = nil
+			local bestBot: BotService.Bot? = nil
+			local bestDistance = Config.shove.range * 0.9
+			for _, other in Players:GetPlayers() do
+				local root = rootOf(other)
+				if root and other:GetAttribute("Faction") ~= bot.faction and type(other:GetAttribute("Faction")) == "number" then
+					local distance = (root.Position - bot.root.Position).Magnitude
+					if distance < bestDistance then
+						best, bestBot, bestDistance = other, nil, distance
+					end
+				end
+			end
+			for _, other in BotService.list() do
+				if other.faction ~= bot.faction then
+					local distance = (other.root.Position - bot.root.Position).Magnitude
+					if distance < bestDistance then
+						best, bestBot, bestDistance = nil, other, distance
+					end
+				end
+			end
+			if best or bestBot then
+				botNextShove[bot.id] = now + Config.shove.cooldownSeconds * (1.5 + math.random() * 2)
+				if best then
+					local root = rootOf(best)
+					if root then
+						local dx, dz = ShoveRules.direction(bot.root.Position.X, bot.root.Position.Z, root.Position.X, root.Position.Z)
+						best:SetAttribute("PushPenaltyUntil", now + Config.shove.penaltySeconds)
+						knockbackRemote:FireClient(best, dx, dz, Config.shove.knockbackStuds)
+						PopupSystem.send(best, "bonk", 2, "")
+					end
+				elseif bestBot then
+					local dx, dz = ShoveRules.direction(bot.root.Position.X, bot.root.Position.Z, bestBot.root.Position.X, bestBot.root.Position.Z)
+					BotService.weaken(bestBot, now + Config.shove.penaltySeconds)
+					BotService.knockback(bestBot, dx, dz, Config.shove.knockbackStuds)
+				end
+			end
+		end
+	end
 end
 
 function ShoveSystem.init()
@@ -129,6 +183,17 @@ function ShoveSystem.init()
 	end)
 end
 
-function ShoveSystem.start() end
+function ShoveSystem.start()
+	local remote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("ShoveKnockback") :: RemoteEvent
+	task.spawn(function()
+		while true do
+			task.wait(0.4)
+			local ok, err = pcall(botShoves, remote)
+			if not ok then
+				warn("[mog-wars] bot shove error: " .. tostring(err))
+			end
+		end
+	end)
+end
 
 return ShoveSystem

@@ -22,8 +22,10 @@ end
 -- every ground flag, with an owner taken from `owners` (keyed by the flag's part name)
 local ground = {}
 for _, entry in Territories.allFlags() do
-	if entry.flag.y <= 3 then
-		table.insert(ground, { name = Territories.partName(entry.territory, entry.index), flag = entry.flag })
+	-- front-line spawns use the flag's open-ground approach point when it has one (raised and indoor flags do)
+	local spot = entry.flag.approach or entry.flag
+	if entry.flag.approach or entry.flag.y <= 3 then
+		table.insert(ground, { name = Territories.partName(entry.territory, entry.index), flag = { x = spot.x, z = spot.z, size = entry.flag.size } })
 	end
 end
 

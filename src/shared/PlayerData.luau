@@ -23,6 +23,7 @@ export type Data = {
 	equipped: { [string]: string }, -- cosmetic slot to the cosmetic id worn there
 	receipts: { [string]: number }, -- Robux purchase ids already applied, with when (never grant twice)
 	weapons: { [string]: boolean }, -- weapons unlocked from boxes (rank unlocks need no entry)
+	aura: number, -- total aura earned, ever. Your rank comes from this and never goes down
 	lifetimeWars: number, -- wars the player took part in (used to reveal screens gradually)
 	lifetimeCaptures: number, -- zone captures the player was paid for
 	season: { week: number, points: { [string]: number }, prevWeek: number, prevPoints: { [string]: number }, claimed: number },
@@ -30,14 +31,14 @@ export type Data = {
 
 local PlayerData = {}
 
-PlayerData.CURRENT_VERSION = 10
+PlayerData.CURRENT_VERSION = 11
 PlayerData.MAX_RECEIPT_ENTRIES = 400
 PlayerData.MAX_UNITS = 1000
 PlayerData.MAX_BOXES_PER_TIER = 1000
 PlayerData.MAX_POINTS = 1_000_000_000 -- far above anything reachable; stops runaway or overflowing values
 
 function PlayerData.template(): Data
-	return { version = PlayerData.CURRENT_VERSION, points = 0, rank = 1, warsToday = 0, lastWarDay = 0, boxes = {}, units = {}, cosmetics = {}, boxDay = 0, boxesToday = 0, streakDay = 0, lastClaimDay = 0, barracksSince = 0, trainingLevel = 0, trainingProgress = 0, trainingDay = 0, trainingToday = 0, equipped = {}, receipts = {}, weapons = {}, lifetimeWars = 0, lifetimeCaptures = 0, season = { week = 0, points = {}, prevWeek = 0, prevPoints = {}, claimed = 0 } }
+	return { version = PlayerData.CURRENT_VERSION, points = 0, rank = 1, warsToday = 0, lastWarDay = 0, boxes = {}, units = {}, cosmetics = {}, boxDay = 0, boxesToday = 0, streakDay = 0, lastClaimDay = 0, barracksSince = 0, trainingLevel = 0, trainingProgress = 0, trainingDay = 0, trainingToday = 0, equipped = {}, receipts = {}, weapons = {}, aura = 0, lifetimeWars = 0, lifetimeCaptures = 0, season = { week = 0, points = {}, prevWeek = 0, prevPoints = {}, claimed = 0 } }
 end
 
 local function isWholeNumber(value: any): boolean
@@ -283,6 +284,10 @@ function PlayerData.migrate(data: any): boolean
 		data.weapons = {}
 		data.version = 10
 	end
+	if data.version == 10 then
+		data.aura = 0 -- ranks are now earned by total aura; a rank already earned is kept
+		data.version = 11
+	end
 	return true
 end
 
@@ -351,6 +356,8 @@ function PlayerData.isValid(data: any): boolean
 		and PlayerData.receiptsValid(data.receipts)
 		and PlayerData.seasonValid(data.season)
 		and PlayerData.cosmeticsValid(data.weapons)
+		and isWholeNumber(data.aura)
+		and data.aura >= 0
 		and isWholeNumber(data.lifetimeWars)
 		and data.lifetimeWars >= 0
 		and isWholeNumber(data.lifetimeCaptures)

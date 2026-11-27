@@ -140,6 +140,15 @@ check("migrate upgrades version 9 and adds an empty weapons table", PlayerData.m
 local weaponPlayer = PlayerData.template()
 check("unlockWeapon records a weapon once", PlayerData.unlockWeapon(weaponPlayer, "sideeye") == true and PlayerData.unlockWeapon(weaponPlayer, "sideeye") == false and weaponPlayer.weapons.sideeye == true)
 
+-- version 11: total aura
+local v10: any = PlayerData.template()
+v10.version = 10
+v10.aura = nil
+check("migrate upgrades version 10 and adds total aura", PlayerData.migrate(v10) and PlayerData.isValid(v10) and v10.aura == 0 and v10.version == 11)
+local auraBad = PlayerData.template()
+auraBad.aura = -3
+check("negative aura is invalid", not PlayerData.isValid(auraBad))
+
 if failures > 0 then
 	error(failures .. " test(s) failed")
 end

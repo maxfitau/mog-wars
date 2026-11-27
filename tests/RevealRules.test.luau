@@ -55,7 +55,7 @@ check("unknown screens are left alone", RevealRules.visible("SomethingElse", 0) 
 check("the mog-off screen is never hidden", RevealRules.screens.MogOffHud == nil)
 
 -- launch switches match the owner's launch list
-check("launch has the war, ranks, boxes, units, treadmill, streak and shop", Features.war and Features.ranks and Features.boxes and Features.units and Features.treadmill and Features.dailyStreak and Features.cosmeticShop)
+check("the simple game has the war, shove, ranks, streak and shop", Features.war and Features.shove and Features.ranks and Features.dailyStreak and Features.cosmeticShop)
 check("seasons and the squad bonus are switched off at launch", not Features.seasons and not Features.squadBonus)
 check("features that are not built are off", not Features.trainingStations and not Features.prestige and not Features.arena)
 

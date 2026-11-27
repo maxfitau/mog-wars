@@ -1,6 +1,7 @@
 --!strict
--- Pure rank rules. Ranks are numbers from 1 (Rookie) up; the config supplies names and costs.
--- Rank-up is all-or-nothing: either the points are spent and the rank rises, or nothing changes.
+-- Pure rank rules. Ranks are numbers from 1 (NPC) up; the config supplies names and aura amounts.
+-- Ranks are EARNED BY TOTAL AURA: each rank's `cost` is the extra aura needed to reach it from the one before, and
+-- the rank rises by itself as aura is earned and never goes down. (The old spend-points rank-up is kept below.)
 
 export type RankEntry = { name: string, cost: number }
 
@@ -42,6 +43,29 @@ function RankRules.totalToReach(config: RankConfig, rank: number): number
 		total += config.ranks[index].cost
 	end
 	return total
+end
+
+-- The rank a player has earned with `aura` total aura (1 = NPC up to the top rank).
+function RankRules.rankForAura(config: RankConfig, aura: number): number
+	if aura ~= aura or aura < 0 then
+		return 1
+	end
+	local rank = 1
+	for index = 2, #config.ranks do
+		if aura >= RankRules.totalToReach(config, index) then
+			rank = index
+		end
+	end
+	return rank
+end
+
+-- For the rank progress bar: the player's rank, the aura where that rank started, and the aura where the next one
+-- starts (nil at the top rank).
+function RankRules.progress(config: RankConfig, aura: number): (number, number, number?)
+	local rank = RankRules.rankForAura(config, aura)
+	local floor = RankRules.totalToReach(config, rank)
+	local ceiling = if rank < #config.ranks then RankRules.totalToReach(config, rank + 1) else nil
+	return rank, floor, ceiling
 end
 
 function RankRules.tryRankUp(config: RankConfig, rank: number, points: number): RankUpResult

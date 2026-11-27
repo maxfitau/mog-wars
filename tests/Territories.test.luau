@@ -29,12 +29,12 @@ check("Locked-In Lighthouse: Diamond, 2 flags", byId.locked_in_lighthouse.tier =
 check("NPC Village: Gold, 1 flag", byId.npc_village.tier == "gold" and #byId.npc_village.flags == 1)
 check("Brainrot Bog: Gold, 1 flag", byId.brainrot_bog.tier == "gold" and #byId.brainrot_bog.flags == 1)
 check("Cooked Canyon: Gold, 1 flag", byId.cooked_canyon.tier == "gold" and #byId.cooked_canyon.flags == 1)
-check("Gigachad Gate flags: both towers and the top of the head", byId.gigachad_gate.flags[1].name == "Left Tower" and byId.gigachad_gate.flags[2].name == "Right Tower" and byId.gigachad_gate.flags[3].name == "Top of the Head" and byId.gigachad_gate.flags[3].y > 20)
+check("Gigachad Gate flags: both tower roofs and the throne room inside the head", byId.gigachad_gate.flags[1].name == "Left Tower" and byId.gigachad_gate.flags[2].name == "Right Tower" and byId.gigachad_gate.flags[3].name == "Throne Room" and byId.gigachad_gate.flags[3].y > 20 and byId.gigachad_gate.flags[1].y > 50)
 check("NPC Village flag is on the statue's head (raised)", byId.npc_village.flags[1].y > 20)
-check("Brainrot Bog flag is in the brain (raised)", byId.brainrot_bog.flags[1].y > 8)
-check("Cooked Canyon flag is in the yolk on the pan (raised)", byId.cooked_canyon.flags[1].y > 5)
+check("Brainrot Bog flag is in the middle of the hollow brain, on the ground", byId.brainrot_bog.flags[1].y == 0 and byId.brainrot_bog.flags[1].noSpawn == true)
+check("Cooked Canyon flag is in the yolk on the pan (raised)", byId.cooked_canyon.flags[1].y > 10)
 check("Rizz Ravine has a flag on each cliff", byId.rizz_ravine.flags[1].name == "North Cliff" and byId.rizz_ravine.flags[2].name == "South Cliff")
-check("Lighthouse has a base flag and a top flag", byId.locked_in_lighthouse.flags[1].y == 0 and byId.locked_in_lighthouse.flags[2].y > 20)
+check("Lighthouse has a base flag and a top flag in the lamp room", byId.locked_in_lighthouse.flags[1].y < 20 and byId.locked_in_lighthouse.flags[2].y > 60)
 check("ten flags in all", #Territories.allFlags() == 10)
 
 -- ---------- rewards ----------
@@ -104,26 +104,15 @@ for i = 1, #all do
 end
 check("no two flags at the same height are closer than 8 studs", apart)
 
-local signsOk = true
-for _, territory in Territories.list do
-	if math.abs(territory.sign.x) > plate or math.abs(territory.sign.z) > plate then
-		signsOk = false
-	end
-end
-check("every territory sign is on the plate", signsOk)
-
-local routesOk = true
-for _, entry in all do
-	if entry.flag.y > 3 then
-		local route = entry.flag.route
-		if not route or #route < 1 then
-			routesOk = false
-			print("a raised flag needs a bot route: " .. entry.flag.name)
+check("one portal at the top edge", #MapLayout.warPortals == 1 and MapLayout.warPortals[1].z < -100 and MapLayout.warPortals[1].x == 0)
+check("every flag has a pole and a beam height set", (function()
+	for _, entry in all do
+		if entry.flag.pole == nil or entry.flag.beam == nil then
+			return false
 		end
 	end
-end
-check("every raised flag has a route for bots", routesOk)
-check("one portal at the top edge", #MapLayout.warPortals == 1 and MapLayout.warPortals[1].z < -100 and MapLayout.warPortals[1].x == 0)
+	return true
+end)())
 check("four corner bases", #MapLayout.bases == 4)
 check("one flag per part name", (function()
 	local seen: { [string]: boolean } = {}

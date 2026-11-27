@@ -1,17 +1,22 @@
 --!strict
--- Press E (or the on-screen button on touch devices) to shove. The client only sends a bare request; the
--- server decides everything. The cooldown label is display only (it reads the server's ShoveReadyAt).
--- Knockback arrives from the server and is applied to this player's own character.
+-- THE shove: one big button bottom right (touch), or press E or click (PC). The client only sends a bare request; the
+-- server decides everything (who, how far, the 1.5 second cooldown). The cooldown shading is display only (it reads
+-- the server's ShoveReadyAt). Knockback and launch pads arrive from the server and are applied to this player's own
+-- character.
 
 local ContextActionService = game:GetService("ContextActionService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
+
+local UiTheme = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("UiTheme"))
 
 local ShoveController = {}
 
-local label: TextLabel
+local button: TextButton
+local shade: Frame
 local request: RemoteEvent
 
 local KNOCKBACK_SPEED_PER_STUD = 3.5 -- tune in playtest
@@ -20,8 +25,17 @@ local KNOCKBACK_LIFT = 25
 local function refresh()
 	local readyAt = Players.LocalPlayer:GetAttribute("ShoveReadyAt")
 	local remaining = if type(readyAt) == "number" then readyAt - Workspace:GetServerTimeNow() else 0
-	label.Text = if remaining > 0 then ("Shove %.1fs"):format(remaining) else "Shove ready (E)"
-	label.TextColor3 = if remaining > 0 then Color3.fromRGB(200, 120, 120) else Color3.fromRGB(120, 220, 140)
+	if remaining > 0 then
+		button.Text = ("%.1f"):format(remaining)
+		shade.Visible = true
+	else
+		button.Text = "SHOVE!"
+		shade.Visible = false
+	end
+end
+
+local function shove()
+	request:FireServer() -- no data: the server decides
 end
 
 function ShoveController.init()
@@ -33,18 +47,53 @@ function ShoveController.init()
 	gui.Name = "ShoveHud"
 	gui.ResetOnSpawn = false
 	gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
-	label = Instance.new("TextLabel")
-	label.Text = "" -- never show Roblox's default placeholder text
-	label.AnchorPoint = Vector2.new(0.5, 1)
-	label.Position = UDim2.new(0.5, 0, 1, -24)
-	label.Size = UDim2.new(0, 190, 0, 34)
-	label.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
-	label.BackgroundTransparency = 0.25
-	label.Font = Enum.Font.GothamBold
-	label.TextScaled = true
-	label.Parent = gui
-	local corner = Instance.new("UICorner")
-	corner.Parent = label
+
+	-- the one big round button, bottom right
+	button = Instance.new("TextButton")
+	button.AnchorPoint = Vector2.new(1, 1)
+	button.Position = UDim2.new(1, -24, 1, -28)
+	button.Size = UDim2.new(0, 132, 0, 132)
+	button.BackgroundColor3 = UiTheme.colors.orange
+	button.Font = UiTheme.font
+	button.TextScaled = true
+	button.TextColor3 = Color3.new(1, 1, 1)
+	button.TextStrokeColor3 = UiTheme.outline
+	button.TextStrokeTransparency = 0
+	button.Text = "SHOVE!"
+	button.Parent = gui
+	UiTheme.round(button, UDim.new(1, 0))
+	local stroke = Instance.new("UIStroke")
+	stroke.Color = Color3.new(1, 1, 1)
+	stroke.Thickness = 5
+	stroke.Parent = button
+	local pad = Instance.new("UIPadding")
+	pad.PaddingLeft = UDim.new(0.14, 0)
+	pad.PaddingRight = UDim.new(0.14, 0)
+	pad.PaddingTop = UDim.new(0.3, 0)
+	pad.PaddingBottom = UDim.new(0.3, 0)
+	pad.Parent = button
+	shade = Instance.new("Frame") -- greys the button out while it recharges
+	shade.Size = UDim2.new(1, 0, 1, 0)
+	shade.BackgroundColor3 = Color3.fromRGB(40, 30, 70)
+	shade.BackgroundTransparency = 0.45
+	shade.Visible = false
+	shade.ZIndex = 2
+	shade.Parent = button
+	UiTheme.round(shade, UDim.new(1, 0))
+	button.Activated:Connect(shove)
+
+	-- E or a click anywhere also shoves (PC)
+	ContextActionService:BindAction("MogWarsShove", function(_, state)
+		if state == Enum.UserInputState.Begin then
+			shove()
+		end
+		return Enum.ContextActionResult.Pass
+	end, false, Enum.KeyCode.E)
+	UserInputService.InputBegan:Connect(function(input, processed)
+		if not processed and input.UserInputType == Enum.UserInputType.MouseButton1 then
+			shove()
+		end
+	end)
 
 	knockback.OnClientEvent:Connect(function(dx: any, dz: any, studs: any)
 		if type(dx) ~= "number" or type(dz) ~= "number" or type(studs) ~= "number" then
@@ -57,16 +106,19 @@ function ShoveController.init()
 			root.AssemblyLinearVelocity = Vector3.new(dx * speed, KNOCKBACK_LIFT, dz * speed)
 		end
 	end)
+
+	-- jump pads and launch pads throw you (the server sends the throw)
+	local launch = remotes:WaitForChild("WorldLaunch") :: RemoteEvent
+	launch.OnClientEvent:Connect(function(velocity: any)
+		local character = Players.LocalPlayer.Character
+		local root = character and character:FindFirstChild("HumanoidRootPart")
+		if root and root:IsA("BasePart") and typeof(velocity) == "Vector3" and velocity.Magnitude < 400 then
+			root.AssemblyLinearVelocity = velocity
+		end
+	end)
 end
 
 function ShoveController.start()
-	ContextActionService:BindAction("Shove", function(_name, state)
-		if state == Enum.UserInputState.Begin then
-			request:FireServer()
-		end
-		return Enum.ContextActionResult.Sink
-	end, true, Enum.KeyCode.E)
-	ContextActionService:SetTitle("Shove", "Shove")
 	RunService.RenderStepped:Connect(refresh)
 end
 

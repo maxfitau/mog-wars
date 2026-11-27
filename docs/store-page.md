@@ -1,6 +1,6 @@
 # Store page draft
 
-> A draft written before `DESIGN.md` was available and before the game is built (see `docs/design-reconciliation.md`). **Only advertise what is built and tested at
+> A draft. The description now matches the launch scope in `src/shared/Features.luau`; see `docs/LAUNCH.md` for the truthful feature list and checks. **Only advertise what is built and tested at
 > launch**: trim the description to match. Everything must be honest (no promises of free items or Robux, no
 > "like <game>"). Images must be your own work or properly licensed; I can only write briefs, not make images.
 > Specs (confirmed 2026-11-26 from Roblox docs): icon is square, at least 512 x 512; thumbnails are 16:9,
@@ -44,29 +44,34 @@ Use real in-game screenshots (or art faithful to the game). No fake buttons, arr
 Tips: faces and bright colours draw clicks; keep the focal point in the centre; make it readable at phone size;
 show the real game so players are not misled.
 
-## Store description (draft)
+## Store description (draft for the launch scope)
+
+> Only usable once every feature below has been tested in Studio (see `docs/LAUNCH.md`). It lists only what
+> is switched on at launch. Seasons, the squad bonus, friend placement and barracks are built but off, so
+> they are not mentioned. No update promises.
 
 > **Fight for the map. Out-aura your rivals.**
 >
-> Join one of four factions and battle for control of the zones. Stand in a zone to fill the capture bar, team
-> up with friends to capture it faster, and shove rivals out of your way. When two rivals meet, a quick 5-second
-> tapping duel decides who stands tall: the mog-off!
+> Pick up the fight in a faction war. Run to a glowing zone, stand in it and watch the capture bar fill. Rivals
+> push it back, so shove them out of the way. When two rivals meet, a quick 5-second tapping duel decides who stands
+> tall: the mog-off!
 >
 > **What you can do**
-> - Capture zones and earn Mog Points based on how much you helped
+> - Capture zones with your faction and earn Mog Points for helping
 > - Rank up from NPC all the way to Mog God
-> - Open earned boxes for points, units and cosmetics (odds are shown before you open)
-> - Use a tank to capture faster or ride a horse to move faster for one war
-> - Come back each day for streak rewards and collect barracks points while you were away
+> - Open earned Gold, Diamond and Ultra boxes for points, units and cosmetics (the odds are shown before you open)
+> - Deploy a tank to capture faster in a zone, or ride a horse to move faster, for one war
+> - Train on the treadmill to raise your aura power
+> - Come back each day for the daily box and keep your streak going
 >
-> **Fair play:** everything that changes power is earned in the game. Optional purchases are cosmetic only.
+> **Fair play:** everything that changes how strong you are is earned in the game. Optional purchases are cosmetic
+> only (trails, auras and titles).
 >
-> Short wars, easy to learn, made for playing with friends. Updates and new zones are planned. [Remove any
-> line that is not true when you publish.]
+> Short wars, easy to learn, made for playing with friends.
 
-Rules for the final text: remove features that are not shipped; do not promise updates you cannot deliver; do
-not mention "free Robux", "free items" or "codes" unless true; do not name other games; keep the line about
-optional purchases if the shop exists.
+Rules for the final text: remove any line that is not true when you publish; do not promise updates you cannot deliver;
+do not mention "free Robux", "free items" or "codes"; do not name other games; keep the line about optional purchases
+because the shop exists.
 
 ## Before you upload
 

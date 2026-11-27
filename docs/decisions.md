@@ -87,3 +87,6 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 81 | Barracks is switched off at launch because it is not in the launch list | Assumption: flagged for the owner (design-reconciliation F1); rank costs were refitted so pacing still holds (casual Chad day 6, Mog God day 45) |
 | 82 | Release order: Update 1 = per-rank training stations, Update 2 = prestige and skill tree, Update 3 = Mog Arena | The owner's change: players reach Sigma within days and need the stations early (supersedes decision 73) |
 | 83 | Screens appear gradually: only the zone bar at first, then after the first capture and the first, second and third finished wars; the server counts lifetime captures and wars in the save | The owner wants the first session simple for a young kid |
+| 84 | The first session shows a hint and an arrow to the nearest zone until the first capture, and zones glow | A new player only sees the zone bar, which only appears inside a zone, so they need to be told where to go |
+| 85 | Zones are switched off until the first war starts | Fix from code review 1: they were live during the first intermission |
+| 86 | docs/LAUNCH.md holds the truthful feature list and checklist status; nothing may be advertised until it has been tested in Studio | The roblox-launch skill's rule |

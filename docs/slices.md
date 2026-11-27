@@ -266,7 +266,8 @@ bought with Mog Points, and no station is for sale.
   bar fill"). After the first capture the points counter and war timer appear; after the first finished war, shove, ranks and
   training; after two wars, boxes and units; after three wars, the daily box and the shop. The server counts captures and wars in
   the save and mirrors a stage to the player. Players who already ranked up see everything.
-**Test:** pure tests in `tests/RevealRules.test.luau`. In Studio: join as a new player and check only the zone bar shows; capture a
+- `TutorialHint` shows "Run to a glowing zone and stand in it!" with an arrow to the nearest zone until the first capture; zones glow.
+**Test:** pure tests in `tests/RevealRules.test.luau` and `tests/HintRules.test.luau`. In Studio: join as a new player and check only the zone bar shows; capture a
 zone and watch the points counter appear; finish wars and watch the rest appear; flip a flag in `Features.luau` and check it
 turns that feature on or off.
 **Done when:** a new player is never shown more than the stage allows, and a switched-off feature does nothing.

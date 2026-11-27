@@ -89,6 +89,7 @@ function PlaceholderMap.start()
 		)
 		zone.CanCollide = false -- players walk straight onto it
 		zone.Transparency = 0.3
+		zone.Material = Enum.Material.Neon -- glows, so a new player can spot it from far away
 		zone:SetAttribute("Value", spec.value)
 		CollectionService:AddTag(zone, "Zone")
 	end

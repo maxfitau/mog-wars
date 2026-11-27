@@ -95,6 +95,7 @@ function WarSystem.init() end
 
 function WarSystem.start()
 	Workspace:SetAttribute("WarWinner", 0)
+	CaptureSystem.setActive(false) -- no captures during the first intermission; the first war switches zones on
 	setPhase("Intermission")
 	task.spawn(function()
 		while true do

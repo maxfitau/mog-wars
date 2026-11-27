@@ -187,6 +187,7 @@ function ShopHud.init()
 				name.Parent = row
 
 				local state = Instance.new("TextLabel")
+				state.Text = "" -- never show Roblox's default placeholder text
 				state.BackgroundTransparency = 1
 				state.Position = UDim2.new(0.46, 0, 0, 0)
 				state.Size = UDim2.new(0.28, 0, 1, 0)
@@ -197,6 +198,7 @@ function ShopHud.init()
 				state.Parent = row
 
 				local button = Instance.new("TextButton")
+				button.Text = "" -- never show Roblox's default placeholder text
 				button.Position = UDim2.new(0.75, 0, 0, 5)
 				button.Size = UDim2.new(0.24, 0, 1, -10)
 				button.TextColor3 = Color3.new(1, 1, 1)
@@ -220,6 +222,7 @@ function ShopHud.init()
 	end
 
 	toast = Instance.new("TextLabel")
+	toast.Text = "" -- never show Roblox's default placeholder text
 	toast.AnchorPoint = Vector2.new(0.5, 0)
 	toast.Position = UDim2.new(0.5, 0, 0.1, 0)
 	toast.Size = UDim2.new(0, 340, 0, 50)

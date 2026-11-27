@@ -48,7 +48,7 @@ function WarHud.init()
 	gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
 
 	local frame = Instance.new("Frame")
-	frame.Position = UDim2.new(0, 16, 0, 16)
+	frame.Position = UDim2.new(0, 16, 0, 76) -- under Mog Points, top left
 	frame.Size = UDim2.new(0, 230, 0, 92)
 	frame.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
 	frame.BackgroundTransparency = 0.25
@@ -57,6 +57,7 @@ function WarHud.init()
 	corner.Parent = frame
 
 	label = Instance.new("TextLabel")
+	label.Text = "War" -- replaced every frame; never leave the default placeholder text
 	label.BackgroundTransparency = 1
 	label.Position = UDim2.new(0, 8, 0, 4)
 	label.Size = UDim2.new(1, -16, 0, 28)
@@ -84,7 +85,14 @@ function WarHud.init()
 end
 
 function WarHud.start()
-	RunService.RenderStepped:Connect(update)
+	local reported = false
+	RunService.RenderStepped:Connect(function()
+		local ok, err = pcall(update)
+		if not ok and not reported then
+			reported = true
+			warn("[mog-wars] WarHud update error: " .. tostring(err))
+		end
+	end)
 end
 
 return WarHud

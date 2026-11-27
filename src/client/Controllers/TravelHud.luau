@@ -62,6 +62,7 @@ function TravelHud.init()
 	end)
 
 	toast = Instance.new("TextLabel")
+	toast.Text = "" -- never show Roblox's default placeholder text
 	toast.AnchorPoint = Vector2.new(0.5, 0)
 	toast.Position = UDim2.new(0.5, 0, 0.18, 0)
 	toast.Size = UDim2.new(0, 360, 0, 60)

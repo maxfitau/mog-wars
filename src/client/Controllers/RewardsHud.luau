@@ -63,6 +63,7 @@ function RewardsHud.init()
 
 	local function makeButton(offset: number): TextButton
 		local button = Instance.new("TextButton")
+		button.Text = "" -- never show Roblox's default placeholder text
 		button.AnchorPoint = Vector2.new(0, 1)
 		button.Position = UDim2.new(0, 16, 1, offset)
 		button.Size = UDim2.new(0, 250, 0, 38)
@@ -85,6 +86,7 @@ function RewardsHud.init()
 	end)
 
 	toast = Instance.new("TextLabel")
+	toast.Text = "" -- never show Roblox's default placeholder text
 	toast.AnchorPoint = Vector2.new(0.5, 0)
 	toast.Position = UDim2.new(0.5, 0, 0.1, 0)
 	toast.Size = UDim2.new(0, 340, 0, 50)

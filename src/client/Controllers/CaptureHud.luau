@@ -92,6 +92,7 @@ function CaptureHud.init()
 	limit.Parent = frame
 
 	title = Instance.new("TextLabel")
+	title.Text = "" -- never show Roblox's default placeholder text
 	title.BackgroundTransparency = 1
 	title.Size = UDim2.new(1, -16, 0, 22)
 	title.Position = UDim2.new(0, 8, 0, 4)
@@ -112,6 +113,7 @@ function CaptureHud.init()
 	fill.Parent = track
 
 	subtitle = Instance.new("TextLabel")
+	subtitle.Text = "" -- never show Roblox's default placeholder text
 	subtitle.BackgroundTransparency = 1
 	subtitle.Size = UDim2.new(1, -16, 0, 16)
 	subtitle.Position = UDim2.new(0, 8, 0, 44)

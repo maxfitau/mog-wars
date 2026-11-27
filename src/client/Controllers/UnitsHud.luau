@@ -104,6 +104,7 @@ function UnitsHud.init()
 		name.Parent = panel
 
 		local count = Instance.new("TextLabel")
+		count.Text = "" -- never show Roblox's default placeholder text
 		count.BackgroundTransparency = 1
 		count.Position = UDim2.new(0.65, 0, 0, top)
 		count.Size = UDim2.new(0.3, 0, 0, 26)
@@ -154,6 +155,7 @@ function UnitsHud.init()
 	end
 
 	toast = Instance.new("TextLabel")
+	toast.Text = "" -- never show Roblox's default placeholder text
 	toast.AnchorPoint = Vector2.new(0.5, 0)
 	toast.Position = UDim2.new(0.5, 0, 0.1, 0)
 	toast.Size = UDim2.new(0, 340, 0, 50)

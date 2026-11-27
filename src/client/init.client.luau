@@ -12,16 +12,32 @@ table.insert(order, "TravelHud")
 table.insert(order, "TutorialHint")
 table.insert(order, "RevealController") -- last: it shows each screen only once the player has reached it
 
-local loaded = {}
+-- Each controller is loaded, initialised and started on its own, so one error does not stop the others;
+-- look for "[mog-wars] FAILED" in the Output window.
+type Controller = { init: () -> (), start: () -> () }
+
+local loaded: { { name: string, controller: Controller } } = {}
 for _, name in order do
-	local controller = require(Controllers:WaitForChild(name)) :: { init: () -> (), start: () -> () }
-	table.insert(loaded, controller)
+	local ok, result = pcall(function()
+		return require(Controllers:WaitForChild(name))
+	end)
+	if ok then
+		table.insert(loaded, { name = name, controller = result :: Controller })
+	else
+		warn(("[mog-wars] FAILED to load %s: %s"):format(name, tostring(result)))
+	end
 end
-for _, controller in loaded do
-	controller.init()
+for _, entry in loaded do
+	local ok, err = pcall(entry.controller.init)
+	if not ok then
+		warn(("[mog-wars] FAILED in %s.init: %s"):format(entry.name, tostring(err)))
+	end
 end
-for _, controller in loaded do
-	controller.start()
+for _, entry in loaded do
+	local ok, err = pcall(entry.controller.start)
+	if not ok then
+		warn(("[mog-wars] FAILED in %s.start: %s"):format(entry.name, tostring(err)))
+	end
 end
 
-print("[mog-wars] client started")
+print(("[mog-wars] client started (%d of %d screens loaded)"):format(#loaded, #order))

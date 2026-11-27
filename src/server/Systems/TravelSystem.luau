@@ -80,7 +80,8 @@ local function travel(player: Player, destination: any): (boolean, string)
 		local island = MapLayout.trainingIsland
 		local x, z = IslandRules.worldPoint(island, island.arrival.x, island.arrival.z)
 		local target = Vector3.new(x, 4, z)
-		(player.Character :: Model):PivotTo(CFrame.lookAt(target, Vector3.new(x, 4, z - 20))) -- facing the treadmills
+		local character = player.Character :: Model
+		character:PivotTo(CFrame.lookAt(target, Vector3.new(x, 4, z - 20))) -- facing the treadmills
 		root.AssemblyLinearVelocity = Vector3.zero
 	elseif not SpawnSystem.sendToWar(player) then
 		return false, "not_ready"

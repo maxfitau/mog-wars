@@ -65,6 +65,15 @@ function PlaceholderMap.start()
 		return
 	end
 
+	-- Studio's Baseplate template adds its own "Baseplate" and "SpawnLocation". They would overlap this map
+	-- and send players to the wrong place, so they are removed from this running game (not from your file).
+	for _, name in { "Baseplate", "SpawnLocation" } do
+		local old = Workspace:FindFirstChild(name)
+		if old then
+			old:Destroy()
+		end
+	end
+
 	local plate = MapLayout.baseplateSize
 	makePart("Baseplate", Vector3.new(plate, 2, plate), Vector3.new(0, -1, 0), Color3.fromRGB(90, 100, 110))
 
@@ -129,6 +138,7 @@ function PlaceholderMap.start()
 	local backX, backZ = at(island.returnPortal.x, island.returnPortal.z)
 	makePortal("Portal_BackToWar", backX, backZ, island.returnPortal.size, Color3.fromRGB(70, 200, 110), "war", "BACK TO WAR")
 	-- The reserved areas (prestige altar, Mog Arena plots) are deliberately left empty.
+	print("[mog-wars] map built: War Island and Training Island")
 end
 
 return PlaceholderMap

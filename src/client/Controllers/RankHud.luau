@@ -60,8 +60,8 @@ function RankHud.init()
 	gui.Parent = player:WaitForChild("PlayerGui")
 
 	local frame = Instance.new("Frame")
-	frame.AnchorPoint = Vector2.new(1, 0)
-	frame.Position = UDim2.new(1, -16, 0, 60)
+	frame.AnchorPoint = Vector2.new(0, 1)
+	frame.Position = UDim2.new(0, 16, 1, -110) -- bottom left, above the daily box (the top right is Roblox's player list)
 	frame.Size = UDim2.new(0, 230, 0, 120)
 	frame.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
 	frame.BackgroundTransparency = 0.25
@@ -70,6 +70,7 @@ function RankHud.init()
 	corner.Parent = frame
 
 	rankLabel = Instance.new("TextLabel")
+	rankLabel.Text = "" -- never show Roblox's default placeholder text
 	rankLabel.BackgroundTransparency = 1
 	rankLabel.Position = UDim2.new(0, 8, 0, 6)
 	rankLabel.Size = UDim2.new(1, -16, 0, 26)
@@ -79,6 +80,7 @@ function RankHud.init()
 	rankLabel.Parent = frame
 
 	nextLabel = Instance.new("TextLabel")
+	nextLabel.Text = "" -- never show Roblox's default placeholder text
 	nextLabel.BackgroundTransparency = 1
 	nextLabel.Position = UDim2.new(0, 8, 0, 36)
 	nextLabel.Size = UDim2.new(1, -16, 0, 20)
@@ -88,6 +90,7 @@ function RankHud.init()
 	nextLabel.Parent = frame
 
 	button = Instance.new("TextButton")
+	button.Text = "" -- never show Roblox's default placeholder text
 	button.Position = UDim2.new(0, 8, 0, 66)
 	button.Size = UDim2.new(1, -16, 0, 44)
 	button.TextColor3 = Color3.new(1, 1, 1)
@@ -101,6 +104,7 @@ function RankHud.init()
 	end)
 
 	toast = Instance.new("TextLabel")
+	toast.Text = "" -- never show Roblox's default placeholder text
 	toast.AnchorPoint = Vector2.new(0.5, 0)
 	toast.Position = UDim2.new(0.5, 0, 0.18, 0)
 	toast.Size = UDim2.new(0, 320, 0, 50)

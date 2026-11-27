@@ -51,7 +51,7 @@ function TrainingHud.init()
 	gui.Parent = player:WaitForChild("PlayerGui")
 
 	local frame = Instance.new("Frame")
-	frame.Position = UDim2.new(0, 16, 0, 116)
+	frame.Position = UDim2.new(0, 16, 0, 176) -- under the war panel, top left
 	frame.Size = UDim2.new(0, 230, 0, 70)
 	frame.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
 	frame.BackgroundTransparency = 0.25
@@ -60,6 +60,7 @@ function TrainingHud.init()
 	corner.Parent = frame
 
 	title = Instance.new("TextLabel")
+	title.Text = "" -- never show Roblox's default placeholder text
 	title.BackgroundTransparency = 1
 	title.Position = UDim2.new(0, 8, 0, 4)
 	title.Size = UDim2.new(1, -16, 0, 22)
@@ -80,6 +81,7 @@ function TrainingHud.init()
 	fill.Parent = track
 
 	info = Instance.new("TextLabel")
+	info.Text = "" -- never show Roblox's default placeholder text
 	info.BackgroundTransparency = 1
 	info.Position = UDim2.new(0, 8, 0, 44)
 	info.Size = UDim2.new(1, -16, 0, 20)

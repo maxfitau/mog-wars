@@ -63,6 +63,7 @@ function MogOffController.init()
 	corner.Parent = panel
 
 	title = Instance.new("TextLabel")
+	title.Text = "" -- never show Roblox's default placeholder text
 	title.BackgroundTransparency = 1
 	title.Position = UDim2.new(0, 8, 0, 8)
 	title.Size = UDim2.new(1, -16, 0, 34)
@@ -72,6 +73,7 @@ function MogOffController.init()
 	title.Parent = panel
 
 	info = Instance.new("TextLabel")
+	info.Text = "" -- never show Roblox's default placeholder text
 	info.BackgroundTransparency = 1
 	info.Position = UDim2.new(0, 8, 0, 46)
 	info.Size = UDim2.new(1, -16, 0, 24)
@@ -97,6 +99,7 @@ function MogOffController.init()
 	end)
 
 	banner = Instance.new("TextLabel")
+	banner.Text = "" -- never show Roblox's default placeholder text
 	banner.AnchorPoint = Vector2.new(0.5, 0)
 	banner.Position = UDim2.new(0.5, 0, 0.25, 0)
 	banner.Size = UDim2.new(0, 320, 0, 54)

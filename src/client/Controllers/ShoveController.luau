@@ -34,6 +34,7 @@ function ShoveController.init()
 	gui.ResetOnSpawn = false
 	gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
 	label = Instance.new("TextLabel")
+	label.Text = "" -- never show Roblox's default placeholder text
 	label.AnchorPoint = Vector2.new(0.5, 1)
 	label.Position = UDim2.new(0.5, 0, 1, -24)
 	label.Size = UDim2.new(0, 190, 0, 34)

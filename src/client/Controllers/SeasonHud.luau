@@ -55,7 +55,7 @@ function SeasonHud.init()
 
 	local frame = Instance.new("Frame")
 	frame.AnchorPoint = Vector2.new(1, 1)
-	frame.Position = UDim2.new(1, -16, 1, -16)
+	frame.Position = UDim2.new(1, -16, 1, -120) -- above the travel button
 	frame.Size = UDim2.new(0, 250, 0, 104)
 	frame.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
 	frame.BackgroundTransparency = 0.25
@@ -64,6 +64,7 @@ function SeasonHud.init()
 	corner.Parent = frame
 
 	title = Instance.new("TextLabel")
+	title.Text = "" -- never show Roblox's default placeholder text
 	title.BackgroundTransparency = 1
 	title.Position = UDim2.new(0, 8, 0, 4)
 	title.Size = UDim2.new(1, -16, 0, 22)
@@ -90,6 +91,7 @@ function SeasonHud.init()
 	end
 
 	mine = Instance.new("TextLabel")
+	mine.Text = "" -- never show Roblox's default placeholder text
 	mine.BackgroundTransparency = 1
 	mine.Position = UDim2.new(0, 8, 0, 66)
 	mine.Size = UDim2.new(1, -16, 0, 32)
@@ -100,6 +102,7 @@ function SeasonHud.init()
 	mine.Parent = frame
 
 	toast = Instance.new("TextLabel")
+	toast.Text = "" -- never show Roblox's default placeholder text
 	toast.AnchorPoint = Vector2.new(0.5, 0)
 	toast.Position = UDim2.new(0.5, 0, 0.1, 0)
 	toast.Size = UDim2.new(0, 380, 0, 56)

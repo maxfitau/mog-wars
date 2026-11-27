@@ -53,20 +53,20 @@ end
 
 -- the front line is the owned flag nearest the centre
 do
-	local zones = zonesOwnedBy({ Flag_npc_village_1 = 1, Flag_brainrot_bog_1 = 1, Flag_cooked_canyon_1 = 2 })
+	local zones = zonesOwnedBy({ Flag_gigachad_gate_1 = 1, Flag_locked_in_lighthouse_1 = 1, Flag_gigachad_gate_2 = 2 })
 	local front = SpawnRules.frontZone(1, zones)
-	check("the front flag is the owned flag nearest the centre", front ~= nil and (front :: SpawnRules.ZoneInfo).z == -105 and (front :: SpawnRules.ZoneInfo).x == 0)
+	check("the front flag is the owned flag nearest the centre", front ~= nil and (front :: SpawnRules.ZoneInfo).z == 0 and (front :: SpawnRules.ZoneInfo).x == -30)
 	check("another faction's flags are not used", SpawnRules.frontZone(3, zones) == nil)
 end
 
 -- the spawn point sits outside the flag on the side facing the base
 do
-	local zones = zonesOwnedBy({ Flag_npc_village_1 = 1 })
+	local zones = zonesOwnedBy({ Flag_gigachad_gate_1 = 1 })
 	local x, z, kind = SpawnRules.spawnPoint(1, zones, base1.x, base1.z, 2) -- slot 2 has no sideways shift
 	check("an owned flag gives a flag spawn", kind == "zone")
-	local dx, dz = x - 0, z - (-105)
-	check("the spawn is a few studs outside the flag edge", math.max(math.abs(dx), math.abs(dz)) - 24 / 2 >= 4)
-	local toBaseX, toBaseZ = base1.x - 0, base1.z - (-105)
+	local dx, dz = x - (-30), z - 0
+	check("the spawn is a few studs outside the flag edge", math.max(math.abs(dx), math.abs(dz)) - 18 / 2 >= 4)
+	local toBaseX, toBaseZ = base1.x - (-30), base1.z - 0
 	check("the spawn is on the side facing the faction base", dx * toBaseX + dz * toBaseZ > 0)
 	check("the spawn is not inside any flag", not insideAnyFlag(x, z))
 end
@@ -94,7 +94,7 @@ end
 
 -- slots spread players out and repeat
 do
-	local zones = zonesOwnedBy({ Flag_npc_village_1 = 1 })
+	local zones = zonesOwnedBy({ Flag_gigachad_gate_1 = 1 })
 	local x0, z0 = SpawnRules.spawnPoint(1, zones, base1.x, base1.z, 0)
 	local x1, z1 = SpawnRules.spawnPoint(1, zones, base1.x, base1.z, 1)
 	local x5, z5 = SpawnRules.spawnPoint(1, zones, base1.x, base1.z, 5)

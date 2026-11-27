@@ -113,3 +113,6 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 106 | One portal at the top edge replaces the four portals by the bases | As in the owner's map description |
 | 107 | Number pop-ups: only the formatter, colour tiers and size scaling are built now (no CRITs or combos yet) | Needed for the rewards; the rest of slice 19 stays planned |
 | 108 | Rank costs raised again (500, 1,150, 2,150, 3,750, 14,000, 34,000) | Territory captures pay more; casual still reaches Chad on day 6 and Mog God on day 41 |
+| 109 | Each territory has one giant landmark built from blocks, balls and ramps, and the flags are on it; raised flags (statue head, brain top, yolk, head top, lighthouse top) are reached by long ramps, and bots follow ramp routes | The owner's request (screenshot not visible to me, so shapes follow the written description) |
+| 110 | NPC Village moved west to x -55 so the Gate's head ramp from the north does not cross it; Gate flags are now both tower bases plus the head top (the old gate flag is gone); "flags on both towers" is at the tower bases, not their tops | Layout needed room for the head ramp; tower tops would need two more ramps. Say if you want tower-top flags |
+| 111 | From now on every playtest instruction says what you are looking for and what counts as a failure | The owner's request |

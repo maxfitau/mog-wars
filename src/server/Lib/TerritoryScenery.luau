@@ -28,95 +28,167 @@ local function decor(part: Part): Part
 	return part
 end
 
--- ---------- Centre: Gigachad Gate, a stone fortress with purple banners ----------
-local function gigachadGate(folder: Folder)
+local function sparkles(folder: Folder, name: string, position: Vector3, color: Color3, rate: number)
+	local emitter = Builder.emitter(name, position, SPARKLES, color, folder)
+	emitter.Rate = rate
+	emitter.Lifetime = NumberRange.new(1, 2)
+	emitter.Speed = NumberRange.new(2, 5)
+	emitter.SpreadAngle = Vector2.new(180, 180)
+	emitter.Size = NumberSequence.new(1.4, 0)
+	emitter.Transparency = NumberSequence.new(0.1, 1)
+	emitter.LightEmission = 0.7
+end
+
+local function steam(folder: Folder, name: string, position: Vector3)
+	local emitter = Builder.emitter(name, position, SMOKE, Color3.fromRGB(245, 245, 245), folder)
+	emitter.Rate = 6
+	emitter.Lifetime = NumberRange.new(3, 4)
+	emitter.Speed = NumberRange.new(3, 5)
+	emitter.EmissionDirection = Enum.NormalId.Top
+	emitter.Size = NumberSequence.new(4, 10)
+	emitter.Transparency = NumberSequence.new(0.5, 1)
+end
+
+-- ---------- Centre: Gigachad Gate. A giant stone face (square jaw, sunglasses); its mouth is the gate ----------
+local function gigachadGate(folder: Folder, territory: Territories.Territory)
+	local cx, cz = territory.x, territory.z
 	local function block(name: string, x: number, y: number, z: number, sx: number, sy: number, sz: number, color: Color3)
-		return solid(Builder.part(name, Vector3.new(sx, sy, sz), Vector3.new(x, y, z), color, folder))
+		return solid(Builder.part(name, Vector3.new(sx, sy, sz), Vector3.new(cx + x, y, cz + z), color, folder))
 	end
-	-- two towers behind the left and right flags
+	local face = Color3.fromRGB(150, 150, 165)
+	-- the head: two jaw blocks with a 14-wide mouth tunnel between them, and the upper head across the top
+	block("JawLeft", -12.5, 10, 0, 11, 20, 40, face)
+	block("JawRight", 12.5, 10, 0, 11, 20, 40, face)
+	block("UpperHead", 0, 27, 0, 36, 14, 40, face) -- its top is 34 high: the flag platform
+	-- the face is on the south side (z = +20): sunglasses, nose, brow and a square chin
+	decor(Builder.part("Sunglasses", Vector3.new(32, 5, 1), Vector3.new(cx, 26, cz + 20.5), Color3.fromRGB(15, 15, 20), folder))
+	decor(Builder.part("GlassesBridge", Vector3.new(4, 1.2, 1.2), Vector3.new(cx, 27, cz + 21), Color3.fromRGB(15, 15, 20), folder))
+	block("Nose", 0, 20, 22, 5, 9, 4, Color3.fromRGB(135, 135, 150))
+	decor(Builder.part("Brow", Vector3.new(34, 2, 2), Vector3.new(cx, 30, cz + 21), Color3.fromRGB(110, 110, 125), folder))
+	decor(Builder.part("MouthDark", Vector3.new(14, 11, 0.4), Vector3.new(cx, 5.5, cz + 20.2), Color3.fromRGB(20, 15, 25), folder))
+	-- two towers beside the head (flags at their bases), each with a purple banner
 	for _, side in { -1, 1 } do
 		block("Tower", side * 30, 14, -14, 10, 28, 10, STONE)
-		decor(Builder.part("Banner", Vector3.new(5, 14, 0.5), Vector3.new(side * 30, 17, -8.6), PURPLE, folder))
+		decor(Builder.part("Banner", Vector3.new(5, 14, 0.5), Vector3.new(cx + side * 30, 17, cz - 8.6), PURPLE, folder))
+		decor(Builder.part("BannerHead", Vector3.new(4, 14, 0.5), Vector3.new(cx + side * 17, 22, cz + 20.4), PURPLE, folder))
 	end
-	-- walls with an opening in the middle of each side, and the gate in the south wall
-	block("WallNorthA", -28, 5, -34, 36, 10, 3, STONE)
-	block("WallNorthB", 28, 5, -34, 36, 10, 3, STONE)
-	block("WallEastA", 46, 5, -22, 3, 10, 24, STONE)
-	block("WallEastB", 46, 5, 25, 3, 10, 30, STONE)
-	block("WallWestA", -46, 5, -22, 3, 10, 24, STONE)
-	block("WallWestB", -46, 5, 25, 3, 10, 30, STONE)
-	block("WallSouthA", -29, 5, 40, 34, 10, 3, STONE)
-	block("WallSouthB", 29, 5, 40, 34, 10, 3, STONE)
-	-- the gate: two pillars and a top beam, with purple banners
-	block("GatePillarLeft", -14, 10, 40, 6, 20, 6, STONE)
-	block("GatePillarRight", 14, 10, 40, 6, 20, 6, STONE)
-	block("GateBeam", 0, 22, 40, 34, 4, 6, STONE)
-	decor(Builder.part("GateBannerLeft", Vector3.new(4, 12, 0.5), Vector3.new(-14, 12, 36.8), PURPLE, folder))
-	decor(Builder.part("GateBannerRight", Vector3.new(4, 12, 0.5), Vector3.new(14, 12, 36.8), PURPLE, folder))
+	-- a long ramp up the back of the head from the north edge of the map
+	Builder.ramp("HeadRamp", Vector3.new(cx, 0, cz - 135), Vector3.new(cx, 34, cz - 22), 10, Color3.fromRGB(165, 165, 180), folder)
 end
 
--- ---------- Inner ring: Rizz Ravine, two cliffs with a rope bridge between ----------
-local function rizzRavine(folder: Folder)
-	decor(Builder.part("RavineFloor", Vector3.new(48, 0.3, 20), Vector3.new(85, 0.15, -15), Color3.fromRGB(35, 28, 40), folder))
-	solid(Builder.part("NorthCliff", Vector3.new(48, 5, 24), Vector3.new(85, 2.5, -37), ROCK, folder))
-	solid(Builder.part("SouthCliff", Vector3.new(48, 5, 24), Vector3.new(85, 2.5, 7), ROCK, folder))
-	Builder.ramp("NorthRamp", Vector3.new(85, 0, -70), Vector3.new(85, 5, -49), 10, ROCK, folder)
-	Builder.ramp("SouthRamp", Vector3.new(85, 0, 43), Vector3.new(85, 5, 19), 10, ROCK, folder)
-	-- the rope bridge: planks and two ropes across the gap
-	solid(Builder.part("BridgePlanks", Vector3.new(6, 0.6, 20), Vector3.new(85, 4.7, -15), Color3.fromRGB(150, 110, 60), folder))
-	decor(Builder.part("RopeLeft", Vector3.new(0.3, 0.3, 20), Vector3.new(82, 7, -15), Color3.fromRGB(200, 180, 130), folder))
-	decor(Builder.part("RopeRight", Vector3.new(0.3, 0.3, 20), Vector3.new(88, 7, -15), Color3.fromRGB(200, 180, 130), folder))
+-- ---------- Inner ring: Rizz Ravine, two cliffs, a rope bridge and a giant pink heart ----------
+local function rizzRavine(folder: Folder, territory: Territories.Territory)
+	local cx, cz = territory.x, territory.z
+	decor(Builder.part("RavineFloor", Vector3.new(48, 0.3, 20), Vector3.new(cx, 0.15, cz), Color3.fromRGB(35, 28, 40), folder))
+	solid(Builder.part("NorthCliff", Vector3.new(48, 5, 24), Vector3.new(cx, 2.5, cz - 22), ROCK, folder))
+	solid(Builder.part("SouthCliff", Vector3.new(48, 5, 24), Vector3.new(cx, 2.5, cz + 22), ROCK, folder))
+	Builder.ramp("NorthRamp", Vector3.new(cx, 0, cz - 55), Vector3.new(cx, 5, cz - 34), 10, ROCK, folder)
+	Builder.ramp("SouthRamp", Vector3.new(cx, 0, cz + 58), Vector3.new(cx, 5, cz + 34), 10, ROCK, folder)
+	solid(Builder.part("BridgePlanks", Vector3.new(6, 0.6, 20), Vector3.new(cx, 4.7, cz), Color3.fromRGB(150, 110, 60), folder))
+	decor(Builder.part("RopeLeft", Vector3.new(0.3, 0.3, 20), Vector3.new(cx - 3, 7, cz), Color3.fromRGB(200, 180, 130), folder))
+	decor(Builder.part("RopeRight", Vector3.new(0.3, 0.3, 20), Vector3.new(cx + 3, 7, cz), Color3.fromRGB(200, 180, 130), folder))
+	-- the giant heart above the middle of the bridge: two balls and a tilted block make the point
+	local pink = Color3.fromRGB(255, 80, 160)
+	local height = 22
+	decor(Builder.ball("HeartLeft", Vector3.new(22, 22, 14), Vector3.new(cx - 8, height + 6, cz), pink, folder))
+	decor(Builder.ball("HeartRight", Vector3.new(22, 22, 14), Vector3.new(cx + 8, height + 6, cz), pink, folder))
+	local point = Builder.part("HeartPoint", Vector3.new(15, 15, 14), Vector3.new(cx, height - 1, cz), pink, folder)
+	point.CFrame = CFrame.new(cx, height - 1, cz) * CFrame.Angles(0, 0, math.rad(45))
+	point.CanCollide = false
+	for index, offset in { { -10, 8 }, { 10, 8 }, { 0, -4 }, { 0, 18 } } do
+		sparkles(folder, "HeartSparkles" .. index, Vector3.new(cx + offset[1], height + offset[2], cz), Color3.fromRGB(255, 190, 235), 14)
+	end
 end
 
--- ---------- Inner ring: Locked-In Lighthouse ----------
+-- ---------- Inner ring: Locked-In Lighthouse. The lamp is a giant golden padlock shining a beam ----------
 local function lighthouse(folder: Folder, territory: Territories.Territory)
-	local top = territory.flags[2].y -- the height of the top platform
+	local top = territory.flags[2].y
 	local stripeHeight = (top - 1.5) / 4
 	for index = 0, 3 do
 		local color = if index % 2 == 0 then Color3.fromRGB(215, 55, 55) else Color3.fromRGB(240, 240, 240)
 		solid(Builder.cylinder("Stripe" .. index, 12, stripeHeight, Vector3.new(territory.x, stripeHeight * (index + 0.5), territory.z), color, folder))
 	end
 	solid(Builder.part("TopPlatform", Vector3.new(22, 1.5, 22), Vector3.new(territory.x, top - 0.75, territory.z), Color3.fromRGB(240, 230, 200), folder))
-	local lamp = Builder.part("Lamp", Vector3.new(4, 4, 4), Vector3.new(territory.x, top + 8, territory.z), Color3.fromRGB(255, 240, 150), folder)
-	lamp.Material = Enum.Material.Neon
-	lamp.CanCollide = false
+	-- the golden padlock: a body, a U-shaped shackle and a keyhole
+	local gold = Color3.fromRGB(255, 200, 40)
+	local lockY = top + 9
+	local body = Builder.part("PadlockBody", Vector3.new(14, 11, 7), Vector3.new(territory.x, lockY, territory.z), gold, folder)
+	body.Material = Enum.Material.Metal
+	body.CanCollide = false
+	for _, side in { -1, 1 } do
+		decor(Builder.cylinder("ShackleSide", 2.4, 8, Vector3.new(territory.x + side * 4.5, lockY + 9, territory.z), gold, folder))
+	end
+	local shackleTop = decor(Builder.cylinder("ShackleTop", 2.4, 12.6, Vector3.new(territory.x, lockY + 13, territory.z), gold, folder))
+	shackleTop.CFrame = CFrame.new(territory.x, lockY + 13, territory.z) -- lies along X, joining the two sides
+	decor(Builder.part("Keyhole", Vector3.new(2.2, 4, 0.4), Vector3.new(territory.x - 0.0, lockY, territory.z + 3.7), Color3.fromRGB(30, 25, 20), folder))
+	-- the beam: a long glowing bar shining east, toward the middle of the map, plus a light
+	local beam = Builder.part("Beam", Vector3.new(5, 5, 110), Vector3.new(territory.x + 55, lockY, territory.z), Color3.fromRGB(255, 245, 160), folder)
+	beam.CFrame = CFrame.lookAt(Vector3.new(territory.x + 55, lockY, territory.z), Vector3.new(territory.x + 120, lockY, territory.z))
+	beam.Material = Enum.Material.Neon
+	beam.Transparency = 0.6
+	beam.CanCollide = false
+	beam.CanQuery = false
 	local light = Instance.new("PointLight")
 	light.Color = Color3.fromRGB(255, 240, 150)
-	light.Range = 40
+	light.Range = 45
 	light.Brightness = 2
-	light.Parent = lamp
-	-- a long ramp up to the platform from the west edge of the map
+	light.Parent = body
 	Builder.ramp("LighthouseRamp", Vector3.new(-155, 0, territory.z), Vector3.new(territory.x - 11, top, territory.z), 10, Color3.fromRGB(190, 170, 140), folder)
 end
 
--- ---------- Outer ring: NPC Village, blocky cube houses and grey blocky villagers ----------
+-- ---------- Outer ring: NPC Village. A giant blocky grey NPC statue, blank face, "..." bubble ----------
 local function npcVillage(folder: Folder, territory: Territories.Territory)
 	local cx, cz = territory.x, territory.z
-	local houses = { { -22, -19 }, { 22, -19 }, { -30, 9 }, { 30, 9 }, { -22, 19 }, { 22, 19 } }
-	for index, offset in houses do
-		local x, z = cx + offset[1], cz + offset[2]
-		local wallColor = if index % 2 == 0 then Color3.fromRGB(195, 160, 120) else Color3.fromRGB(170, 175, 190)
-		solid(Builder.part("House" .. index, Vector3.new(8, 8, 8), Vector3.new(x, 4, z), wallColor, folder))
-		solid(Builder.part("Roof" .. index, Vector3.new(10, 2, 10), Vector3.new(x, 9, z), Color3.fromRGB(125, 75, 65), folder))
-	end
-	-- plain grey blocky villagers (no faces, original look)
-	local villagers = { { -8, 12 }, { 10, -20 }, { -12, -5 }, { 14, 5 }, { 0, 16 } }
-	for index, offset in villagers do
-		local x, z = cx + offset[1], cz + offset[2]
-		decor(Builder.part("VillagerLegs" .. index, Vector3.new(2, 3, 1), Vector3.new(x, 1.5, z), Color3.fromRGB(110, 110, 118), folder))
-		decor(Builder.part("VillagerBody" .. index, Vector3.new(2, 3, 1), Vector3.new(x, 4.5, z), Color3.fromRGB(150, 150, 158), folder))
-		decor(Builder.part("VillagerHead" .. index, Vector3.new(2, 2, 2), Vector3.new(x, 7, z), Color3.fromRGB(185, 185, 192), folder))
-	end
+	local grey = Color3.fromRGB(150, 150, 158)
+	local dark = Color3.fromRGB(110, 110, 118)
+	local top = territory.flags[1].y
+	solid(Builder.part("LegLeft", Vector3.new(6, 10, 6), Vector3.new(cx - 4, 5, cz), dark, folder))
+	solid(Builder.part("LegRight", Vector3.new(6, 10, 6), Vector3.new(cx + 4, 5, cz), dark, folder))
+	solid(Builder.part("Torso", Vector3.new(16, 12, 8), Vector3.new(cx, 16, cz), grey, folder))
+	decor(Builder.part("ArmLeft", Vector3.new(4, 12, 4), Vector3.new(cx - 10, 16, cz), dark, folder))
+	decor(Builder.part("ArmRight", Vector3.new(4, 12, 4), Vector3.new(cx + 10, 16, cz), dark, folder))
+	solid(Builder.part("Head", Vector3.new(12, 10, 12), Vector3.new(cx, 27, cz), Color3.fromRGB(190, 190, 198), folder)) -- a blank face
+	solid(Builder.part("HeadPlatform", Vector3.new(18, 1, 18), Vector3.new(cx, top - 0.5, cz), Color3.fromRGB(170, 170, 180), folder))
+	-- the speech bubble: a white squashed ball beside the head with three dots on it
+	local bubble = Builder.ball("SpeechBubble", Vector3.new(22, 13, 3), Vector3.new(cx + 18, 36, cz + 8), Color3.new(1, 1, 1), folder)
+	bubble.CanCollide = false
+	local gui = Instance.new("SurfaceGui")
+	gui.Face = Enum.NormalId.Front
+	gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+	gui.PixelsPerStud = 40
+	gui.Parent = bubble
+	local dots = Instance.new("TextLabel")
+	dots.Size = UDim2.new(1, 0, 1, 0)
+	dots.BackgroundTransparency = 1
+	dots.TextColor3 = Color3.fromRGB(35, 25, 60)
+	dots.Font = Enum.Font.FredokaOne
+	dots.TextScaled = true
+	dots.Text = "..."
+	dots.Parent = gui
+	decor(Builder.ball("BubbleTail", Vector3.new(4, 4, 2), Vector3.new(cx + 9, 31, cz + 8), Color3.new(1, 1, 1), folder))
+	Builder.ramp("StatueRamp", Vector3.new(cx - 85, 0, cz), Vector3.new(cx - 9, top, cz), 10, Color3.fromRGB(175, 175, 185), folder)
 end
 
--- ---------- Outer ring: Brainrot Bog, a bubbling green swamp with a dead tree ----------
+-- ---------- Outer ring: Brainrot Bog. A giant pink brain half-sunk in bubbling green goo ----------
 local function brainrotBog(folder: Folder, territory: Territories.Territory)
 	local cx, cz = territory.x, territory.z
-	local pool = Builder.cylinder("SwampPool", 56, 0.4, Vector3.new(cx, 0.2, cz), Color3.fromRGB(70, 190, 60), folder)
+	local top = territory.flags[1].y
+	local pool = Builder.cylinder("SwampPool", 64, 0.4, Vector3.new(cx, 0.2, cz), Color3.fromRGB(70, 190, 60), folder)
 	pool.Material = Enum.Material.Neon
 	pool.Transparency = 0.25
 	pool.CanCollide = false
-	local spots = { { 0, 0 }, { -16, 8 }, { 14, -10 }, { 8, 16 }, { -10, -16 }, { 20, 6 } }
+	-- the brain: two big hemispheres with darker folds, mostly under the goo (you can walk through it)
+	local pink = Color3.fromRGB(255, 130, 175)
+	local folds = Color3.fromRGB(235, 95, 150)
+	decor(Builder.ball("BrainLeft", Vector3.new(30, 26, 34), Vector3.new(cx - 8, 3, cz), pink, folder))
+	decor(Builder.ball("BrainRight", Vector3.new(30, 26, 34), Vector3.new(cx + 8, 3, cz), pink, folder))
+	for index, offset in { { -14, -8 }, { -4, 6 }, { 6, -10 }, { 14, 4 }, { 0, -2 } } do
+		decor(Builder.ball("Fold" .. index, Vector3.new(9, 6, 9), Vector3.new(cx + offset[1], 14, cz + offset[2]), folds, folder))
+	end
+	-- a flat pad at the top (where the flag is stuck in the brain) and a ramp up to it
+	solid(Builder.part("BrainPad", Vector3.new(18, 1, 18), Vector3.new(cx, top - 0.5, cz), Color3.fromRGB(215, 85, 140), folder))
+	Builder.ramp("BrainRamp", Vector3.new(cx - 45, 0, cz), Vector3.new(cx - 9, top, cz), 10, Color3.fromRGB(205, 95, 140), folder)
+	local spots = { { -24, 14 }, { 22, -18 }, { 18, 18 }, { -20, -18 }, { 28, 4 }, { -28, -4 } }
 	for index, offset in spots do
 		local emitter = Builder.emitter("Bubbles" .. index, Vector3.new(cx + offset[1], 0.6, cz + offset[2]), SPARKLES, Color3.fromRGB(120, 255, 90), folder)
 		emitter.Rate = 6
@@ -128,8 +200,7 @@ local function brainrotBog(folder: Folder, territory: Territories.Territory)
 		emitter.Transparency = NumberSequence.new(0.2, 1)
 		emitter.LightEmission = 0.6
 	end
-	-- a dead tree on the edge of the swamp
-	local tx, tz = cx + 20, cz - 16
+	local tx, tz = cx + 30, cz - 26
 	decor(Builder.part("DeadTreeTrunk", Vector3.new(2.5, 16, 2.5), Vector3.new(tx, 8, tz), Color3.fromRGB(80, 55, 35), folder))
 	for index, tilt in { 35, -40, 20 } do
 		local branch = Builder.part("DeadTreeBranch" .. index, Vector3.new(1, 8, 1), Vector3.new(tx, 12 + index * 1.5, tz), Color3.fromRGB(70, 48, 30), folder)
@@ -138,42 +209,42 @@ local function brainrotBog(folder: Folder, territory: Territories.Territory)
 	end
 end
 
--- ---------- Outer ring: Cooked Canyon, a lava river, smoke and red rock walls ----------
+-- ---------- Outer ring: Cooked Canyon. A giant frying pan with a fried egg over the lava river ----------
 local function cookedCanyon(folder: Folder, territory: Territories.Territory)
 	local cx, cz = territory.x, territory.z
+	local top = territory.flags[1].y
 	local red = Color3.fromRGB(175, 65, 40)
-	solid(Builder.part("RockWallWest", Vector3.new(6, 16, 60), Vector3.new(cx - 20, 8, cz), red, folder))
-	solid(Builder.part("RockWallEast", Vector3.new(6, 16, 60), Vector3.new(cx + 37, 8, cz), red, folder))
-	for index, offset in { { -14, -34 }, { 10, 36 }, { 30, -30 } } do
-		solid(Builder.part("Boulder" .. index, Vector3.new(9, 7, 9), Vector3.new(cx + offset[1], 3.5, cz + offset[2]), Color3.fromRGB(150, 55, 35), folder))
-	end
-	-- the lava river runs along the east side, away from the flag
-	local lava = Builder.part("LavaRiver", Vector3.new(8, 0.4, 60), Vector3.new(cx + 25, 0.2, cz), Color3.fromRGB(255, 110, 20), folder)
+	-- the lava river runs north to south under the pan; red rock walls close in the canyon at both ends
+	local lava = Builder.part("LavaRiver", Vector3.new(14, 0.4, 90), Vector3.new(cx + 18, 0.2, cz), Color3.fromRGB(255, 110, 20), folder)
 	lava.Material = Enum.Material.Neon
 	lava.CanCollide = false
 	local glow = Instance.new("PointLight")
 	glow.Color = Color3.fromRGB(255, 120, 30)
-	glow.Range = 30
+	glow.Range = 35
 	glow.Brightness = 2
 	glow.Parent = lava
-	for index, offset in { -20, 0, 20 } do
-		local emitter = Builder.emitter("Smoke" .. index, Vector3.new(cx + 25, 2, cz + offset), SMOKE, Color3.fromRGB(70, 65, 65), folder)
-		emitter.Rate = 5
-		emitter.Lifetime = NumberRange.new(3, 5)
-		emitter.Speed = NumberRange.new(4, 6)
-		emitter.EmissionDirection = Enum.NormalId.Top
-		emitter.Size = NumberSequence.new(5, 12)
-		emitter.Transparency = NumberSequence.new(0.4, 1)
+	solid(Builder.part("RockWallNorth", Vector3.new(70, 16, 6), Vector3.new(cx, 8, cz - 50), red, folder))
+	solid(Builder.part("RockWallSouth", Vector3.new(70, 16, 6), Vector3.new(cx, 8, cz + 50), red, folder))
+	-- the pan: a wide dark disc held up on rock pillars, with a long handle
+	local iron = Color3.fromRGB(45, 45, 52)
+	for index, offset in { { -16, -16 }, { 16, -16 }, { -16, 16 }, { 16, 16 } } do
+		solid(Builder.part("PanLeg" .. index, Vector3.new(4, top - 1, 4), Vector3.new(cx + offset[1], (top - 1) / 2, cz + offset[2]), red, folder))
 	end
+	solid(Builder.cylinder("Pan", 56, 2, Vector3.new(cx, top - 1, cz), iron, folder))
+	solid(Builder.part("PanHandle", Vector3.new(34, 2, 6), Vector3.new(cx + 42, top - 1, cz), Color3.fromRGB(70, 50, 40), folder))
+	-- the fried egg: a wobbly white blob with a big yellow yolk in the middle, where the flag is
+	decor(Builder.ball("EggWhite", Vector3.new(44, 3, 40), Vector3.new(cx - 2, top + 0.6, cz), Color3.new(1, 1, 1), folder))
+	decor(Builder.ball("EggWhiteLobe", Vector3.new(24, 3, 24), Vector3.new(cx + 18, top + 0.6, cz + 12), Color3.new(1, 1, 1), folder))
+	decor(Builder.ball("Yolk", Vector3.new(18, 9, 18), Vector3.new(cx, top + 3, cz), Color3.fromRGB(255, 205, 30), folder))
+	for index, offset in { { -10, -8 }, { 6, 10 }, { 14, -6 } } do
+		steam(folder, "Steam" .. index, Vector3.new(cx + offset[1], top + 5, cz + offset[2]))
+	end
+	Builder.ramp("PanRamp", Vector3.new(cx - 47, 0, cz), Vector3.new(cx - 22, top, cz), 10, red, folder)
 end
 
 local builders: { [string]: (Folder, Territories.Territory) -> () } = {
-	gigachad_gate = function(folder)
-		gigachadGate(folder)
-	end,
-	rizz_ravine = function(folder)
-		rizzRavine(folder)
-	end,
+	gigachad_gate = gigachadGate,
+	rizz_ravine = rizzRavine,
 	locked_in_lighthouse = lighthouse,
 	npc_village = npcVillage,
 	brainrot_bog = brainrotBog,

@@ -29,6 +29,12 @@ check("Locked-In Lighthouse: Diamond, 2 flags", byId.locked_in_lighthouse.tier =
 check("NPC Village: Gold, 1 flag", byId.npc_village.tier == "gold" and #byId.npc_village.flags == 1)
 check("Brainrot Bog: Gold, 1 flag", byId.brainrot_bog.tier == "gold" and #byId.brainrot_bog.flags == 1)
 check("Cooked Canyon: Gold, 1 flag", byId.cooked_canyon.tier == "gold" and #byId.cooked_canyon.flags == 1)
+check("Gigachad Gate flags: both towers and the top of the head", byId.gigachad_gate.flags[1].name == "Left Tower" and byId.gigachad_gate.flags[2].name == "Right Tower" and byId.gigachad_gate.flags[3].name == "Top of the Head" and byId.gigachad_gate.flags[3].y > 20)
+check("NPC Village flag is on the statue's head (raised)", byId.npc_village.flags[1].y > 20)
+check("Brainrot Bog flag is in the brain (raised)", byId.brainrot_bog.flags[1].y > 8)
+check("Cooked Canyon flag is in the yolk on the pan (raised)", byId.cooked_canyon.flags[1].y > 5)
+check("Rizz Ravine has a flag on each cliff", byId.rizz_ravine.flags[1].name == "North Cliff" and byId.rizz_ravine.flags[2].name == "South Cliff")
+check("Lighthouse has a base flag and a top flag", byId.locked_in_lighthouse.flags[1].y == 0 and byId.locked_in_lighthouse.flags[2].y > 20)
 check("ten flags in all", #Territories.allFlags() == 10)
 
 -- ---------- rewards ----------

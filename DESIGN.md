@@ -23,13 +23,17 @@ A live territory war on a meme map: train your aura, drop into the war, capture 
 7. Between wars, train in the Training Arena to raise aura power (see the Training Arena section).
 
 ## Territories
-Six territories, ten capture flags, all on War Island. Names, positions, flag counts and rewards live in one settings file (src/shared/Territories.luau).
-- Centre: Gigachad Gate. Ultra. 3 flags (left tower, right tower, the gate). Stone fortress with purple banners.
-- Inner ring: Rizz Ravine (Diamond, 2 flags, one on each cliff, rope bridge between) and Locked-In Lighthouse (Diamond, 2 flags, one at the base and one at the top).
-- Outer ring: NPC Village (blocky cube houses, grey blocky villagers, original style), Brainrot Bog (bubbling green swamp, dead tree) and Cooked Canyon (lava river, smoke, red rock walls). Gold, 1 flag each.
+Six territories, ten capture flags, all on War Island. Names, positions, flag counts and rewards live in one settings file (src/shared/Territories.luau). Each territory has ONE giant landmark matching its name, big enough to see from across the map, and the flags are on the landmark. Built from simple parts (blocks, spheres, wedges) in bright colours, no Toolbox models.
+- Centre: Gigachad Gate. Ultra. Landmark: a giant stone face with a square jaw and sunglasses; the gate is its mouth, so players walk through it. 3 flags: both towers and the top of the head.
+- Inner ring: Rizz Ravine. Diamond. Landmark: a giant pink heart in the middle of the rope bridge, with sparkles. 2 flags, one on each cliff.
+- Inner ring: Locked-In Lighthouse. Diamond. Landmark: the lamp is a giant golden padlock that shines a beam. 2 flags, at the base and at the top.
+- Outer ring, Gold, 1 flag each:
+  - NPC Village: a giant blocky grey NPC statue with a blank face and a "..." speech bubble. Flag on its head.
+  - Brainrot Bog: a giant pink brain half-sunk in bubbling green goo. Flag stuck in the brain.
+  - Cooked Canyon: a giant frying pan with a fried egg over the lava river, with steam. Flag in the yolk.
 - Faction spawns in the 4 corners. The portal to Training Island is at the top edge.
 - Each flag is captured by standing near it. A faction owns a territory only when it holds ALL its flags. The HUD shows e.g. "Gigachad Gate: 2/3 flags".
-- On capture, everyone who helped gets rewards by contribution: Gold +100 aura, Diamond +300 aura, Ultra +1,000 aura, plus Mog Points and a box of that territory's tier.
+- On capture, everyone who helped gets rewards by contribution: Gold +100 aura, Diamond +300 aura, Ultra +1,000 aura (aura means aura points), plus Mog Points and a box of that territory's tier.
 - A faction that holds a territory gets a small aura trickle every minute (more for harder territories).
 
 ## Islands

@@ -28,6 +28,13 @@ function Builder.cylinder(name: string, diameter: number, height: number, positi
 	return part
 end
 
+-- A ball (sphere). `position` is its middle. Pass different sizes for a squashed ball (an egg white, a yolk).
+function Builder.ball(name: string, size: Vector3, position: Vector3, color: Color3, parent: Instance?): Part
+	local part = Builder.part(name, size, position, color, parent)
+	part.Shape = Enum.PartType.Ball
+	return part
+end
+
 -- A walkable ramp from one point up (or down) to another.
 function Builder.ramp(name: string, from: Vector3, to: Vector3, width: number, color: Color3, parent: Instance?): Part
 	local length = (to - from).Magnitude + 2

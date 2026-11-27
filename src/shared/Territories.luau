@@ -52,10 +52,19 @@ Territories.list = {
 		x = 0,
 		z = 0,
 		sign = { x = 0, z = 52 },
+		-- Landmark: a giant stone face with a square jaw and sunglasses. Its mouth is the gate players walk through.
+		-- Flags on both towers (at their bases) and on top of the head (reached by a long ramp from the north).
 		flags = {
 			{ name = "Left Tower", x = -30, z = 0, y = 0, size = 18 },
 			{ name = "Right Tower", x = 30, z = 0, y = 0, size = 18 },
-			{ name = "The Gate", x = 0, z = 26, y = 0, size = 18 },
+			{
+				name = "Top of the Head",
+				x = 0,
+				z = 0,
+				y = 34,
+				size = 20,
+				route = { { x = 0, z = -132, y = 3 }, { x = 0, z = -26, y = 37 } },
+			},
 		},
 	},
 	{
@@ -65,6 +74,7 @@ Territories.list = {
 		x = 85,
 		z = -15,
 		sign = { x = 120, z = -15 },
+		-- Landmark: a giant pink heart in the middle of the rope bridge. Flags on each cliff.
 		flags = {
 			{ name = "North Cliff", x = 85, z = -37, y = 5, size = 18, route = { { x = 85, z = -68, y = 3 }, { x = 85, z = -52, y = 8 } } },
 			{ name = "South Cliff", x = 85, z = 7, y = 5, size = 18, route = { { x = 85, z = 41, y = 3 }, { x = 85, z = 22, y = 8 } } },
@@ -77,6 +87,7 @@ Territories.list = {
 		x = -85,
 		z = 10,
 		sign = { x = -120, z = 28 },
+		-- Landmark: the lamp is a giant golden padlock that shines a beam. Flags at the base and at the top.
 		flags = {
 			{ name = "Lighthouse Base", x = -85, z = 40, y = 0, size = 18 },
 			{
@@ -93,10 +104,20 @@ Territories.list = {
 		id = "npc_village",
 		name = "NPC Village",
 		tier = "gold",
-		x = 0,
+		x = -55,
 		z = -105,
-		sign = { x = -34, z = -100 },
-		flags = { { name = "Village Square", x = 0, z = -105, y = 0, size = 24 } },
+		sign = { x = -95, z = -88 },
+		-- Landmark: a giant blocky grey NPC statue with a blank face and a "..." speech bubble. Flag on its head.
+		flags = {
+			{
+				name = "Statue Head",
+				x = -55,
+				z = -105,
+				y = 32,
+				size = 16,
+				route = { { x = -142, z = -105, y = 3 }, { x = -70, z = -105, y = 35 } },
+			},
+		},
 	},
 	{
 		id = "brainrot_bog",
@@ -104,8 +125,18 @@ Territories.list = {
 		tier = "gold",
 		x = -105,
 		z = 70,
-		sign = { x = -80, z = 96 },
-		flags = { { name = "Bog Centre", x = -105, z = 70, y = 0, size = 24 } },
+		sign = { x = -80, z = 100 },
+		-- Landmark: a giant pink brain half-sunk in bubbling green goo. Flag stuck in the brain.
+		flags = {
+			{
+				name = "Brain Top",
+				x = -105,
+				z = 70,
+				y = 14,
+				size = 16,
+				route = { { x = -150, z = 70, y = 3 }, { x = -118, z = 70, y = 17 } },
+			},
+		},
 	},
 	{
 		id = "cooked_canyon",
@@ -113,8 +144,18 @@ Territories.list = {
 		tier = "gold",
 		x = 105,
 		z = 70,
-		sign = { x = 78, z = 96 },
-		flags = { { name = "Canyon Floor", x = 105, z = 70, y = 0, size = 24 } },
+		sign = { x = 78, z = 100 },
+		-- Landmark: a giant frying pan with a fried egg over the lava river. Flag in the yolk.
+		flags = {
+			{
+				name = "The Yolk",
+				x = 105,
+				z = 70,
+				y = 9,
+				size = 20,
+				route = { { x = 58, z = 70, y = 3 }, { x = 86, z = 70, y = 12 } },
+			},
+		},
 	},
 } :: { Territory }
 

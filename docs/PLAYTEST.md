@@ -81,3 +81,16 @@ Nothing has been run yet, so expect to find errors. Write down or paste anything
 5. Bots should spread over a territory's flags, climb the ramps to the cliffs and lighthouse top, and fight over the Gate.
 6. The first-session arrow should point to the nearest 1-flag territory (a Gold one).
 7. Output: no "[mog-wars] FAILED" lines. Look for "[mog-wars] ASSET 203785492 was found on ..." or "... is not on any server-side object" and the CLIENT version.
+
+## Landmarks (new): what you are looking for
+Stand at the middle of the map and turn around. You should be able to see all six landmarks from far away (this is the point: a child should spot where to go).
+1. **Gigachad Gate** (middle): a big grey stone face looking south, with black sunglasses, a nose and a square jaw. The mouth is a tunnel: walk into the dark mouth and out the back. FAIL if the mouth is blocked or you can't walk through.
+2. **Rizz Ravine** (east): a giant pink heart floating over the rope bridge, with sparkles around it. FAIL if there is no heart or no sparkles.
+3. **Locked-In Lighthouse** (west): a red and white tower with a giant gold padlock on top and a long yellow beam shining east. FAIL if the top is just a plain lamp.
+4. **NPC Village** (north-west): a giant blocky grey statue with a blank face and a white speech bubble with "...". FAIL if the face has any features.
+5. **Brainrot Bog** (south-west): a giant pink brain sitting in bright green goo with bubbles and a dead tree.
+6. **Cooked Canyon** (south-east): a giant dark frying pan on pillars with a white fried egg and a yellow yolk, steam rising, lava underneath.
+Then check the flags are ON the landmarks and reachable:
+- Walk up the long ramps: the Gate ramp (from the north edge up the back of the head), the statue ramp (from the west, up to the head), the brain ramp, the pan ramp, the lighthouse ramp. FAIL if a ramp is too steep to walk or you slide off.
+- Each flag is a glowing zone with a light pillar at: both tower bases and the top of the Gate's head; each cliff; the lighthouse base and top; the statue's head; the top of the brain; the yolk.
+- A bot should climb each ramp on its own to reach the raised flags. FAIL if bots stand at the bottom of a ramp forever.

@@ -48,12 +48,12 @@ def load():
                                               "fullRewardWarsPerDay", "reducedRewardMultiplier")}
     cfg["capture"] = {k: number(capture, k) for k in ("basePool", "sideValue", "centreValue")}
     cfg["aura"] = {"perRankBonus": number(aura, "perRankBonus")}
-    cfg["ranks"] = [(m.group(1), int(m.group(2)), m.group(3)) for m in re.finditer(
-        r'\{\s*name\s*=\s*"([^"]+)"\s*,\s*cost\s*=\s*(\d+)\s*,\s*rewardBox\s*=\s*"([^"]*)"', block(text, "ranks"))]
+    cfg["ranks"] = [(m.group(1), int(m.group(2))) for m in re.finditer(
+        r'\{\s*name\s*=\s*"([^"]+)"\s*,\s*cost\s*=\s*(\d+)\s*\}', block(text, "ranks"))]
     units = block(text, "units")
     cfg["unitSell"] = {u: number(block(units, u), "sellValue") for u in ("tank", "horse")}
     tiers = {}
-    for tier in ("recruit", "veteran", "elite", "legend"):
+    for tier in re.findall(r"(\w+)\s*=\s*\{\s*displayName", block(text, "tiers")):
         body = block(block(text, "tiers"), tier)
         drops = []
         for m in re.finditer(r"\{([^{}]*)\}", block(body, "drops")):
@@ -70,6 +70,10 @@ def load():
         tiers[tier] = drops
     cfg["boxEV"] = {t: sum(w * v for w, v in drops) / sum(w for w, _ in drops) for t, drops in tiers.items()}
     cfg["boxWeightSums"] = {t: sum(w for w, _ in drops) for t, drops in tiers.items()}
+    boxes = block(text, "boxes")
+    cfg["boxRules"] = [(int(m.group(1)), m.group(2)) for m in re.finditer(
+        r'\{\s*minValue\s*=\s*(\d+)\s*,\s*tier\s*=\s*"([^"]+)"\s*\}', boxes)]
+    cfg["boxDailyCap"] = number(boxes, "dailyCap")
     streak = block(text, "dailyStreak")
     cfg["streak"] = [cfg["boxEV"][t] for t in re.findall(r'"([^"]+)"', block(streak, "rewards"))]  # the daily box, valued at its expected points
     bar = block(text, "barracks")
@@ -87,9 +91,19 @@ PROFILES = {
 }
 
 
+def tier_for(cfg, value):
+    for minimum, tier in cfg["boxRules"]:
+        if value >= minimum:
+            return tier
+    sys.exit("no box tier matches a zone value of %s" % value)
+
+
 def simulate(cfg, p, max_days=400):
     ranks = cfg["ranks"]
     avg_pool = cfg["capture"]["basePool"] * (4 * cfg["capture"]["sideValue"] + cfg["capture"]["centreValue"]) / 5
+    side_tier = tier_for(cfg, cfg["capture"]["sideValue"])
+    centre_tier = tier_for(cfg, cfg["capture"]["centreValue"])
+    avg_box = (4 * cfg["boxEV"][side_tier] + cfg["boxEV"][centre_tier]) / 5
     rank, points, streak_day = 1, 0.0, 0
     days_to = {}
     history = []
@@ -106,9 +120,12 @@ def simulate(cfg, p, max_days=400):
         mult = (full + reduced * cfg["war"]["reducedRewardMultiplier"])
         share_mult = 1 + 0.04 * (rank - 1)  # a higher rank adds a little aura power, so a little more share
         per_war = (p["captures"] * avg_pool * min(0.9, p["share"] * share_mult)
-                   + p["winRate"] * cfg["war"]["winnerBonusPoints"] + (1 - p["winRate"]) * cfg["war"]["participantBonusPoints"]
-                   + p["winRate"] * cfg["boxEV"]["veteran"] + (1 - p["winRate"]) * cfg["boxEV"]["recruit"])
+                   + p["winRate"] * cfg["war"]["winnerBonusPoints"] + (1 - p["winRate"]) * cfg["war"]["participantBonusPoints"])
         earned = per_war * mult
+        # Every paid contributor earns one box per capture, up to the daily cap. Four of the five zones
+        # are side zones and one is the centre zone.
+        boxes_today = min(cfg["boxDailyCap"], wars * p["captures"])
+        earned += boxes_today * avg_box
         rewards = cfg["streak"]
         earned += rewards[streak_day % len(rewards)]
         streak_day += 1
@@ -118,9 +135,6 @@ def simulate(cfg, p, max_days=400):
         points += earned
         while rank < len(ranks) and points >= ranks[rank][1]:
             points -= ranks[rank][1]
-            box = ranks[rank][2]
-            if box:
-                points += cfg["boxEV"][box]
             rank += 1
             days_to.setdefault(rank, day + 1)
         history.append((day, rank, points))
@@ -136,8 +150,8 @@ def main():
     chad, god = names.index("Chad") + 1, len(names)
     print("Box odds sums (each must be 100):", cfg["boxWeightSums"])
     print("Box expected points:", {k: round(v, 1) for k, v in cfg["boxEV"].items()})
-    print("Rank costs:", [(n, c) for n, c, _ in cfg["ranks"]], " total to Chad:",
-          sum(c for _, c, _ in cfg["ranks"][1:chad]), " total to Mog God:", sum(c for _, c, _ in cfg["ranks"][1:]))
+    print("Rank costs:", [(n, c) for n, c in cfg["ranks"]], " total to Chad:",
+          sum(c for _, c in cfg["ranks"][1:chad]), " total to Mog God:", sum(c for _, c in cfg["ranks"][1:]))
     print()
     print(f"{'player type':<10} {'wars/day':>8} {'days/wk':>7}   days to {names[chad-1]:<6} days to {names[-1]}")
     for name, p in PROFILES.items():

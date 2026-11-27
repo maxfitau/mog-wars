@@ -24,8 +24,8 @@ shoving rivals, winning tapping duels called mog-offs, and spending the Mog Poin
    it back. Use shove (cooldown) to clear a rival. If two enemies meet in a zone, a 5-second mog-off decides who
    is knocked back.
 3. When a zone is captured, everyone who contributed earns Mog Points in proportion to their contribution.
-4. When the war ends, the faction with the highest zone-control score wins a bonus. Everyone earns boxes for
-   taking part.
+4. When the war ends, the faction with the highest zone-control score wins a bonus. Every paid contributor on a capture also earns a box (Gold for
+   a side zone, Diamond for the centre).
 5. Spend Mog Points to rank up. Open boxes for points, units, and cosmetics. Come back tomorrow for the
    streak reward, and collect barracks income earned while away.
 
@@ -36,14 +36,14 @@ shoving rivals, winning tapping duels called mog-offs, and spending the Mog Poin
 | Factions | Four placeholder factions: Jawline Legion, Mewing Order, Sigma Syndicate, Aura Cartel (names may change, see `docs/compliance.md`) | Server assigns and balances; a player cannot switch mid-war |
 | Map | Four home bases (safe, cannot be captured) and five contested zones (four side zones, one centre zone worth double) | Zones are tagged parts; the server finds them by tag |
 | Capture bar | Per zone; stronger faction presence pushes progress; enemies push it back | Pure math in `src/shared`, server runs it every tick (`docs/economy.md` has the numbers) |
-| Aura power | Each player's contribution to the bar, a little higher with rank | Capped so a Mog God is at most about 2x a Rookie |
+| Aura power | Each player's contribution to the bar, a little higher with rank | Capped so a Mog God is at most about 2x an NPC |
 | Shove | Short cooldown ability: knocks a rival back and briefly weakens their push | Server validates range and cooldown |
 | Mog-off | When two enemies stay close in a zone, a 5-second tapping duel starts; more taps wins; loser is knocked back and stunned briefly; ties go to the defender | Taps are counted on the server, capped per second, and ranks give no advantage |
 | Units | Tank: speeds capture in its zone. Horse: speeds movement. Each lasts one war. | Earned from boxes, sellable for Mog Points, never sold for Robux |
 | Mog Points | The one currency. Earned from captures by contribution, boxes, streaks, barracks; spent on rank-ups | Granted by the server only |
-| Ranks | Ten ranks from Rookie to Mog God, with Chad at rank 7 | Cost curve in `docs/economy.md` |
-| Boxes | Earned by playing, never bought. Four tiers with published odds | Odds shown to players, no pity or boosts |
-| Daily streak | A 7-day reward cycle | Server clock, UTC day |
+| Ranks | Seven ranks: NPC, Rookie, Sigma, Chadlite, Chad, Gigachad, Mog God | Cost curve in `docs/economy.md` |
+| Boxes | Earned on captures by territory value (Gold, Diamond, Ultra) and from the daily streak, never bought. Published odds | Odds shown to players, no pity or boosts |
+| Daily box | A 7-day streak, one box a day | Server clock, UTC day |
 | Barracks | Offline income that fills while away, up to a cap, collected on return | Server clock, capped, tiny next to active play |
 
 ## What the server owns (everything that matters)

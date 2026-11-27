@@ -17,27 +17,27 @@ local function check(name: string, condition: boolean)
 	end
 end
 
-check("ten ranks", RankRules.maxRank(Config) == 10)
-check("Chad is rank 7", Config.ranks[7].name == "Chad")
-check("Mog God is the top rank", Config.ranks[10].name == "Mog God")
-check("total to Chad is 4600", RankRules.totalToReach(Config, 7) == 4600)
-check("total to Mog God is 32100", RankRules.totalToReach(Config, 10) == 32100)
-check("next cost from Rookie", RankRules.nextCost(Config, 1) == 250)
-check("no next cost at the top", RankRules.nextCost(Config, 10) == nil)
-check("aura at Rookie is 1", RankRules.auraMultiplier(Config, 1) == 1)
-check("aura at Mog God is about 1.9", math.abs(RankRules.auraMultiplier(Config, 10) - 1.9) < 1e-9)
-check("aura clamps out of range ranks", RankRules.auraMultiplier(Config, 99) == RankRules.auraMultiplier(Config, 10))
+check("seven ranks", RankRules.maxRank(Config) == 7)
+check("the ranks are in the design order", Config.ranks[1].name == "NPC" and Config.ranks[2].name == "Rookie" and Config.ranks[3].name == "Sigma" and Config.ranks[4].name == "Chadlite" and Config.ranks[5].name == "Chad" and Config.ranks[6].name == "Gigachad" and Config.ranks[7].name == "Mog God")
+check("NPC is free", Config.ranks[1].cost == 0)
+check("total to Chad", RankRules.totalToReach(Config, 5) == 300 + 700 + 1300 + 2300)
+check("total to Mog God", RankRules.totalToReach(Config, 7) == 300 + 700 + 1300 + 2300 + 7000 + 17000)
+check("next cost from NPC", RankRules.nextCost(Config, 1) == 300)
+check("no next cost at the top", RankRules.nextCost(Config, 7) == nil)
+check("aura at NPC is 1", RankRules.auraMultiplier(Config, 1) == 1)
+check("aura at Mog God is about 1.9", math.abs(RankRules.auraMultiplier(Config, 7) - 1.9) < 1e-9)
+check("aura clamps out of range ranks", RankRules.auraMultiplier(Config, 99) == RankRules.auraMultiplier(Config, 7))
 
 do
-	local result = RankRules.tryRankUp(Config, 1, 300)
-	check("rank up spends points", result.ok and result.rank == 2 and result.points == 50 and result.rewardBox == "recruit")
+	local result = RankRules.tryRankUp(Config, 1, 350)
+	check("rank up spends points", result.ok and result.rank == 2 and result.points == 50)
 end
 do
-	local result = RankRules.tryRankUp(Config, 1, 249)
-	check("not enough points changes nothing", not result.ok and result.reason == "not_enough_points" and result.rank == 1 and result.points == 249)
+	local result = RankRules.tryRankUp(Config, 1, 299)
+	check("not enough points changes nothing", not result.ok and result.reason == "not_enough_points" and result.rank == 1 and result.points == 299)
 end
 do
-	local result = RankRules.tryRankUp(Config, 10, 99999)
+	local result = RankRules.tryRankUp(Config, 7, 99999)
 	check("top rank cannot rank up", not result.ok and result.reason == "max_rank" and result.points == 99999)
 end
 check("fractional points rejected", RankRules.tryRankUp(Config, 1, 300.5).reason == "bad_input")

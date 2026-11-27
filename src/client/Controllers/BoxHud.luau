@@ -19,7 +19,7 @@ local panel: Frame
 local toast: TextLabel
 local toastUntil = 0
 local counters: { [string]: { count: TextLabel, button: TextButton } } = {}
-local order = { "recruit", "veteran", "elite", "legend" }
+local order = { "gold", "diamond", "ultra" }
 
 local MESSAGES: { [string]: string } = {
 	no_box = "You have no box of that tier.",

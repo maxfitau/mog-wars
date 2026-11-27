@@ -2,7 +2,7 @@
 -- Pure rank rules. Ranks are numbers from 1 (Rookie) up; the config supplies names and costs.
 -- Rank-up is all-or-nothing: either the points are spent and the rank rises, or nothing changes.
 
-export type RankEntry = { name: string, cost: number, rewardBox: string }
+export type RankEntry = { name: string, cost: number }
 
 export type RankConfig = {
 	ranks: { RankEntry },
@@ -14,7 +14,6 @@ export type RankUpResult = {
 	reason: string?, -- stable reason when not ok
 	rank: number, -- the rank after the attempt
 	points: number, -- the points after the attempt
-	rewardBox: string, -- box tier to grant, "" for none
 }
 
 local RankRules = {}
@@ -53,7 +52,7 @@ function RankRules.auraMultiplier(config: RankConfig, rank: number): number
 end
 
 function RankRules.tryRankUp(config: RankConfig, rank: number, points: number): RankUpResult
-	local unchanged: RankUpResult = { ok = false, reason = nil, rank = rank, points = points, rewardBox = "" }
+	local unchanged: RankUpResult = { ok = false, reason = nil, rank = rank, points = points }
 	if not isWholeNumber(rank) or not isWholeNumber(points) or rank < 1 or points < 0 then
 		unchanged.reason = "bad_input"
 		return unchanged
@@ -72,7 +71,6 @@ function RankRules.tryRankUp(config: RankConfig, rank: number, points: number): 
 		reason = nil,
 		rank = rank + 1,
 		points = points - nextEntry.cost,
-		rewardBox = nextEntry.rewardBox,
 	}
 end
 

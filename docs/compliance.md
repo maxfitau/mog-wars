@@ -47,7 +47,8 @@ and could break harassment rules in the Community Standards. Safer design:
 ## 2. Faction and rank names
 
 - Rename **Aura Cartel** (suggest **Aura Collective**, or Aura Clan). Update `docs/decisions.md` if you accept.
-- All ten ranks are positive (Rookie to Mog God). Keep it that way. Do not add ranks that put anyone down, and do
+- All seven ranks come from the design brief (NPC to Mog God) and measure aura earned by winning. "NPC" is the
+  friendly starting rank: never use it as an insult in text or UI. Do not add ranks that put anyone down, and do
   not use appearance words as rank insults.
 - Do not use another game's, show's or brand's names. Run the launch scan's brand-word check before publishing.
 

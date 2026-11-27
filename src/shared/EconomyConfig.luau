@@ -20,8 +20,12 @@ export type Tier = {
 
 export type Rank = {
 	name: string,
-	cost: number, -- Mog Points spent to reach this rank from the one before. Rookie is free.
-	rewardBox: string, -- tier of the box granted on reaching this rank, or "" for none
+	cost: number, -- Mog Points spent to reach this rank from the one before. NPC is the free starting rank.
+}
+
+export type BoxRule = {
+	minValue: number, -- a zone worth at least this much gives this box tier
+	tier: string,
 }
 
 export type Config = {
@@ -34,9 +38,6 @@ export type Config = {
 		minContributionForBonus: number,
 		fullRewardWarsPerDay: number,
 		reducedRewardMultiplier: number,
-		dailyBoxCap: number,
-		winnerBoxTier: string,
-		participantBoxTier: string,
 	},
 	capture: {
 		secondsForOneAura: number,
@@ -72,6 +73,8 @@ export type Config = {
 	},
 	ranks: { Rank },
 	boxes: {
+		dailyCap: number,
+		tierForValue: { BoxRule },
 		duplicateCosmeticPoints: number,
 		tiers: { [string]: Tier },
 	},
@@ -99,9 +102,6 @@ local config: Config = {
 		minContributionForBonus = 5,
 		fullRewardWarsPerDay = 8, -- after this many wars in a day rewards are halved, so play never feels like a chore
 		reducedRewardMultiplier = 0.5,
-		dailyBoxCap = 12, -- most boxes a player can earn from wars in one UTC day
-		winnerBoxTier = "veteran", -- box for contributors on the winning faction
-		participantBoxTier = "recruit", -- box for every other contributor
 	},
 	capture = {
 		secondsForOneAura = 24, -- one player with aura power 1 captures an empty zone alone in this many seconds
@@ -116,7 +116,7 @@ local config: Config = {
 		mogOffWin = 3, -- contribution for winning a mog-off
 	},
 	aura = {
-		perRankBonus = 0.1, -- each rank adds 10 percent aura power: Mog God is 1.9 times a Rookie
+		perRankBonus = 0.15, -- each rank adds 15 percent aura power: Mog God (rank 7) is 1.9 times an NPC
 	},
 	shove = {
 		cooldownSeconds = 6, -- time before the same player can shove again
@@ -136,62 +136,56 @@ local config: Config = {
 		knockbackStuds = 18, -- the loser is pushed back this far
 	},
 	ranks = {
-		{ name = "Rookie", cost = 0, rewardBox = "" },
-		{ name = "Grunt", cost = 250, rewardBox = "recruit" },
-		{ name = "Fighter", cost = 400, rewardBox = "recruit" },
-		{ name = "Veteran", cost = 600, rewardBox = "veteran" },
-		{ name = "Captain", cost = 850, rewardBox = "veteran" },
-		{ name = "Warlord", cost = 1100, rewardBox = "elite" },
-		{ name = "Chad", cost = 1400, rewardBox = "elite" },
-		{ name = "Alpha", cost = 3500, rewardBox = "elite" },
-		{ name = "Titan", cost = 8000, rewardBox = "legend" },
-		{ name = "Mog God", cost = 16000, rewardBox = "legend" },
+		{ name = "NPC", cost = 0 },
+		{ name = "Rookie", cost = 350 },
+		{ name = "Sigma", cost = 800 },
+		{ name = "Chadlite", cost = 1500 },
+		{ name = "Chad", cost = 2600 },
+		{ name = "Gigachad", cost = 10000 },
+		{ name = "Mog God", cost = 24000 },
 	},
 	boxes = {
+		dailyCap = 12, -- most boxes a player can earn from captures in one UTC day
+		-- A capture gives every paid contributor one box. The tier depends on the zone's value.
+		-- Listed from the highest minimum value down; the first match wins.
+		tierForValue = {
+			{ minValue = 3, tier = "ultra" },
+			{ minValue = 2, tier = "diamond" },
+			{ minValue = 1, tier = "gold" },
+		},
 		duplicateCosmeticPoints = 50, -- a cosmetic you already own pays this many Mog Points instead
 		tiers = {
-			recruit = {
-				displayName = "Recruit Box",
+			gold = {
+				displayName = "Gold Box",
 				drops = {
-					{ weight = 40, kind = "points", amount = 20 },
-					{ weight = 30, kind = "points", amount = 40 },
-					{ weight = 15, kind = "points", amount = 80 },
-					{ weight = 6, kind = "unit", unit = "horse" },
-					{ weight = 3, kind = "unit", unit = "tank" },
-					{ weight = 6, kind = "cosmetic", cosmetic = "trail_spark" },
+					{ weight = 50, kind = "points", amount = 20 },
+					{ weight = 25, kind = "points", amount = 40 },
+					{ weight = 8, kind = "points", amount = 80 },
+					{ weight = 5, kind = "unit", unit = "horse" },
+					{ weight = 2, kind = "unit", unit = "tank" },
+					{ weight = 10, kind = "cosmetic", cosmetic = "trail_spark" },
 				},
 			},
-			veteran = {
-				displayName = "Veteran Box",
+			diamond = {
+				displayName = "Diamond Box",
 				drops = {
-					{ weight = 35, kind = "points", amount = 60 },
-					{ weight = 30, kind = "points", amount = 120 },
-					{ weight = 15, kind = "points", amount = 200 },
-					{ weight = 8, kind = "unit", unit = "horse" },
-					{ weight = 5, kind = "unit", unit = "tank" },
-					{ weight = 7, kind = "cosmetic", cosmetic = "aura_ember" },
-				},
-			},
-			elite = {
-				displayName = "Elite Box",
-				drops = {
-					{ weight = 30, kind = "points", amount = 150 },
-					{ weight = 28, kind = "points", amount = 300 },
-					{ weight = 14, kind = "points", amount = 500 },
+					{ weight = 30, kind = "points", amount = 80 },
+					{ weight = 25, kind = "points", amount = 150 },
+					{ weight = 12, kind = "points", amount = 300 },
 					{ weight = 10, kind = "unit", unit = "horse" },
 					{ weight = 8, kind = "unit", unit = "tank" },
-					{ weight = 10, kind = "cosmetic", cosmetic = "aura_frost" },
+					{ weight = 15, kind = "cosmetic", cosmetic = "aura_frost" },
 				},
 			},
-			legend = {
-				displayName = "Legend Box",
+			ultra = {
+				displayName = "Ultra Box",
 				drops = {
-					{ weight = 25, kind = "points", amount = 400 },
-					{ weight = 25, kind = "points", amount = 800 },
-					{ weight = 12, kind = "points", amount = 1500 },
-					{ weight = 12, kind = "unit", unit = "horse" },
-					{ weight = 12, kind = "unit", unit = "tank" },
-					{ weight = 14, kind = "cosmetic", cosmetic = "aura_gold" },
+					{ weight = 20, kind = "points", amount = 200 },
+					{ weight = 22, kind = "points", amount = 400 },
+					{ weight = 13, kind = "points", amount = 800 },
+					{ weight = 15, kind = "unit", unit = "horse" },
+					{ weight = 15, kind = "unit", unit = "tank" },
+					{ weight = 15, kind = "cosmetic", cosmetic = "aura_gold" },
 				},
 			},
 		},
@@ -201,7 +195,7 @@ local config: Config = {
 		horse = { sellValue = 100, speedMultiplier = 1.3 }, -- 30 percent faster movement for one player
 	},
 	dailyStreak = {
-		rewards = { "recruit", "recruit", "recruit", "veteran", "veteran", "veteran", "elite" }, -- the daily box, day 1 to 7, then the cycle repeats
+		rewards = { "gold", "gold", "gold", "diamond", "diamond", "diamond", "ultra" }, -- the daily box, day 1 to 7, then the cycle repeats
 	},
 	barracks = {
 		baseRatePerHour = 6,

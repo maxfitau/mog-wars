@@ -55,6 +55,9 @@ local function load(player: Player)
 	profile:AddUserId(player.UserId)
 	profile:Reconcile()
 	PlayerData.migrate(profile.Data)
+	if type(profile.Data.rank) == "number" and profile.Data.rank > #Config.ranks then
+		profile.Data.rank = #Config.ranks -- a save from before the rank list changed
+	end
 	if not PlayerData.isValid(profile.Data) then
 		-- Never run with data we cannot trust.
 		profile:EndSession()
@@ -127,8 +130,8 @@ function DataService.recordWar(player: Player)
 	end
 end
 
--- Server-only rank-up. All or nothing: points, rank and the reward box change together in one step
--- with no yielding, or nothing changes. Returns ok and a stable reason string when it fails.
+-- Server-only rank-up. All or nothing: points and rank change together in one step with no yielding,
+-- or nothing changes. Returns ok and a stable reason string when it fails.
 function DataService.tryRankUp(player: Player): (boolean, string?)
 	local data = DataService.get(player)
 	if not data then
@@ -138,9 +141,6 @@ function DataService.tryRankUp(player: Player): (boolean, string?)
 	if not result.ok then
 		return false, result.reason
 	end
-	if result.rewardBox ~= "" and not PlayerData.addBox(data, result.rewardBox) then
-		return false, "boxes_full" -- nothing was changed yet, so the player keeps their points
-	end
 	data.points = result.points
 	data.rank = result.rank
 	player:SetAttribute("Points", data.points)
@@ -149,14 +149,14 @@ function DataService.tryRankUp(player: Player): (boolean, string?)
 	return true, nil
 end
 
--- Earn a box from a war (counts toward the daily cap). Returns true if the box was added.
+-- Earn a box from a capture (counts toward the daily cap). Returns true if the box was added.
 function DataService.earnBox(player: Player, tier: string): boolean
 	local data = DataService.get(player)
 	if not data or Config.boxes.tiers[tier] == nil then
 		return false
 	end
 	local day = PlayerData.dayNumber(os.time())
-	if not PlayerData.tryEarnBox(data, day, Config.war.dailyBoxCap, tier) then
+	if not PlayerData.tryEarnBox(data, day, Config.boxes.dailyCap, tier) then
 		return false
 	end
 	syncInventory(player, data)

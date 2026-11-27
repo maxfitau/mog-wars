@@ -77,6 +77,20 @@ function BoxRoll.roll(tier: Tier, random: () -> number): Drop
 	return tier.drops[#tier.drops]
 end
 
+-- The box tier a zone of this value gives. `rules` lists { minValue, tier } from the highest minimum down;
+-- the first rule the value reaches wins. Returns nil for a bad value or no match.
+function BoxRoll.tierForValue(value: number, rules: { { minValue: number, tier: string } }): string?
+	if value ~= value or value == math.huge or value == -math.huge then
+		return nil
+	end
+	for _, rule in rules do
+		if value >= rule.minValue then
+			return rule.tier
+		end
+	end
+	return nil
+end
+
 -- Expected points per box (units and cosmetics are not counted). Used by the pacing check.
 function BoxRoll.expectedPoints(tier: Tier): number
 	local total = 0

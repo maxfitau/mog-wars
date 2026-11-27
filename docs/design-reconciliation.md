@@ -2,7 +2,7 @@
 
 `DESIGN.md` is now in the repo root and it wins. Everything in slices 1 to 11 was written before it was
 available, from the owner's defaults. This file lists every difference, what I recommend, and how big the
-change is. Nothing here has been changed yet except the wording fixes in section A.
+change is. Sections A and the first two rows of B (ranks and boxes) have been applied. The rest waits for your yes.
 
 ## A. Fixed already
 
@@ -11,13 +11,15 @@ change is. Nothing here has been changed yet except the wording fixes in section
 | Guardrail: no "Risk" anywhere | Removed the word from all project docs (now "concern" or "problem") |
 | Guardrail: no incel language | Removed the one place a doc named an example of it |
 | Daily reward | Was points. Now a **daily box** on a 7-day streak, as the brief says (decision 45) |
+| Ranks | Now the brief's 7 ranks: NPC, Rookie, Sigma, Chadlite, Chad, Gigachad, Mog God (decision 49) |
+| Boxes | Now Gold, Diamond and Ultra, earned on captures by territory value; rank-up and war boxes removed (decision 50) |
 
 ## B. Differences that change the design (need your yes)
 
 | # | DESIGN.md says | Built now | Recommendation | Size |
 |---|---|---|---|---|
-| 1 | 7 ranks: NPC, Rookie, Sigma, Chadlite, Chad, Gigachad, Mog God | 10 placeholder ranks (Chad is rank 7) | Switch to the brief's 7 ranks. Refit the rank costs so a casual player still reaches Chad (rank 5) in about a week and Mog God in 1 to 2 months. Aura bonus per rank rises so Mog God is still about 1.9x | Medium: config, tests, pacing tool, docs |
-| 2 | Boxes come from **captures**, tier by territory value: Gold, Diamond, Ultra | 4 tiers (Recruit, Veteran, Elite, Legend) from rank-ups, wars and the daily claim | Rename to the 3 tiers, give a box to every paid contributor on a capture (side zone Gold, centre Diamond, Ultra for the highest-value territories later), keep the daily cap, and drop the rank-up and war boxes. Re-run the pacing check | Medium to large: box config, odds, capture payout, war and rank code, tests |
+| 1 | ~~7 ranks~~ | **Done** | | |
+| 2 | ~~Boxes from captures: Gold, Diamond, Ultra~~ | **Done** | | |
 | 3 | Aura power is raised by **training** in a Training Arena between wars | Aura power only rises with rank | Build the Training Arena (build order step 6): a safe area with a treadmill-style action that slowly raises a saved aura level, capped. Then rank would no longer drive aura | Large: new slice |
 | 4 | **Join mid-round anytime**, spawn on your faction's front line; 10 to 15 minute rounds | 10 minute wars; everyone respawns at the base at war start; 20 second break | Spawn joiners and respawns at the faction's nearest owned zone (base if none), and make the war length a setting between 10 and 15 | Small to medium |
 | 5 | 8 to 12 territories | 5 zones | Add 3 to 7 zones to the placeholder map, with a few worth more | Small |
@@ -38,7 +40,7 @@ change is. Nothing here has been changed yet except the wording fixes in section
 
 ## Suggested order if you say yes to everything
 
-1. Ranks (B1) and boxes (B2) together, because they share the pacing numbers.
+1. ~~Ranks (B1) and boxes (B2)~~ done.
 2. Spawn and map size (B4, B5).
 3. Training Arena (B3).
 4. Cosmetic shop (slice 12), after checking gifting (B8).

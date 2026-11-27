@@ -54,7 +54,7 @@ show the real game so players are not misled.
 >
 > **What you can do**
 > - Capture zones and earn Mog Points based on how much you helped
-> - Rank up from Rookie all the way to Mog God
+> - Rank up from NPC all the way to Mog God
 > - Open earned boxes for points, units and cosmetics (odds are shown before you open)
 > - Use a tank to capture faster or ride a horse to move faster for one war
 > - Come back each day for streak rewards and collect barracks points while you were away

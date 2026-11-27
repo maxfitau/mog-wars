@@ -84,14 +84,14 @@ uses an autoclicker-like burst and is capped.
 
 ## 8. Ranks and aura power
 
-**Build (code written, not yet playtested):** the ten ranks (`src/shared/RankRules.luau`), a rank-up screen, spending Mog Points, and aura power
+**Build (code written, not yet playtested):** the seven ranks (`src/shared/RankRules.luau`), a rank-up screen, spending Mog Points, and aura power
 scaling.
 **Test:** pure tests for costs and rank-up. In Studio: earn points, rank up, check the aura effect.
 **Done when:** rank-up is server-only, atomic, and the costs match `docs/economy.md`.
 
 ## 9. Boxes
 
-**Build (code written, not yet playtested):** earn boxes after wars, a box-opening screen that shows the odds for that tier before opening, server
+**Build (code written, not yet playtested):** earn boxes on captures (Gold, Diamond, Ultra by zone value), a box-opening screen that shows the odds for that tier before opening, server
 rolls (`src/shared/BoxRoll.luau`), and the rewards.
 **Test:** pure tests for rolls and odds. In Studio: open many boxes and compare the results with the shown odds.
 **Done when:** shown odds equal the server's weights, every tier sums to 100 percent, and there is no way to buy a

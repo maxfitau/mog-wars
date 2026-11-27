@@ -60,10 +60,6 @@ local function finishWar()
 		if player then
 			DataService.addPoints(player, WarRules.applyMultiplier(amount, DataService.rewardMultiplier(player)))
 			DataService.recordWar(player) -- count it after paying, so the 9th war is the first reduced one
-			local result = results[userId]
-			if result then
-				DataService.earnBox(player, WarRules.boxTier(winner, result.faction, Config.war.winnerBoxTier, Config.war.participantBoxTier))
-			end
 		end
 	end
 

@@ -59,31 +59,31 @@ check("migrate upgrades version 2", PlayerData.migrate(v2) and PlayerData.isVali
 
 -- boxes
 local boxy = PlayerData.template()
-check("adding a box works", PlayerData.addBox(boxy, "recruit") and boxy.boxes.recruit == 1)
+check("adding a box works", PlayerData.addBox(boxy, "gold") and boxy.boxes.gold == 1)
 check("an empty tier name is rejected", not PlayerData.addBox(boxy, ""))
-boxy.boxes.recruit = PlayerData.MAX_BOXES_PER_TIER
-check("a full stack is rejected", not PlayerData.addBox(boxy, "recruit"))
-check("boxes with a negative count are invalid", not PlayerData.isValid(save({ boxes = { recruit = -1 } })))
-check("boxes with a fractional count are invalid", not PlayerData.isValid(save({ boxes = { recruit = 1.5 } })))
+boxy.boxes.gold = PlayerData.MAX_BOXES_PER_TIER
+check("a full stack is rejected", not PlayerData.addBox(boxy, "gold"))
+check("boxes with a negative count are invalid", not PlayerData.isValid(save({ boxes = { gold = -1 } })))
+check("boxes with a fractional count are invalid", not PlayerData.isValid(save({ boxes = { gold = 1.5 } })))
 check("boxes that are not a table are invalid", not PlayerData.isValid(save({ boxes = 5 })))
 
 -- taking boxes
 local taker = PlayerData.template()
-PlayerData.addBox(taker, "recruit")
-PlayerData.addBox(taker, "recruit")
-check("taking a box works", PlayerData.takeBox(taker, "recruit") and taker.boxes.recruit == 1)
-check("taking the last box removes the entry", PlayerData.takeBox(taker, "recruit") and taker.boxes.recruit == nil)
-check("taking from none changes nothing", not PlayerData.takeBox(taker, "recruit") and next(taker.boxes) == nil)
+PlayerData.addBox(taker, "gold")
+PlayerData.addBox(taker, "gold")
+check("taking a box works", PlayerData.takeBox(taker, "gold") and taker.boxes.gold == 1)
+check("taking the last box removes the entry", PlayerData.takeBox(taker, "gold") and taker.boxes.gold == nil)
+check("taking from none changes nothing", not PlayerData.takeBox(taker, "gold") and next(taker.boxes) == nil)
 
 -- daily box cap
 local earner = PlayerData.template()
 local boxDay = 5000
 for _ = 1, 12 do
-	PlayerData.tryEarnBox(earner, boxDay, 12, "recruit")
+	PlayerData.tryEarnBox(earner, boxDay, 12, "gold")
 end
-check("12 boxes earned fills the daily cap", earner.boxesToday == 12 and earner.boxes.recruit == 12)
-check("the 13th box is refused", not PlayerData.tryEarnBox(earner, boxDay, 12, "recruit") and earner.boxes.recruit == 12)
-check("a new day resets the cap", PlayerData.tryEarnBox(earner, boxDay + 1, 12, "recruit") and earner.boxesToday == 1)
+check("12 boxes earned fills the daily cap", earner.boxesToday == 12 and earner.boxes.gold == 12)
+check("the 13th box is refused", not PlayerData.tryEarnBox(earner, boxDay, 12, "gold") and earner.boxes.gold == 12)
+check("a new day resets the cap", PlayerData.tryEarnBox(earner, boxDay + 1, 12, "gold") and earner.boxesToday == 1)
 
 -- units and cosmetics
 local owner = PlayerData.template()
@@ -99,8 +99,8 @@ check("streak day above 7 is invalid", not PlayerData.isValid(save({ streakDay =
 check("negative barracks time is invalid", not PlayerData.isValid(save({ barracksSince = -1 })))
 local v4: any = { version = 4, points = 9, rank = 2, warsToday = 0, lastWarDay = 0, boxes = {}, units = {}, cosmetics = {}, boxDay = 0, boxesToday = 0 }
 check("migrate upgrades version 4", PlayerData.migrate(v4) and PlayerData.isValid(v4) and v4.streakDay == 0)
-local v3: any = { version = 3, points = 1, rank = 1, warsToday = 0, lastWarDay = 0, boxes = { recruit = 2 } }
-check("migrate upgrades version 3 and keeps boxes", PlayerData.migrate(v3) and PlayerData.isValid(v3) and v3.boxes.recruit == 2)
+local v3: any = { version = 3, points = 1, rank = 1, warsToday = 0, lastWarDay = 0, boxes = { gold = 2 } }
+check("migrate upgrades version 3 and keeps boxes", PlayerData.migrate(v3) and PlayerData.isValid(v3) and v3.boxes.gold == 2)
 
 -- daily war limit
 local day = PlayerData.dayNumber(86400 * 20000 + 5)

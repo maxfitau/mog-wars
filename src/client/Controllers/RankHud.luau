@@ -24,7 +24,6 @@ local toastUntil = 0
 local MESSAGES: { [string]: string } = {
 	not_enough_points = "Not enough Mog Points yet.",
 	max_rank = "You are already a Mog God!",
-	boxes_full = "Open some boxes first.",
 	not_loaded = "Still loading your data.",
 	bad_input = "Something went wrong. Try again.",
 }

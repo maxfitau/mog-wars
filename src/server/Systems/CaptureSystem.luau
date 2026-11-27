@@ -13,6 +13,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local CaptureBar = require(Shared:WaitForChild("CaptureBar"))
 local Config = require(Shared:WaitForChild("EconomyConfig"))
 local FactionRules = require(Shared:WaitForChild("FactionRules"))
+local BoxRoll = require(Shared:WaitForChild("BoxRoll"))
 local ContributionScoring = require(Shared:WaitForChild("ContributionScoring"))
 local RankRules = require(Shared:WaitForChild("RankRules"))
 local ShoveRules = require(Shared:WaitForChild("ShoveRules"))
@@ -144,6 +145,7 @@ local function payOut(record: ZoneRecord, winner: number)
 	local value = record.part:GetAttribute("Value")
 	local zoneValue = if type(value) == "number" then value else 1
 	local pool = Config.capture.basePool * zoneValue
+	local boxTier = BoxRoll.tierForValue(zoneValue, Config.boxes.tierForValue)
 	local units: { [number]: number } = {}
 	for userId, entry in record.contribs do
 		if entry.faction == winner then
@@ -158,6 +160,9 @@ local function payOut(record: ZoneRecord, winner: number)
 		local player = Players:GetPlayerByUserId(userId)
 		if player then
 			DataService.addPoints(player, WarRules.applyMultiplier(amount, DataService.rewardMultiplier(player))) -- a player who left before payout loses that share
+			if boxTier then
+				DataService.earnBox(player, boxTier) -- every paid contributor also earns a box, up to the daily cap
+			end
 		end
 	end
 	record.contribs = {}

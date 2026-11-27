@@ -8,7 +8,7 @@ export type Data = {
 	rank: number, -- 1 = Rookie
 	warsToday: number, -- wars finished on lastWarDay (for the daily full-reward limit)
 	lastWarDay: number, -- UTC day number (days since 1970) of the last finished war, 0 = never
-	boxes: { [string]: number }, -- unopened boxes by tier id, for example { recruit = 2 }
+	boxes: { [string]: number }, -- unopened boxes by tier id, for example { gold = 2 }
 	units: { [string]: number }, -- owned units by id, for example { tank = 1 }
 	cosmetics: { [string]: boolean }, -- owned cosmetic ids
 	boxDay: number, -- UTC day number the boxesToday count belongs to

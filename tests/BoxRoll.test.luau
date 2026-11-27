@@ -22,31 +22,40 @@ for id, tier in Config.boxes.tiers do
 	check(id .. " tier is valid (" .. tostring(reason) .. ")", ok)
 end
 
-local recruit = Config.boxes.tiers.recruit
-check("roll 0 gives the first drop", BoxRoll.roll(recruit, function() return 0 end) == recruit.drops[1])
-check("roll just under 1 gives the last drop", BoxRoll.roll(recruit, function() return 0.999999 end) == recruit.drops[#recruit.drops])
-check("a bad random value is safe", BoxRoll.roll(recruit, function() return 0 / 0 end) == recruit.drops[1])
-check("a random value of 1 is safe", BoxRoll.roll(recruit, function() return 1 end) == recruit.drops[#recruit.drops])
+local gold = Config.boxes.tiers.gold
+check("roll 0 gives the first drop", BoxRoll.roll(gold, function() return 0 end) == gold.drops[1])
+check("roll just under 1 gives the last drop", BoxRoll.roll(gold, function() return 0.999999 end) == gold.drops[#gold.drops])
+check("a bad random value is safe", BoxRoll.roll(gold, function() return 0 / 0 end) == gold.drops[1])
+check("a random value of 1 is safe", BoxRoll.roll(gold, function() return 1 end) == gold.drops[#gold.drops])
 
--- boundary: 40 percent is where the first drop ends
-check("0.399 is still the first drop", BoxRoll.roll(recruit, function() return 0.399 end) == recruit.drops[1])
-check("0.401 is the second drop", BoxRoll.roll(recruit, function() return 0.401 end) == recruit.drops[2])
+-- boundary: 50 percent is where the first drop ends
+check("0.499 is still the first drop", BoxRoll.roll(gold, function() return 0.499 end) == gold.drops[1])
+check("0.501 is the second drop", BoxRoll.roll(gold, function() return 0.501 end) == gold.drops[2])
 
 -- odds shown equal the weights
-local shown = BoxRoll.odds(recruit)
+local shown = BoxRoll.odds(gold)
 local total = 0
 for index, entry in shown do
-	check("shown odds match weight " .. index, entry.percent == recruit.drops[index].weight)
+	check("shown odds match weight " .. index, entry.percent == gold.drops[index].weight)
 	total += entry.percent
 end
 check("shown odds add up to 100", total == 100)
 
 -- every box tier named anywhere in the config must exist
-check("winner box tier exists", Config.boxes.tiers[Config.war.winnerBoxTier] ~= nil)
-check("participant box tier exists", Config.boxes.tiers[Config.war.participantBoxTier] ~= nil)
-for _, rank in Config.ranks do
-	check("rank box tier exists for " .. rank.name, rank.rewardBox == "" or Config.boxes.tiers[rank.rewardBox] ~= nil)
+for _, rule in Config.boxes.tierForValue do
+	check("capture rule tier exists: " .. rule.tier, Config.boxes.tiers[rule.tier] ~= nil)
 end
+for _, tier in Config.dailyStreak.rewards do
+	check("daily box tier exists: " .. tier, Config.boxes.tiers[tier] ~= nil)
+end
+
+-- which tier a capture gives
+check("a side zone gives gold", BoxRoll.tierForValue(Config.capture.sideValue, Config.boxes.tierForValue) == "gold")
+check("the centre zone gives diamond", BoxRoll.tierForValue(Config.capture.centreValue, Config.boxes.tierForValue) == "diamond")
+check("a zone worth 3 gives ultra", BoxRoll.tierForValue(3, Config.boxes.tierForValue) == "ultra")
+check("a zone worth 10 still gives ultra", BoxRoll.tierForValue(10, Config.boxes.tierForValue) == "ultra")
+check("a worthless zone gives no box", BoxRoll.tierForValue(0, Config.boxes.tierForValue) == nil)
+check("nan gives no box", BoxRoll.tierForValue(0 / 0, Config.boxes.tierForValue) == nil)
 
 -- a bad tier is rejected
 local bad = { displayName = "Bad", drops = { { weight = 50, kind = "points", amount = 10 } } }
@@ -58,11 +67,11 @@ check("empty tier is rejected", select(2, BoxRoll.validate({ displayName = "x", 
 local counts: { [BoxRoll.Drop]: number } = {}
 local steps = 10000
 for step = 0, steps - 1 do
-	local drop = BoxRoll.roll(recruit, function() return step / steps end)
+	local drop = BoxRoll.roll(gold, function() return step / steps end)
 	counts[drop] = (counts[drop] or 0) + 1
 end
 local close = true
-for _, drop in recruit.drops do
+for _, drop in gold.drops do
 	if math.abs((counts[drop] or 0) / steps * 100 - drop.weight) > 0.1 then
 		close = false
 	end

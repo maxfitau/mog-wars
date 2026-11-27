@@ -31,7 +31,7 @@ Train in the Training Arena to raise aura power. Each rank unlocks a new trainin
 - Gigachad: Stare-Down Dojo. Practise mog-off duels against dummies.
 - Mog God: Aura Summit. Passive aura on a peak, boosted by other players' emotes.
 
-Rules: older stations still work but give less aura. Stations unlock by rank only, never with Robux. Cosmetic station skins can be sold. Not built yet.
+Rules: older stations still work but give less aura. Stations unlock by rank only, never with Robux. Cosmetic station skins can be sold. At launch only the Treadmill exists; the other stations arrive in Update 1 (players reach Sigma within days, so they need them early).
 
 ## Number pop-ups
 Floating numbers appear for every tap, zone capture, shove that pushes someone out of a zone, mog-off win (the "kill" moment: the loser is knocked back), training tap, box opening and rank-up. Bigger events get bigger numbers: +12, +1.2K, +4.7M. Bigger numbers get bigger text and colour tiers (white, gold, purple). Occasional CRITs give 2-5x. Chains of actions build combo multipliers. Numbers scale exponentially and use short suffixes (K, M, B, T, Qa). Each prestige multiplies gains so the climb gets faster. Not built yet.
@@ -39,16 +39,20 @@ Floating numbers appear for every tap, zone capture, shove that pushes someone o
 ## Prestige
 The Prestige altar unlocks at Mog God and is optional. A confirm screen shows what resets (rank, Mog Points, aura, station unlocks) and what is kept (cosmetics, Legacy Points, faction, friends, streak, arena). Everyone in the server sees an "ascended" broadcast.
 - Legacy Points: 3 earned on each prestige. Never sold.
-- Legacy Points are spent on a prestige skill tree with 3 branches of 3 tiers:
-  - Grind: Mog Point bonus (+5% per level, max 25%); bigger offline arena earnings; capped box luck.
+- Legacy Points are spent on a prestige skill tree with 3 branches of 3 tiers. A tier 1 skill costs 1 Legacy Point, tier 2 costs 2, tier 3 costs 3:
+  - Grind: Mog Point bonus (+5% per level, max 25%); bigger offline arena earnings; box luck, capped at +10% chance to roll the better outcomes, with the boosted odds shown on the opening screen while it is active.
   - Tactics: pick ONE of two per tier: faster respawn OR longer shove; rally banner OR scout; mog-off combo OR dash. Total combat advantage is capped at around 10%.
+    - Rally banner: a small push boost for teammates standing near it.
+    - Scout: shows enemy counts in zones on your screen.
+    - Mog-off combo: a bigger knockback after two mog-off wins in a row.
+    - Dash: a short sprint on a cooldown.
   - Swagger: prestige aura colours, titles and emotes; a legend statue in the hub.
 - Free respec once a week.
-- Factions auto-balance by prestige level as well as player count.
+- Factions auto-balance by prestige level as well as player count: when the server picks the smallest faction, each player counts as 1 plus 0.25 per prestige level, at most 2.5.
 - Mentor bonus: prestiged players get a bonus for helping low-rank teammates capture. It only counts for real friends, or for teammates who have been in the server at least 10 minutes, and it has a daily cap.
-Not built yet.
+Arrives in Update 2. Not built yet.
 
-## Mog Arena (tycoon) - Update 2, not version 1
+## Mog Arena (tycoon) - Update 3, not version 1
 - Each player gets a plot in the training area.
 - Rank unlocks station types. Players buy, upgrade and place stations with Mog Points.
 - Prestige unlocks themes (P1 Neon Gym, P3 Volcano Dojo, P5 Space Summit) and special builds (throne, trophy wall, statue spot). These themes stay prestige-only.
@@ -59,15 +63,20 @@ Not built yet.
 - Extra theme variants and decor can be sold; stations cannot. Not built yet.
 
 ## Release plan
-- Launch: the war plus a simple training area.
-- Update 1 (around week 4-5): prestige and the skill tree.
-- Update 2: the Mog Arena tycoon.
+Everything is built, but only part of it is switched on (see `src/shared/Features.luau`).
+- Launch: the war, ranks, boxes and units, the treadmill, the daily streak and the cosmetic shop. Seasons and the squad bonus are built but switched off; they are turned on as later weekly updates.
+- Update 1: per-rank training stations.
+- Update 2: prestige and the skill tree.
+- Update 3: the Mog Arena tycoon.
+
+## First session
+The first session must be simple enough for a young kid: a new player only sees "stand in the zone, watch the bar fill". Other screens appear gradually as they play: after the first capture (points, war timer), after the first finished war (shove, ranks, training), after two wars (boxes, units), after three wars (daily box, shop).
 
 ## Version 1 scope
-One map per server, 8–12 territories, 2–4 factions auto-balanced (Jawline Legion, Mewing Order, Sigma Syndicate, Aura Cartel), 10–15 minute rounds that reset, join mid-round anytime. Boxes are earned only, never sold. Not in version 1: prestige (Update 1) and the Mog Arena (Update 2).
+One map per server, 8–12 territories, 2–4 factions auto-balanced (Jawline Legion, Mewing Order, Sigma Syndicate, Aura Cartel), 10–15 minute rounds that reset, join mid-round anytime. Boxes are earned only, never sold. Not in version 1: the extra training stations (Update 1), prestige (Update 2) and the Mog Arena (Update 3).
 
 ## Retention
-Daily box with a 7-day streak, barracks earn points offline (replaced by the Mog Arena's offline recruits in Update 2), weekly faction season, join a friend's faction, squad capture bonus.
+Daily box with a 7-day streak, barracks earn points offline (switched off at launch; replaced by the Mog Arena's offline recruits in Update 3), weekly faction season, join a friend's faction, squad capture bonus.
 
 ## Money (cosmetic only)
 Aura effects, extra arena theme variants and decor, station skins, faction banners, victory emotes, unit skins, box-opening animations, titles, private servers, cosmetic season pass, gifting.

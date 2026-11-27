@@ -25,17 +25,18 @@ clients can only ask; the server decides.
 | 13 | Polish: tutorial, effects, sounds, mobile | 5 |
 | 14 | Launch prep | all |
 | 15 | Training Arena: treadmill (built) | 8 |
-| 16 | Training stations by rank (planned, not built) | 15, 8 |
+| 16 | Training stations by rank (planned, Update 1, not built) | 15, 8 |
 | 17 | Battle pass, cosmetic only (planned, not built) | 12, 18 |
 | 18 | Seasons, friends and the squad bonus | 5, 12 |
 | 19 | Number pop-ups and big numbers (planned, not built) | 4, 9 |
-| 20 | Prestige and the skill tree (planned, Update 1, not built) | 8, 19 |
-| 21 | Mog Arena tycoon (planned, Update 2, not built) | 16, 20 |
+| 20 | Prestige and the skill tree (planned, Update 2, not built) | 8, 19 |
+| 21 | Mog Arena tycoon (planned, Update 3, not built) | 16, 20 |
+| 22 | Launch switches and gradual reveal (built) | all |
 
-**Release plan (from the owner):** launch = the war plus a simple training area. Update 1 (around week 4 to 5) = prestige and
-the skill tree (slice 20). Update 2 = the Mog Arena tycoon (slice 21). Slice 19 (number pop-ups) is not given its own date; it
-belongs with prestige, which needs the big numbers. Everything built in slices 1 to 18 counts as the launch bucket unless the
-owner says otherwise.
+**Release plan (from the owner):** everything is built, but launch switches on only the war, ranks, boxes and units, the
+treadmill, the daily streak and the cosmetic shop. Seasons and the squad bonus are built and switched off; they come on as later
+weekly updates. Update 1 = per-rank training stations (slice 16). Update 2 = prestige and the skill tree (slice 20). Update 3 =
+the Mog Arena tycoon (slice 21). Switches live in `src/shared/Features.luau`; the first session is kept simple by slice 22.
 
 ## 1. Capture one territory by standing in it
 
@@ -153,7 +154,7 @@ stand on the belt and walk against it, watch the bar fill and the level rise, st
 capture is faster at a higher level, and check the daily time runs out.
 **Done when:** only moving on a belt counts, the cap holds, and the capture speed matches the aura level.
 
-## 16. Training stations by rank (planned, not built)
+## 16. Training stations by rank (planned, Update 1, not built)
 
 The plan comes from `DESIGN.md`. Each rank unlocks a station with its own mini-game; older stations keep working
 but give less aura; unlocking is by rank only, never Robux (cosmetic station skins can be sold).
@@ -213,7 +214,7 @@ the client only shows what the server sent.
 rules. In Studio: pop-ups stay readable on a phone, never more than a set number on screen, no flashing.
 **Done when:** every shown number matches what the server really granted.
 
-## 20. Prestige and the skill tree (planned, Update 1 at about week 4 to 5, not built)
+## 20. Prestige and the skill tree (planned, Update 2, not built)
 
 - **Altar:** unlocks at Mog God, optional. A confirm screen lists what resets (rank, Mog Points, aura, station unlocks) and what
   is kept (cosmetics, Legacy Points, faction, friends, streak, arena). A server-wide "ascended" message. Each prestige multiplies
@@ -229,14 +230,16 @@ rules. In Studio: pop-ups stay readable on a phone, never more than a set number
 - **Factions auto-balance by prestige level** as well as player count.
 - **Mentor bonus:** for helping low-rank teammates capture. Only for real friends, or teammates who have been in the server at
   least 10 minutes, with a daily cap.
-**Settle before building:** the Legacy Point cost of each skill (3 points per prestige is slow), the exact box luck cap and how its
-odds are shown, what rally banner, scout, combo and dash do, and the formula that balances factions by prestige.
+**Decided:** a skill costs 1, 2 or 3 Legacy Points by tier; box luck is at most +10 percent chance for better outcomes, with boosted
+odds shown on the opening screen; rally banner = small push boost for teammates near it, scout = enemy counts in zones, mog-off
+combo = bigger knockback after two wins in a row, dash = short sprint on a cooldown; factions balance by counting each player as
+1 plus 0.25 per prestige level, at most 2.5.
 **Test:** pure tests for what resets and what is kept, the skill caps (Mog Point bonus 25 percent, combat 10 percent), respec
 once a week, the balance rule, and that a prestige is all or nothing.
 **Done when:** the reset is atomic on the server, the confirm screen matches what really happens, the caps hold, and nothing
 about prestige or the tree can be bought with Robux.
 
-## 21. Mog Arena tycoon (planned, Update 2, not built)
+## 21. Mog Arena tycoon (planned, Update 3, not built)
 
 From `DESIGN.md`:
 - A plot for each player in the training area. Rank unlocks station types; stations are bought, upgraded and placed with Mog
@@ -252,3 +255,18 @@ From `DESIGN.md`:
 saved, and how friends visit.
 **Done when:** a plot saves and reloads, every placement is validated on the server, stations can only be unlocked by rank and
 bought with Mog Points, and no station is for sale.
+
+## 22. Launch switches and gradual reveal (built)
+
+**Build (code written, not yet playtested):**
+- `src/shared/Features.luau` holds the launch switches. On: war, ranks, boxes, units, treadmill, daily streak, cosmetic shop. Off:
+  seasons, squad bonus, friend placement, barracks (and the unbuilt training stations, prestige and arena). A flag set to `false`
+  stops that system from doing anything on the server and hides its screen on the client.
+- `src/shared/RevealRules.luau` and `RevealController`: a brand-new player sees only the zone bar ("stand in the zone, watch the
+  bar fill"). After the first capture the points counter and war timer appear; after the first finished war, shove, ranks and
+  training; after two wars, boxes and units; after three wars, the daily box and the shop. The server counts captures and wars in
+  the save and mirrors a stage to the player. Players who already ranked up see everything.
+**Test:** pure tests in `tests/RevealRules.test.luau`. In Studio: join as a new player and check only the zone bar shows; capture a
+zone and watch the points counter appear; finish wars and watch the rest appear; flip a flag in `Features.luau` and check it
+turns that feature on or off.
+**Done when:** a new player is never shown more than the stage allows, and a switched-off feature does nothing.

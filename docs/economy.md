@@ -26,7 +26,7 @@ change, run `python3 tools/pacing.py --ranks` (it reads the config file directly
 | Capture box | Every paid contributor also earns one box: Gold for a side zone, Diamond for the centre zone, Ultra for a zone worth 3 or more (none yet). Max 12 a day |
 | War bonus | 60 for the winning faction, 20 for anyone who contributed at least 5 units |
 | Daily box (7-day streak) | Gold on days 1 to 3, Diamond on days 4 to 6, Ultra on day 7, then the cycle repeats. Skipping a day restarts at day 1 |
-| Barracks | 6 per hour plus 2 per rank, filling up to 8 hours |
+| Barracks | 6 per hour plus 2 per rank, filling up to 8 hours. **Switched off at launch** (`src/shared/Features.luau`) |
 | Selling units | Tank 150, horse 100 |
 
 Sinks: rank-up costs (the only big sink). Cosmetics are bought with Robux or are box drops, never with points.
@@ -46,12 +46,12 @@ paid also gets the zone's box.
 | # | Rank | Cost | Total |
 |---|---|---|---|
 | 1 | NPC | 0 | 0 |
-| 2 | Rookie | 350 | 350 |
-| 3 | Sigma | 800 | 1,150 |
-| 4 | Chadlite | 1,500 | 2,650 |
-| 5 | Chad | 2,600 | 5,250 |
-| 6 | Gigachad | 10,000 | 15,250 |
-| 7 | Mog God | 24,000 | 39,250 |
+| 2 | Rookie | 320 | 320 |
+| 3 | Sigma | 720 | 1,040 |
+| 4 | Chadlite | 1,350 | 2,390 |
+| 5 | Chad | 2,350 | 4,740 |
+| 6 | Gigachad | 8,800 | 13,540 |
+| 7 | Mog God | 21,000 | 34,540 |
 
 The ladder is gentle up to Chad (so the first week is fun and fast) then steep (so Gigachad and Mog God take
 weeks and mean something). Ranks measure aura earned by winning, never looks. Rank does not change aura power.
@@ -90,12 +90,12 @@ the current config:
 
 | Player | Wars/day | Days/week | Days to Chad | Days to Mog God |
 |---|---|---|---|---|
-| Light | 2 | 4 | 18 | 120 |
+| Light | 2 | 4 | 18 | 130 |
 | **Casual** | **3** | **6** | **6** | **45** |
-| Regular | 5 | 7 | 4 | 24 |
-| Hardcore | 12 | 7 | 2 | 13 |
+| Regular | 5 | 7 | 4 | 23 |
+| Hardcore | 12 | 7 | 2 | 12 |
 
-Target met: a casual player reaches Chad in about a week (day 6) and Mog God in about six and a half weeks (day 45),
+Target met: a casual player reaches Chad in about a week (day 6) and Mog God in about six and a half weeks (day 45). Barracks being off at launch is already included: the rank costs were refitted down a little to compensate,
 inside the one to two month goal. A light player takes about four months, a deliberate choice: they still
 progress every session, and no tier is gated by money.
 
@@ -136,3 +136,15 @@ the owner: Mog Point bonus at most 25 percent (5 percent per level), all combat 
 capped (number to be set). Because Grind adds Mog Point gains and prestige also multiplies gains, the pacing table must be re-run
 with both before launch of Update 1. Respec is free once a week, so tree choices are never a trap. Box luck is only ever earned,
 never bought, and the opening screen must show the boosted odds while it is active.
+
+## Launch switches (built)
+
+Seasons, the squad bonus, friend placement and barracks are switched off at launch (`src/shared/Features.luau`), so the numbers above
+leave out the squad bonus and season points and (since barracks is off) barracks income. The pacing tool reads the barracks switch
+and was re-run with it off. When a feature is switched on in a later weekly update, re-run `python3 tools/pacing.py`.
+
+## Prestige costs and caps (decided, not built)
+
+Skill costs are 1, 2 or 3 Legacy Points by tier (so one branch is about 4 prestiges and the whole tree about 12). Hard caps: Mog Point
+bonus 25 percent, combat advantage about 10 percent, box luck at most +10 percent chance for the better outcomes with the boosted odds
+shown. Faction balancing counts each player as 1 plus 0.25 per prestige level, at most 2.5.

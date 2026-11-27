@@ -5,6 +5,9 @@
 -- no way for players to chat or contact each other.
 
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local Features = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Features"))
 
 local FriendService = {}
 
@@ -49,6 +52,9 @@ function FriendService.refresh(player: Player, timeoutSeconds: number)
 end
 
 function FriendService.init()
+	if not (Features.friendPlacement or Features.squadBonus) then
+		return -- no friend lookups at all while both features are switched off
+	end
 	Players.PlayerAdded:Connect(function(player)
 		task.spawn(FriendService.refresh, player, 10)
 	end)
@@ -66,6 +72,9 @@ function FriendService.init()
 end
 
 function FriendService.start()
+	if not (Features.friendPlacement or Features.squadBonus) then
+		return
+	end
 	for _, player in Players:GetPlayers() do
 		task.spawn(FriendService.refresh, player, 10)
 	end

@@ -15,6 +15,8 @@ local TrainingRules = require(ReplicatedStorage:WaitForChild("Shared"):WaitForCh
 local CosmeticCatalog = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("CosmeticCatalog"))
 local CosmeticRules = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("CosmeticRules"))
 local SeasonRules = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("SeasonRules"))
+local Features = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Features"))
+local RevealRules = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("RevealRules"))
 local PlayerData = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("PlayerData"))
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("EconomyConfig"))
 
@@ -40,7 +42,7 @@ local function syncRewards(player: Player, data: PlayerData.Data)
 	local ready, day = StreakRules.preview(data.streakDay, data.lastClaimDay, PlayerData.dayNumber(now), #Config.dailyStreak.rewards)
 	player:SetAttribute("DailyReady", ready)
 	player:SetAttribute("DailyDay", day)
-	player:SetAttribute("BarracksPending", BarracksRules.pending(now, data.barracksSince, data.rank, Config.barracks))
+	player:SetAttribute("BarracksPending", if Features.barracks then BarracksRules.pending(now, data.barracksSince, data.rank, Config.barracks) else 0)
 end
 
 -- Mirror the Training Arena state to attributes for the client and for CaptureSystem (read only):
@@ -72,6 +74,11 @@ end
 -- Mirror this week's season points (all factions together) to the "SeasonPoints" attribute.
 local function syncSeason(player: Player, data: PlayerData.Data)
 	player:SetAttribute("SeasonPoints", SeasonRules.total(data.season.points))
+end
+
+-- Mirror how much of the game this player should see yet to the "RevealStage" attribute (read only for the client).
+local function syncReveal(player: Player, data: PlayerData.Data)
+	player:SetAttribute("RevealStage", RevealRules.stage(data.lifetimeCaptures, data.lifetimeWars))
 end
 
 local function load(player: Player)
@@ -124,6 +131,7 @@ local function load(player: Player)
 	syncTraining(player, profile.Data :: any)
 	syncCosmetics(player, profile.Data :: any)
 	syncSeason(player, profile.Data :: any)
+	syncReveal(player, profile.Data :: any)
 end
 
 -- The live save table for a player, or nil while loading or after they leave.
@@ -171,6 +179,8 @@ function DataService.recordWar(player: Player)
 	local data = DataService.get(player)
 	if data then
 		PlayerData.recordWar(data, PlayerData.dayNumber(os.time()))
+		data.lifetimeWars += 1
+		syncReveal(player, data)
 	end
 end
 
@@ -455,6 +465,9 @@ end
 
 -- Collect the barracks income. All or nothing. Returns ok, a stable reason and the points paid.
 function DataService.collectBarracks(player: Player): (boolean, string, number)
+	if not Features.barracks then
+		return false, "disabled", 0 -- switched off at launch
+	end
 	local data = DataService.get(player)
 	if not data then
 		return false, "not_loaded", 0
@@ -470,6 +483,15 @@ function DataService.collectBarracks(player: Player): (boolean, string, number)
 	player:SetAttribute("Points", data.points)
 	syncRewards(player, data)
 	return true, "", amount
+end
+
+-- Count a zone capture the player was paid for (reveals more of the game as they play).
+function DataService.recordCapture(player: Player)
+	local data = DataService.get(player)
+	if data then
+		data.lifetimeCaptures += 1
+		syncReveal(player, data)
+	end
 end
 
 function DataService.init()

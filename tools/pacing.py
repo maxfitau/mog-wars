@@ -79,6 +79,9 @@ def load():
     cfg["zoneValues"] = [int(v) for v in re.findall(r"value\s*=\s*(\d+)", block(strip_comments(layout), "zones"))]
     if not cfg["zoneValues"]:
         sys.exit("MapLayout.luau has no zones")
+    features = (CONFIG.parent / "Features.luau").read_text(encoding="utf-8")
+    match = re.search(r"\bbarracks\s*=\s*(true|false)", strip_comments(features))
+    cfg["barracksOn"] = bool(match and match.group(1) == "true")
     streak = block(text, "dailyStreak")
     cfg["streak"] = [cfg["boxEV"][t] for t in re.findall(r'"([^"]+)"', block(streak, "rewards"))]  # the daily box, valued at its expected points
     bar = block(text, "barracks")
@@ -141,7 +144,8 @@ def simulate(cfg, p, max_days=400):
         streak_day += 1
         bar = cfg["barracks"]
         rate = bar["baseRatePerHour"] + bar["perRankRatePerHour"] * (rank - 1)
-        earned += rate * min(p["awayHours"], bar["maxStoredHours"])
+        if cfg["barracksOn"]:  # switched off at launch (src/shared/Features.luau)
+            earned += rate * min(p["awayHours"], bar["maxStoredHours"])
         points += earned
         while rank < len(ranks) and points >= ranks[rank][1]:
             points -= ranks[rank][1]

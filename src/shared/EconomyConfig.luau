@@ -167,12 +167,12 @@ local config: Config = {
 	},
 	ranks = {
 		{ name = "NPC", cost = 0 },
-		{ name = "Rookie", cost = 350 },
-		{ name = "Sigma", cost = 800 },
-		{ name = "Chadlite", cost = 1500 },
-		{ name = "Chad", cost = 2600 },
-		{ name = "Gigachad", cost = 10000 },
-		{ name = "Mog God", cost = 24000 },
+		{ name = "Rookie", cost = 320 },
+		{ name = "Sigma", cost = 720 },
+		{ name = "Chadlite", cost = 1350 },
+		{ name = "Chad", cost = 2350 },
+		{ name = "Gigachad", cost = 8800 },
+		{ name = "Mog God", cost = 21000 },
 	},
 	boxes = {
 		dailyCap = 12, -- most boxes a player can earn from captures in one UTC day

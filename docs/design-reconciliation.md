@@ -63,17 +63,22 @@ change is. Sections A and rows 1 to 5 of B (ranks, boxes, the Training Arena, sp
 7. Best Arena vote: one vote per player per week, visitors only, fixed categories, cosmetic prize.
 8. Friends training at your arena: the owner bonus builds up while away, capped like barracks.
 
-## E. New open questions
+## E. Answered by the owner (second round, now in `DESIGN.md`)
 
-1. **Skill costs:** with 3 Legacy Points per prestige, what does each skill cost? Suggestion: tier 1 costs 1, tier 2 costs 2, tier 3 costs 3, so
-   one branch takes about 4 prestiges and the whole tree about 12.
-2. **Box luck cap:** how big? Suggestion: at most +10 percent chance to roll the better outcomes, with the boosted odds shown on the
-   opening screen while it is active.
-3. **Tactics skills:** what do rally banner, scout, mog-off combo and dash do exactly? Suggestions: rally banner = a small push boost for
-   teammates standing near the banner; scout = shows enemy counts in zones on your screen; combo = a bigger knockback after two mog-off
-   wins in a row; dash = a short sprint on a cooldown. All inside the 10 percent cap.
-4. **Balancing by prestige:** suggestion: each player counts as 1 plus 0.25 per prestige level when the server picks the smallest faction.
-5. **What counts as launch:** shop, seasons, squad bonus, boxes, units, ranks and the training treadmill are all built. Do they all ship
-   at launch? Suggestion: yes, except hide anything you do not want players to see yet behind a switch.
-6. **Training at launch:** "simple training area" fits the treadmill that exists now. The per-rank stations are slice 16, with no date.
-   Should they ship before prestige?
+1. Skill costs 1, 2, 3 Legacy Points by tier.
+2. Box luck capped at +10 percent chance, boosted odds shown.
+3. Tactics skills: rally banner, scout, mog-off combo and dash as suggested.
+4. Prestige balancing: 1 plus 0.25 per prestige level, capped at 2.5 per player.
+5. Launch: the war, ranks, boxes and units, the treadmill, the daily streak and the cosmetic shop. Seasons and the squad bonus switched
+   off and turned on in later weekly updates. The first session is kept simple: new players only see the zone bar.
+6. Release order: Update 1 = per-rank training stations, Update 2 = prestige and the skill tree, Update 3 = Mog Arena.
+
+## F. New open questions
+
+1. **Barracks:** it is not in your launch list, so I switched it off at launch (it is replaced by arena recruits in Update 3, so it may
+   never come back). Is that what you want? One flag in `Features.luau`.
+2. **Friend placement:** I grouped it with the squad bonus, so it is also off at launch. Do you want friends placed together from day one?
+3. **Shove and mog-offs:** I counted them as part of "the war", so they are on at launch (a new player only sees them after their first
+   finished war, apart from the mog-off screen, which appears whenever a duel starts). Fine?
+4. **Reveal speed:** the screens appear after the first capture, first, second and third finished wars. Faster, slower, or tied to
+   rank instead?

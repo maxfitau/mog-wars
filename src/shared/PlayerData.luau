@@ -22,19 +22,21 @@ export type Data = {
 	trainingToday: number, -- strides counted on trainingDay (daily cap)
 	equipped: { [string]: string }, -- cosmetic slot to the cosmetic id worn there
 	receipts: { [string]: number }, -- Robux purchase ids already applied, with when (never grant twice)
+	lifetimeWars: number, -- wars the player took part in (used to reveal screens gradually)
+	lifetimeCaptures: number, -- zone captures the player was paid for
 	season: { week: number, points: { [string]: number }, prevWeek: number, prevPoints: { [string]: number }, claimed: number },
 }
 
 local PlayerData = {}
 
-PlayerData.CURRENT_VERSION = 8
+PlayerData.CURRENT_VERSION = 9
 PlayerData.MAX_RECEIPT_ENTRIES = 400
 PlayerData.MAX_UNITS = 1000
 PlayerData.MAX_BOXES_PER_TIER = 1000
 PlayerData.MAX_POINTS = 1_000_000_000 -- far above anything reachable; stops runaway or overflowing values
 
 function PlayerData.template(): Data
-	return { version = PlayerData.CURRENT_VERSION, points = 0, rank = 1, warsToday = 0, lastWarDay = 0, boxes = {}, units = {}, cosmetics = {}, boxDay = 0, boxesToday = 0, streakDay = 0, lastClaimDay = 0, barracksSince = 0, trainingLevel = 0, trainingProgress = 0, trainingDay = 0, trainingToday = 0, equipped = {}, receipts = {}, season = { week = 0, points = {}, prevWeek = 0, prevPoints = {}, claimed = 0 } }
+	return { version = PlayerData.CURRENT_VERSION, points = 0, rank = 1, warsToday = 0, lastWarDay = 0, boxes = {}, units = {}, cosmetics = {}, boxDay = 0, boxesToday = 0, streakDay = 0, lastClaimDay = 0, barracksSince = 0, trainingLevel = 0, trainingProgress = 0, trainingDay = 0, trainingToday = 0, equipped = {}, receipts = {}, lifetimeWars = 0, lifetimeCaptures = 0, season = { week = 0, points = {}, prevWeek = 0, prevPoints = {}, claimed = 0 } }
 end
 
 local function isWholeNumber(value: any): boolean
@@ -260,6 +262,13 @@ function PlayerData.migrate(data: any): boolean
 		data.season = { week = 0, points = {}, prevWeek = 0, prevPoints = {}, claimed = 0 }
 		data.version = 8
 	end
+	if data.version == 8 then
+		-- Players who already reached rank 2 or higher have played enough to see everything.
+		local experienced = type(data.rank) == "number" and data.rank >= 2
+		data.lifetimeWars = if experienced then 3 else 0
+		data.lifetimeCaptures = if experienced then 1 else 0
+		data.version = 9
+	end
 	return true
 end
 
@@ -327,6 +336,10 @@ function PlayerData.isValid(data: any): boolean
 		and PlayerData.equippedValid(data.equipped)
 		and PlayerData.receiptsValid(data.receipts)
 		and PlayerData.seasonValid(data.season)
+		and isWholeNumber(data.lifetimeWars)
+		and data.lifetimeWars >= 0
+		and isWholeNumber(data.lifetimeCaptures)
+		and data.lifetimeCaptures >= 0
 end
 
 -- Add points to a save table. Returns true if it changed. Rejects bad amounts and never exceeds the cap.

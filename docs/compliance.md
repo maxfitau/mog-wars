@@ -176,3 +176,10 @@ should show everything it gives before purchase.
   person. Plots hold no free text. The Best Arena vote is one vote per player per week, visitors only, fixed categories and a cosmetic prize,
   and must not become a popularity contest that pressures young players. Check Roblox's current rules before selling anything bought by or for
   friends.
+
+## 13. Launch switches and the first session (built)
+
+- A simple first session helps with safety for young players: a new player sees only the zone bar, and the shop, boxes and daily
+  box only appear after three finished wars. Features that are switched off do nothing on the server, not just in the screens.
+- Seasons, the squad bonus and friend lookups are off at launch, so no friends-list lookups happen until they are switched on. Re-read
+  sections 5 and 11 before switching them on.

@@ -17,6 +17,7 @@ local BoxRoll = require(Shared:WaitForChild("BoxRoll"))
 local ContributionScoring = require(Shared:WaitForChild("ContributionScoring"))
 local TrainingRules = require(Shared:WaitForChild("TrainingRules"))
 local SpawnRules = require(Shared:WaitForChild("SpawnRules"))
+local Features = require(Shared:WaitForChild("Features"))
 local SquadRules = require(Shared:WaitForChild("SquadRules"))
 local ShoveRules = require(Shared:WaitForChild("ShoveRules"))
 local UnitRules = require(Shared:WaitForChild("UnitRules"))
@@ -175,7 +176,7 @@ local function payOut(record: ZoneRecord, winner: number)
 	end
 	local friendCounts = SquadRules.friendCounts(members, function(a: number, b: number)
 		local playerA, playerB = present[a], present[b]
-		return playerA ~= nil and playerB ~= nil and FriendService.areFriends(playerA, playerB)
+		return Features.squadBonus and playerA ~= nil and playerB ~= nil and FriendService.areFriends(playerA, playerB)
 	end)
 	for userId, player in present do
 		local bonus = SquadRules.bonusPoints(finalAmounts[userId], friendCounts[userId] or 0, Config.squad)
@@ -184,6 +185,7 @@ local function payOut(record: ZoneRecord, winner: number)
 			DataService.earnBox(player, boxTier) -- every paid contributor also earns a box, up to the daily cap
 		end
 		SeasonService.earn(player, "capture", zoneValue)
+		DataService.recordCapture(player)
 	end
 	record.contribs = {}
 end

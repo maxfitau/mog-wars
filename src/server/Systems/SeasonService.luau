@@ -19,6 +19,7 @@ local FactionRules = require(Shared:WaitForChild("FactionRules"))
 local SeasonRules = require(Shared:WaitForChild("SeasonRules"))
 local SeasonStore = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("SeasonStore"))
 local DataService = require(script.Parent:WaitForChild("DataService"))
+local Features = require(Shared:WaitForChild("Features"))
 
 local CHAMPION_TITLE = "title_season_champion"
 
@@ -35,6 +36,9 @@ end
 
 -- Record season points for a player. kind is "capture" (value = zone value), "warWin" or "mogOffWin".
 function SeasonService.earn(player: Player, kind: string, value: number)
+	if not Features.seasons then
+		return -- switched off at launch
+	end
 	local faction = player:GetAttribute("Faction")
 	local points = SeasonRules.pointsFor(kind, value, Config.season)
 	if type(faction) ~= "number" or points <= 0 then
@@ -125,6 +129,9 @@ function SeasonService.init()
 end
 
 function SeasonService.start()
+	if not Features.seasons then
+		return -- no season loops, no shared totals and no panel while seasons are switched off
+	end
 	publish(currentWeek())
 	task.spawn(function()
 		while true do

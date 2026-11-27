@@ -12,6 +12,7 @@ local Teams = game:GetService("Teams")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("EconomyConfig"))
 local FactionRules = require(Shared:WaitForChild("FactionRules"))
+local Features = require(Shared:WaitForChild("Features"))
 local FriendService = require(script.Parent:WaitForChild("FriendService"))
 
 local FRIEND_LOOKUP_SECONDS = 3 -- the longest a joining player waits for friend lookups before being placed
@@ -75,14 +76,16 @@ local function assign(player: Player)
 		return
 	end
 	assigning[player] = true
-	FriendService.refresh(player, FRIEND_LOOKUP_SECONDS) -- yields; the faction is chosen after this
+	if Features.friendPlacement then
+		FriendService.refresh(player, FRIEND_LOOKUP_SECONDS) -- yields; the faction is chosen after this
+	end
 	assigning[player] = nil
 	if player.Parent ~= Players or assigned[player] then
 		return
 	end
 
 	-- No yielding from here until the faction is stored, so two joiners cannot be counted at the same time.
-	local id = FactionRules.pickFaction(counts(), friendsFaction(player), Config.squad.friendTolerance)
+	local id = FactionRules.pickFaction(counts(), if Features.friendPlacement then friendsFaction(player) else nil, Config.squad.friendTolerance)
 	assigned[player] = id
 	player:SetAttribute("Faction", id)
 	local team = Teams:FindFirstChild(FactionRules.factions[id].name)

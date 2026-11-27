@@ -7,6 +7,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 
+local Features = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Features"))
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("EconomyConfig"))
 
 local RewardsHud = {}
@@ -75,6 +76,7 @@ function RewardsHud.init()
 	end
 	dailyButton = makeButton(-62)
 	barracksButton = makeButton(-16)
+	barracksButton.Visible = Features.barracks -- switched off at launch
 	dailyButton.Activated:Connect(function()
 		claim:FireServer()
 	end)

@@ -32,6 +32,7 @@ clients can only ask; the server decides.
 | 20 | Prestige and the skill tree (planned, Update 2, not built) | 8, 19 |
 | 21 | Mog Arena tycoon (planned, Update 3, not built) | 16, 20 |
 | 22 | Launch switches and gradual reveal (built) | all |
+| 23 | Two islands: War Island and Training Island (built) | 15, 12 |
 
 **Release plan (from the owner):** everything is built, but launch switches on only the war, ranks, boxes and units, the
 treadmill, the daily streak and the cosmetic shop. Seasons and the squad bonus are built and switched off; they come on as later
@@ -146,7 +147,7 @@ real products: buy once, receive once, rejoin and keep it; confirm a retried rec
 
 ## 15. Training Arena
 
-**Build (code written, not yet playtested):** a treadmill belt beside each home base. Walking on it earns strides
+**Build (code written, not yet playtested):** a row of treadmill belts on Training Island (slice 23; before that, one by each base). Walking on it earns strides
 once a second (server counted, 10 minutes a day); strides fill 20 training levels; each level raises aura power.
 Aura power now comes from training, not rank. A small panel shows level, progress and time left today.
 **Test:** pure tests for level costs, the daily cap and the top level (`tests/TrainingRules.test.luau`). In Studio:
@@ -271,3 +272,19 @@ bought with Mog Points, and no station is for sale.
 zone and watch the points counter appear; finish wars and watch the rest appear; flip a flag in `Features.luau` and check it
 turns that feature on or off.
 **Done when:** a new player is never shown more than the stage allows, and a switched-off feature does nothing.
+
+## 23. Two islands: War Island and Training Island (built)
+
+**Build (code written, not yet playtested):**
+- One place, two platforms. **War Island** (the baseplate) has the bases, the nine zones and a TRAIN portal by each base. **Training
+  Island** (700 studs east) has all the treadmills in one row, the shop kiosk, a BACK TO WAR portal, and empty reserved space for the
+  prestige altar (Update 2) and the Mog Arena plots (Update 3). The old treadmills by the bases are gone.
+- `TravelSystem`: walking into a portal, or the big HUD button (`TravelHud`: TRAIN on War Island, BACK TO WAR on Training Island), moves
+  you. Everyone still spawns on War Island. Back to war lands you on your faction's front line (home base between wars).
+- Rules (`IslandRules.canTravel`): known destination, not already there, not during a mog-off, not right after being shoved or losing a
+  duel, and a 3 second cooldown. A new war does not pull players out of Training Island.
+- The shop button only shows on Training Island. The TRAIN button joins the gradual reveal (after the first finished war). New screens use
+  a chunky rounded style from `src/client/Lib/UiTheme.luau`.
+**Test:** pure tests in `tests/IslandRules.test.luau` and `tests/MapLayout.test.luau`. In Studio: see `docs/PLAYTEST.md`.
+**Done when:** you can go to Training Island and back instantly, training only counts on the treadmills there, the shop only opens
+there, and nothing in the war can be reached from Training Island.

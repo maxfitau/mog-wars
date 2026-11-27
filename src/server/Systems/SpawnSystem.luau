@@ -49,6 +49,29 @@ local function place(player: Player, character: Model)
 	character:PivotTo(CFrame.lookAt(target, Vector3.new(0, height, 0)))
 end
 
+-- Move a player (from Training Island) back to War Island. During a war they land on their faction's front
+-- line; between wars, at their home base. Returns true if they were moved.
+function SpawnSystem.sendToWar(player: Player): boolean
+	local faction = player:GetAttribute("Faction")
+	local character = player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	if type(faction) ~= "number" or not character or not root or not root:IsA("BasePart") then
+		return false
+	end
+	slots[faction] = (slots[faction] or 0) + 1
+	local baseX, baseZ = baseOf(faction)
+	local x, z
+	if Workspace:GetAttribute("WarPhase") == "War" then
+		x, z = SpawnRules.spawnPoint(faction, CaptureSystem.zoneList(), baseX, baseZ, slots[faction])
+	else
+		x, z = baseX, baseZ
+	end
+	local target = Vector3.new(x, 4, z)
+	character:PivotTo(CFrame.lookAt(target, Vector3.new(0, 4, 0)))
+	root.AssemblyLinearVelocity = Vector3.zero
+	return true
+end
+
 local function watch(player: Player)
 	player.CharacterAdded:Connect(function(character)
 		task.defer(place, player, character)

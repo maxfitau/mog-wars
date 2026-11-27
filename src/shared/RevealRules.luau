@@ -20,6 +20,7 @@ RevealRules.screens = {
 	RewardsHud = 4, -- after three finished wars
 	ShopHud = 4,
 	SeasonHud = 4,
+	TrainButton = 2, -- not a screen: TravelHud asks when to show the TRAIN button (after the first finished war)
 } :: { [string]: number }
 
 local function whole(value: any): number

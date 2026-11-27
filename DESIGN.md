@@ -22,6 +22,13 @@ A live territory war on a meme map: train your aura, drop into the war, capture 
 6. Spend Mog Points to rank up: NPC → Rookie → Sigma → Chadlite → Chad → Gigachad → Mog God.
 7. Between wars, train in the Training Arena to raise aura power (see the Training Arena section).
 
+## Islands
+One place, two islands (no separate places).
+- War Island: everyone spawns here, straight into the war. It has the territories, the capture zones, the faction bases and a portal by each base.
+- Training Island: all training stations in one area, plus the shop. Space is kept free for the prestige altar and the Mog Arena plots.
+- A big "Train" button on the HUD and a portal on War Island teleport you to Training Island instantly. A "Back to War" button and portal on Training Island drop you on your faction's front line.
+- Placeholder terrain for now; art comes later. The UI is bright, chunky, with a rounded font and big buttons.
+
 ## Training Arena
 Train in the Training Arena to raise aura power. Each rank unlocks a new training station with its own mini-game:
 - Rookie: Treadmill. Tap to run.

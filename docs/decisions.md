@@ -91,3 +91,9 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 85 | Zones are switched off until the first war starts | Fix from code review 1: they were live during the first intermission |
 | 86 | docs/LAUNCH.md holds the truthful feature list and checklist status; nothing may be advertised until it has been tested in Studio | The roblox-launch skill's rule |
 | 87 | Owner confirmed: barracks off at launch, friend placement off at launch, shove and mog-offs on at launch, reveal speed as built | Answers to design-reconciliation F1 to F4 (supersedes the "assumed" note in decision 81) |
+| 88 | One place, two islands: War Island (bases, zones, portals) and Training Island (all treadmills, the shop, room for the prestige altar and arena plots), 700 studs apart | The owner's request; no second place means no teleport between places and one saved game |
+| 89 | Travel is server checked: portals and the HUD button use the same rules (not in a mog-off, not just after being shoved, 3 second cooldown); a new war does not pull players out of Training Island | Stops fleeing a fight and keeps training uninterrupted |
+| 90 | Back to War lands on the faction's front line during a war and at the home base between wars | Matches "drops you on your faction's front line"; between wars zones are not meaningful |
+| 91 | There is a TRAIN portal by each of the four home bases (not one in the middle) | Every faction has the same short walk; the owner asked for "a portal" so say if you want only one |
+| 92 | The shop button only shows on Training Island; the TRAIN button appears after the first finished war; BACK TO WAR always shows on Training Island | Keeps the war screen simple and the first session uncluttered |
+| 93 | New buttons use a shared chunky theme (rounded Fredoka font, thick outlines, big sizes) in src/client/Lib/UiTheme.luau | The owner's UI designs were not available to the cloud session, so this is a guess to be matched to them later |

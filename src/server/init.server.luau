@@ -3,7 +3,7 @@
 local Systems = script:WaitForChild("Systems")
 
 -- Order matters: factions create the Teams first, then the map builds matching spawns, then captures start.
-local order = { "DataService", "FriendService", "FactionSystem", "PlaceholderMap", "CaptureSystem", "SpawnSystem", "ShoveSystem", "MogOffSystem", "RankSystem", "BoxSystem", "UnitSystem", "RewardsSystem", "SeasonService", "TrainingSystem", "ShopSystem", "WarSystem" }
+local order = { "DataService", "FriendService", "FactionSystem", "PlaceholderMap", "CaptureSystem", "SpawnSystem", "ShoveSystem", "MogOffSystem", "RankSystem", "BoxSystem", "UnitSystem", "RewardsSystem", "SeasonService", "TrainingSystem", "ShopSystem", "TravelSystem", "WarSystem" }
 
 local loaded = {}
 for _, name in order do

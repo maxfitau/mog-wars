@@ -153,6 +153,11 @@ local function scan(dt: number)
 	end
 end
 
+-- True while the player is in a mog-off (used to stop them travelling away from it).
+function MogOffSystem.inDuel(player: Player): boolean
+	return activeByUser[player.UserId] ~= nil
+end
+
 function MogOffSystem.init()
 	local folder = ReplicatedStorage:WaitForChild("Remotes")
 	knockbackRemote = folder:WaitForChild("ShoveKnockback") :: RemoteEvent

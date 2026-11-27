@@ -84,6 +84,9 @@ local function startWar()
 			if player:GetAttribute("Faction") == nil then
 				return -- still being placed on a faction; they spawn when that finishes
 			end
+			if player:GetAttribute("Island") == "training" then
+				return -- training is a side trip: a new war does not pull them out of it
+			end
 			player:LoadCharacter() -- back to the faction base for a fresh start
 		end)
 	end

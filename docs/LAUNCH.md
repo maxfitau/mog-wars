@@ -21,9 +21,10 @@ guarantees approval, a rating, visibility or revenue.
 | Ranks NPC to Mog God | on | yes | no | yes | no |
 | Boxes (Gold, Diamond, Ultra) with odds shown | on | yes | no | yes | no |
 | Units: tank and horse, deploy and sell | on | yes | no | yes | no |
-| Training treadmill raising aura power | on | yes | no | yes | no |
+| Training Island with four treadmills raising aura power | on | yes | no | yes | no |
+| Portals and TRAIN / BACK TO WAR buttons between War Island and Training Island | on | yes | no | yes | no |
 | Daily box with a 7-day streak | on | yes | no | yes | no |
-| Cosmetic shop (trails, auras, titles) | on | yes | no | yes | no (no products created yet) |
+| Cosmetic shop on Training Island (trails, auras, titles) | on | yes | no | yes | no (no products created yet) |
 | First-session hint and gradual screens | on | yes | no | yes | no |
 | Seasons, squad bonus, friend placement | off | yes | no | no | no (not at launch) |
 | Barracks offline income | off | yes | no | no | no (not at launch) |
@@ -62,6 +63,7 @@ done = with evidence, blocked = what is in the way, unknown = nobody checked, us
 1. A wide shot of a side zone mid-capture with two teammates in the ring and the bar half full (camera behind them, UI visible).
 2. A mog-off with the "5" countdown panel and the two players facing each other (UI visible, 16:9).
 3. The four coloured bases from above, with the glowing centre zone (camera high, UI hidden).
+3b. Training Island: the row of treadmills with the "Training Area" sign (UI visible).
 4. A box opening with the odds list visible (UI visible).
 Export each at 16:9 (1920 by 1080).
 

@@ -16,6 +16,7 @@ local ShopHud = {}
 
 local player = Players.LocalPlayer
 local panel: ScrollingFrame
+local toggle: TextButton
 local toast: TextLabel
 local toastUntil = 0
 local rows: { [string]: { button: TextButton, state: TextLabel, item: CosmeticCatalog.Item } } = {}
@@ -49,6 +50,11 @@ end
 
 local function update()
 	refreshOwned()
+	local onTraining = player:GetAttribute("Island") == "training" -- the shop lives on Training Island
+	toggle.Visible = onTraining
+	if not onTraining then
+		panel.Visible = false
+	end
 	for id, row in rows do
 		local item = row.item
 		local equippedId = player:GetAttribute("Equip_" .. item.slot)
@@ -85,7 +91,7 @@ function ShopHud.init()
 	gui.ResetOnSpawn = false
 	gui.Parent = player:WaitForChild("PlayerGui")
 
-	local toggle = Instance.new("TextButton")
+	toggle = Instance.new("TextButton")
 	toggle.AnchorPoint = Vector2.new(0, 0.5)
 	toggle.Position = UDim2.new(0, 16, 0.5, 104)
 	toggle.Size = UDim2.new(0, 90, 0, 40)

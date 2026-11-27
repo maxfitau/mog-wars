@@ -118,6 +118,59 @@ local function auraTick(amount: number)
 	tween:Play()
 end
 
+-- A soft little note on the left (never in the middle), for "combo ended +240" and "-45 aura".
+local noteCount = 0
+local function softNote(text: string, color: Color3)
+	if noteCount >= 3 then
+		return
+	end
+	noteCount += 1
+	local note = Instance.new("TextLabel")
+	note.Size = UDim2.new(0, 190, 0, 22)
+	note.Position = UDim2.new(0, 22, 0, 176)
+	note.BackgroundTransparency = 1
+	note.Font = UiTheme.font
+	note.TextScaled = true
+	note.TextXAlignment = Enum.TextXAlignment.Left
+	note.Text = text
+	note.TextColor3 = color
+	note.TextStrokeColor3 = UiTheme.outline
+	note.TextStrokeTransparency = 0
+	note.Parent = gui
+	local tween = TweenService:Create(note, TweenInfo.new(1.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		Position = note.Position - UDim2.new(0, 0, 0, 20),
+		TextTransparency = 1,
+		TextStrokeTransparency = 1,
+	})
+	tween.Completed:Connect(function()
+		noteCount -= 1
+		note:Destroy()
+	end)
+	tween:Play()
+end
+
+-- The screen-edge glow that gets hotter as the combo grows.
+local edgeFrames: { Frame } = {}
+local edgeToken = 0
+local function edgeGlow(multiplier: number)
+	edgeToken += 1
+	local token = edgeToken
+	local heat = math.clamp((multiplier - 2) / 8, 0, 1)
+	local color = Color3.fromRGB(255, 220 - math.floor(heat * 170), 60 - math.floor(heat * 40))
+	for _, frame in edgeFrames do
+		frame.BackgroundColor3 = color
+		frame.BackgroundTransparency = 0.75 - heat * 0.4
+		frame.Visible = true
+	end
+	task.delay(Weapons.combat.comboWindowSeconds, function()
+		if edgeToken == token then
+			for _, frame in edgeFrames do
+				frame.Visible = false
+			end
+		end
+	end)
+end
+
 -- A big banner at the top of the screen (one at a time).
 local function showBanner(text: string, color: Color3, seconds: number)
 	bannerToken += 1
@@ -144,6 +197,7 @@ local function showCombo(multiplier: number)
 	end
 	comboToken += 1
 	local token = comboToken
+	edgeGlow(multiplier)
 	comboLabel.Text = ("COMBO x%d"):format(multiplier)
 	comboLabel.Visible = true
 	comboLabel.TextTransparency = 0
@@ -177,7 +231,7 @@ local function flyTo(color: Color3, count: number, targetY: number)
 		rim.Parent = coin
 		task.delay((index - 1) * 0.07, function()
 			local tween = TweenService:Create(coin, TweenInfo.new(0.55, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-				Position = UDim2.new(1, -60, 0, targetY),
+				Position = UDim2.new(0, 140, 0, targetY), -- into the aura counter, top left
 				Size = UDim2.new(0, 10, 0, 10),
 			})
 			tween.Completed:Connect(function()
@@ -209,6 +263,17 @@ function PopupController.init()
 	flash.BackgroundTransparency = 1
 	flash.BorderSizePixel = 0
 	flash.Parent = gui
+
+	for _, edge in { { UDim2.new(1, 0, 0, 14), UDim2.new(0, 0, 0, 0) }, { UDim2.new(1, 0, 0, 14), UDim2.new(0, 0, 1, -14) }, { UDim2.new(0, 14, 1, 0), UDim2.new(0, 0, 0, 0) }, { UDim2.new(0, 14, 1, 0), UDim2.new(1, -14, 0, 0) } } do
+		local frame = Instance.new("Frame")
+		frame.Size = edge[1]
+		frame.Position = edge[2]
+		frame.BorderSizePixel = 0
+		frame.BackgroundTransparency = 0.7
+		frame.Visible = false
+		frame.Parent = gui
+		table.insert(edgeFrames, frame)
+	end
 
 	banner = Instance.new("TextLabel")
 	banner.AnchorPoint = Vector2.new(0.5, 0)
@@ -252,13 +317,13 @@ function PopupController.init()
 		local number = NumberFormat.format(amount)
 		if kind == "points" then
 			show(("+%s Mog Points"):format(number), amount)
-			flyTo(Color3.fromRGB(255, 205, 50), math.clamp(math.floor(math.log(amount + 1, 4)) + 1, 1, 4), 30)
+			flyTo(Color3.fromRGB(255, 205, 50), math.clamp(math.floor(math.log(amount + 1, 4)) + 1, 1, 4), 92)
 		elseif kind == "aura" and amount <= 12 then
 			auraTick(amount)
 		elseif kind == "aura" then
 			show(("+%s"):format(number), amount, if amount >= 25 then nil else Color3.fromRGB(150, 235, 255))
 			if amount >= 10 then
-				flyTo(Color3.fromRGB(120, 220, 255), 2, 110)
+				flyTo(Color3.fromRGB(120, 220, 255), math.clamp(math.floor(math.log(amount + 1, 5)), 1, 4), 92)
 			end
 		elseif kind == "mogged" then
 			showBanner("MOGGED!", Color3.fromRGB(190, 110, 255), 1.0)
@@ -270,6 +335,34 @@ function PopupController.init()
 			-- the funny shove pop-up: BONK! for the shover (amount 1) or for whoever got bonked (amount 2)
 			showBanner(if amount >= 2 then "BONKED!" else "BONK!", Color3.fromRGB(255, 160, 40), 0.8)
 			punch()
+		elseif kind == "crit" then
+			-- MEGA MOG! (x5, gold) or ULTRA MOG! (x10, rainbow): a banner, a flash and a big number
+			local ultra = detail == "ultra"
+			showBanner(if ultra then "ULTRA MOG!" else "MEGA MOG!", if ultra then Color3.new(1, 1, 1) else Color3.fromRGB(255, 205, 60), 1.3)
+			if ultra then
+				local gradient = Instance.new("UIGradient")
+				gradient.Color = ColorSequence.new({
+					ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 80, 80)), ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 220, 60)),
+					ColorSequenceKeypoint.new(0.5, Color3.fromRGB(80, 230, 120)), ColorSequenceKeypoint.new(0.75, Color3.fromRGB(80, 160, 255)),
+					ColorSequenceKeypoint.new(1, Color3.fromRGB(200, 100, 255)),
+				})
+				gradient.Parent = banner
+				task.delay(1.5, function()
+					gradient:Destroy()
+				end)
+			end
+			flash.BackgroundColor3 = if ultra then Color3.fromRGB(255, 255, 255) else Color3.fromRGB(255, 225, 120)
+			flash.BackgroundTransparency = 0.7
+			TweenService:Create(flash, TweenInfo.new(0.4), { BackgroundTransparency = 1 }):Play()
+			show(("+%s"):format(number), amount * 50, if ultra then Color3.fromRGB(255, 255, 255) else Color3.fromRGB(255, 205, 60))
+			flyTo(Color3.fromRGB(255, 215, 80), 4, 92)
+		elseif kind == "comboend" then
+			softNote(("Combo ended +%s"):format(number), Color3.fromRGB(255, 190, 60))
+		elseif kind == "stolen" then
+			show(("+%s STOLEN!"):format(number), 100000, Color3.fromRGB(190, 110, 255)) -- purple
+			flyTo(Color3.fromRGB(190, 110, 255), 3, 92)
+		elseif kind == "lost" then
+			softNote(("-%s aura"):format(number), Color3.fromRGB(255, 120, 120))
 		elseif kind == "whoosh" then
 			showBanner("WHOOSH!", Color3.fromRGB(150, 220, 255), 1.2)
 		elseif kind == "rankup" then

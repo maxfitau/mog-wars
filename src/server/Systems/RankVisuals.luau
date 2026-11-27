@@ -9,6 +9,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("EconomyConfig"))
 local DataService = require(script.Parent:WaitForChild("DataService"))
 local PopupSystem = require(script.Parent:WaitForChild("PopupSystem"))
+local Events = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("Events"))
 
 local RankVisuals = {}
 
@@ -64,7 +65,7 @@ local function apply(player: Player)
 	title.TextColor3 = color
 	title.TextStrokeColor3 = Color3.fromRGB(35, 25, 60)
 	title.TextStrokeTransparency = 0
-	title.Text = string.upper(info.name) .. (if player:GetAttribute("StashHunter") == true then "  *STASH HUNTER*" else "")
+	title.Text = string.upper(info.name) .. (if type(player:GetAttribute("Title")) == "string" and player:GetAttribute("Title") ~= "" then "  *" .. string.upper(player:GetAttribute("Title") :: string) .. "*" else "")
 	title.Parent = gui
 	local name = Instance.new("TextLabel")
 	name.Position = UDim2.new(0, 0, 0.42, 0)
@@ -108,7 +109,7 @@ local function watch(player: Player)
 	player:GetAttributeChangedSignal("Rank"):Connect(function()
 		apply(player)
 	end)
-	player:GetAttributeChangedSignal("StashHunter"):Connect(function()
+	player:GetAttributeChangedSignal("Title"):Connect(function()
 		apply(player)
 	end)
 	if player.Character then
@@ -120,6 +121,7 @@ function RankVisuals.init()
 	DataService.onRankUp = function(player: Player, rank: number)
 		local info = Config.ranks[rank]
 		PopupSystem.send(player, "rankup", rank, if info then info.name else "")
+		Events.fire(player, "rank", rank)
 	end
 	Players.PlayerAdded:Connect(watch)
 	for _, player in Players:GetPlayers() do

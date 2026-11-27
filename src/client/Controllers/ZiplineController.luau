@@ -1,65 +1,72 @@
 --!strict
--- Rides the zipline when the server says so: this player's own character glides along the cable (hanging a little below
--- it) at a steady speed, then lets go with some forward momentum. Jump to let go early. Display and movement of your own
--- character only; the server decided that you may ride and where the cable goes.
+-- Zipline visuals. The SERVER carries you along the cable; this only adds the feel: speed lines racing past, a wider
+-- field of view, and "jump to let go". Display only.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
+local Workspace = game:GetService("Workspace")
 
 local ZiplineController = {}
 
+local player = Players.LocalPlayer
+local gui: ScreenGui
+local lines: { Frame } = {}
 local riding = false
+local letGo: RemoteEvent
 
-function ZiplineController.init() end
+local function setRiding(on: boolean)
+	riding = on
+	local camera = Workspace.CurrentCamera
+	if camera then
+		TweenService:Create(camera, TweenInfo.new(0.35), { FieldOfView = if on then 88 else 70 }):Play()
+	end
+	for _, line in lines do
+		line.Visible = on
+	end
+end
+
+function ZiplineController.init()
+	gui = Instance.new("ScreenGui")
+	gui.Name = "ZiplineFx"
+	gui.ResetOnSpawn = false
+	gui.IgnoreGuiInset = true
+	gui.Parent = player:WaitForChild("PlayerGui")
+	for index = 1, 14 do
+		local line = Instance.new("Frame") -- a thin white speed line, drawn near the edges so it never covers the middle
+		line.BackgroundColor3 = Color3.new(1, 1, 1)
+		line.BackgroundTransparency = 0.5
+		line.BorderSizePixel = 0
+		line.Size = UDim2.new(0, 3, 0, 60 + (index * 13) % 50)
+		line.Visible = false
+		line.Parent = gui
+		table.insert(lines, line)
+	end
+end
 
 function ZiplineController.start()
-	local remote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("ZiplineStart") :: RemoteEvent
-	remote.OnClientEvent:Connect(function(startPos: any, endPos: any, speed: any)
-		if riding or typeof(startPos) ~= "Vector3" or typeof(endPos) ~= "Vector3" or type(speed) ~= "number" or speed <= 0 or speed > 200 then
+	letGo = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("ZiplineLetGo") :: RemoteEvent
+	player:GetAttributeChangedSignal("Ziplining"):Connect(function()
+		setRiding(player:GetAttribute("Ziplining") == true)
+	end)
+	UserInputService.JumpRequest:Connect(function()
+		if riding then
+			letGo:FireServer() -- jump to let go
+		end
+	end)
+	local clock = 0
+	RunService.RenderStepped:Connect(function(dt)
+		if not riding then
 			return
 		end
-		local character = Players.LocalPlayer.Character
-		local root = character and character:FindFirstChild("HumanoidRootPart")
-		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-		if not root or not root:IsA("BasePart") or not humanoid then
-			return
+		clock += dt
+		for index, line in lines do
+			local side = if index % 2 == 0 then 0.06 + (index % 5) * 0.03 else 0.94 - (index % 5) * 0.03
+			local y = ((clock * (1.8 + (index % 4) * 0.4)) + index * 0.17) % 1.2 - 0.1
+			line.Position = UDim2.new(side, 0, y, 0)
 		end
-		riding = true
-		local direction = (endPos - startPos).Unit
-		local length = (endPos - startPos).Magnitude
-		local travelled = 0
-		humanoid.PlatformStand = true
-		root.Anchored = true
-		local connection: RBXScriptConnection? = nil
-		local jump: RBXScriptConnection? = nil
-		local function finish()
-			if connection then
-				connection:Disconnect()
-			end
-			if jump then
-				jump:Disconnect()
-			end
-			root.Anchored = false
-			humanoid.PlatformStand = false
-			root.AssemblyLinearVelocity = direction * speed * 0.6 + Vector3.new(0, 10, 0) -- let go with some momentum
-			riding = false
-		end
-		jump = UserInputService.JumpRequest:Connect(finish)
-		connection = RunService.Heartbeat:Connect(function(dt)
-			if not root.Parent then
-				finish()
-				return
-			end
-			travelled += speed * dt
-			if travelled >= length then
-				finish()
-				return
-			end
-			local point = startPos + direction * travelled
-			root.CFrame = CFrame.lookAt(point - Vector3.new(0, 4.2, 0), point - Vector3.new(0, 4.2, 0) + Vector3.new(direction.X, 0, direction.Z))
-		end)
 	end)
 end
 

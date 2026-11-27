@@ -72,7 +72,7 @@ function ResultsHud.start()
 		local current = token
 		local winnerFaction = if type(winner) == "number" then FactionRules.byId(winner) else nil
 		title.Text = if winnerFaction then string.upper(winnerFaction.name) .. " WIN!" else "DRAW!"
-		mineLabel.Text = ("You: +%s aura   %d flags"):format(NumberFormat.format(tonumber(mine.aura) or 0), tonumber(mine.flags) or 0)
+		mineLabel.Text = ("You: +%s aura   %d flags   %s stolen"):format(NumberFormat.format(tonumber(mine.aura) or 0), tonumber(mine.flags) or 0, NumberFormat.format(tonumber(mine.stolen) or 0))
 		for id, row in rows do
 			local entry = factions[id]
 			if type(entry) == "table" then

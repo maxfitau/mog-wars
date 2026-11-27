@@ -145,6 +145,7 @@ local v10: any = PlayerData.template()
 v10.version = 10
 v10.aura = nil
 check("migrate upgrades version 10 and adds total aura", PlayerData.migrate(v10) and PlayerData.isValid(v10) and v10.aura == 0 and v10.version == PlayerData.CURRENT_VERSION)
+check("version 13 adds achievements, counters and a title", next(v10.achievements) == nil and next(v10.counters) == nil and v10.title == "")
 check("version 12 adds unlock cards and stashes", next(v10.unlocksSeen) == nil and next(v10.stashes) == nil)
 do
 	local seen = PlayerData.template()

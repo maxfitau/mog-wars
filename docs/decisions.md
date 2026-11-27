@@ -169,3 +169,10 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 162 | The AssetCheck debug scripts were removed as asked. If "ContentId rbxassetid://203785492" is still printed, it comes from Studio or from the place file itself, not from our scripts | We could not find it in our objects; the bots were the main suspect and no longer download an avatar |
 | 163 | The 12 Aura Stashes give +100 once per war each; the first time ever each counts toward the saved "found n/12"; the crate is not solid | The owner's design; a solid crate in a tunnel was what trapped players |
 | 164 | Gigachad Gate's radius is 140, not 128 | Rizz Ravine grew to radius 130 when islands were spaced out, which made it bigger than the Gate; the Gate must stay the biggest island |
+| 164 | Rank amounts now give Rookie about a minute, Sigma about 10, Chadlite 30, Chad an hour, Gigachad 3 hours and Mog God multi-day (cumulative 150 / 2,500 / 7,500 / 15,000 / 45,000 / 150,000) | The owner's pacing; tune against real play |
+| 165 | Only Shove plus the two newest abilities show (Q and R on PC); the server still allows every unlocked ability | Keeps the screen simple without taking power away |
+| 166 | Stealing takes 10% (20% from the bounty holder) of aura earned THIS WAR, tracked in the per-war tally, never the saved total; orbs pay out the thief or anyone who grabs them | Ranks must never go down |
+| 167 | Crits and combos are applied inside DataService.addAura, so every source of aura gets them without each system knowing; their total is capped at x20 | One place to tune; stops runaway numbers |
+| 168 | Ziplines are driven by the server (it takes network ownership of the rider while they ride) and work both ways; touching a platform or pressing its prompt starts a ride | The client-driven version was unreliable |
+| 169 | Cooldown covers wipe away instead of a true circular ring | Roblox UI has no radial progress without images |
+| 170 | Not built yet: airship taxis, tank mode, music and sound effects, slow-motion and hit-stop, phone haptics | Time; sounds need licensed ids; Roblox has no phone vibration API |

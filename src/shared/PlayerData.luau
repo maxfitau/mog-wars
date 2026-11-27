@@ -26,6 +26,9 @@ export type Data = {
 	aura: number, -- total aura earned, ever. Your rank comes from this and never goes down
 	unlocksSeen: { [string]: boolean }, -- unlock cards already shown ("shove", "dash", "stare")
 	stashes: { [string]: boolean }, -- hidden Aura Stashes found, ever (12 in all)
+	achievements: { [string]: boolean }, -- unlocked achievements
+	counters: { [string]: number }, -- lifetime counters the achievements watch (flags, shoves, ...)
+	title: string, -- the title shown over your head ("" for none)
 	lifetimeWars: number, -- wars the player took part in (used to reveal screens gradually)
 	lifetimeCaptures: number, -- zone captures the player was paid for
 	season: { week: number, points: { [string]: number }, prevWeek: number, prevPoints: { [string]: number }, claimed: number },
@@ -33,14 +36,14 @@ export type Data = {
 
 local PlayerData = {}
 
-PlayerData.CURRENT_VERSION = 12
+PlayerData.CURRENT_VERSION = 13
 PlayerData.MAX_RECEIPT_ENTRIES = 400
 PlayerData.MAX_UNITS = 1000
 PlayerData.MAX_BOXES_PER_TIER = 1000
 PlayerData.MAX_POINTS = 1_000_000_000 -- far above anything reachable; stops runaway or overflowing values
 
 function PlayerData.template(): Data
-	return { version = PlayerData.CURRENT_VERSION, points = 0, rank = 1, warsToday = 0, lastWarDay = 0, boxes = {}, units = {}, cosmetics = {}, boxDay = 0, boxesToday = 0, streakDay = 0, lastClaimDay = 0, barracksSince = 0, trainingLevel = 0, trainingProgress = 0, trainingDay = 0, trainingToday = 0, equipped = {}, receipts = {}, weapons = {}, aura = 0, unlocksSeen = {}, stashes = {}, lifetimeWars = 0, lifetimeCaptures = 0, season = { week = 0, points = {}, prevWeek = 0, prevPoints = {}, claimed = 0 } }
+	return { version = PlayerData.CURRENT_VERSION, points = 0, rank = 1, warsToday = 0, lastWarDay = 0, boxes = {}, units = {}, cosmetics = {}, boxDay = 0, boxesToday = 0, streakDay = 0, lastClaimDay = 0, barracksSince = 0, trainingLevel = 0, trainingProgress = 0, trainingDay = 0, trainingToday = 0, equipped = {}, receipts = {}, weapons = {}, aura = 0, unlocksSeen = {}, stashes = {}, achievements = {}, counters = {}, title = "", lifetimeWars = 0, lifetimeCaptures = 0, season = { week = 0, points = {}, prevWeek = 0, prevPoints = {}, claimed = 0 } }
 end
 
 local function isWholeNumber(value: any): boolean
@@ -213,6 +216,19 @@ function PlayerData.takeUnit(data: Data, unit: string): boolean
 	return true
 end
 
+-- True when `counters` is a table of short names to whole numbers.
+function PlayerData.countersValid(counters: any): boolean
+	if type(counters) ~= "table" then
+		return false
+	end
+	for key, value in counters do
+		if type(key) ~= "string" or #key > 32 or not isWholeNumber(value) or value < 0 then
+			return false
+		end
+	end
+	return true
+end
+
 -- Remember that an unlock card was shown / a stash was found. Return false if the id is bad or already recorded.
 function PlayerData.markSeen(map: { [string]: boolean }, id: string): boolean
 	if type(id) ~= "string" or id == "" or #id > 40 or map[id] then
@@ -304,6 +320,12 @@ function PlayerData.migrate(data: any): boolean
 		data.stashes = {}
 		data.version = 12
 	end
+	if data.version == 12 then
+		data.achievements = {}
+		data.counters = {}
+		data.title = ""
+		data.version = 13
+	end
 	return true
 end
 
@@ -374,6 +396,9 @@ function PlayerData.isValid(data: any): boolean
 		and PlayerData.cosmeticsValid(data.weapons)
 		and PlayerData.cosmeticsValid(data.unlocksSeen)
 		and PlayerData.cosmeticsValid(data.stashes)
+		and PlayerData.cosmeticsValid(data.achievements)
+		and PlayerData.countersValid(data.counters)
+		and type(data.title) == "string"
 		and isWholeNumber(data.aura)
 		and data.aura >= 0
 		and isWholeNumber(data.lifetimeWars)

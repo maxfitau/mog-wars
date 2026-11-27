@@ -127,7 +127,7 @@ export type Config = {
 local config: Config = {
 	war = {
 		durationSeconds = 360, -- 6 minutes; fast wars (WarRules keeps it between 3 and 15 minutes)
-		intermissionSeconds = 5, -- the results screen, then straight into the next war
+		intermissionSeconds = 9, -- 5 seconds of results, then 4 of war chest, then straight into the next war
 		playersPerServer = 16,
 		winnerBonusPoints = 60,
 		participantBonusPoints = 20,
@@ -200,11 +200,11 @@ local config: Config = {
 	ranks = {
 		{ name = "NPC", cost = 0 },
 		{ name = "Rookie", cost = 150 }, -- aura needed to reach this rank from the one before; ranks are earned by total aura
-		{ name = "Sigma", cost = 1050 },
-		{ name = "Chadlite", cost = 3800 },
-		{ name = "Chad", cost = 20000 },
-		{ name = "Gigachad", cost = 55000 },
-		{ name = "Mog God", cost = 120000 },
+		{ name = "Sigma", cost = 2350 },
+		{ name = "Chadlite", cost = 5000 },
+		{ name = "Chad", cost = 7500 },
+		{ name = "Gigachad", cost = 30000 },
+		{ name = "Mog God", cost = 105000 },
 	},
 	boxes = {
 		dailyCap = 12, -- most boxes a player can earn from captures in one UTC day

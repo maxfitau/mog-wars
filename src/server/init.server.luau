@@ -8,7 +8,7 @@ local Systems = script:WaitForChild("Systems")
 local Features = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Features"))
 
 -- Only the systems for switched-on features are loaded (see src/shared/Features.luau).
-local order = { "DataService", "PopupSystem", "FriendService", "FactionSystem", "PlaceholderMap", "BotService", "CaptureSystem", "SpawnSystem", "ShoveSystem", "MovementSystem", "VoidSystem", "RankVisuals", "StashSystem" }
+local order = { "DataService", "PopupSystem", "FriendService", "FactionSystem", "PlaceholderMap", "BotService", "CaptureSystem", "SpawnSystem", "ShoveSystem", "MovementSystem", "StealSystem", "ComboSystem", "QuestSystem", "AchievementSystem", "VoidSystem", "RankVisuals", "StashSystem" }
 local function add(name: string, on: boolean)
 	if on then
 		table.insert(order, name)
@@ -21,6 +21,7 @@ add("BoxSystem", Features.boxes)
 add("UnitSystem", Features.units)
 add("ZiplineSystem", Features.ziplines)
 add("AbilitySystem", Features.abilities)
+add("RiftSystem", Features.rifts)
 add("RewardsSystem", Features.dailyStreak)
 add("SeasonService", true) -- guarded inside by Features.seasons
 add("TrainingSystem", Features.trainingIsland)

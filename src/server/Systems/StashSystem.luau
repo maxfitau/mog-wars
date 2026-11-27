@@ -11,6 +11,7 @@ local Workspace = game:GetService("Workspace")
 local Pace = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Pace"))
 local DataService = require(script.Parent:WaitForChild("DataService"))
 local PopupSystem = require(script.Parent:WaitForChild("PopupSystem"))
+local Events = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("Events"))
 local Stats = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("Stats"))
 
 local StashSystem = {}
@@ -47,8 +48,10 @@ local function bind(stash: Instance)
 			Stats.add(player, "aura", shown)
 			PopupSystem.send(player, "aura", shown, "")
 		end
+		Events.fire(player, "stash", 1)
 		local isNew, found = DataService.recordStash(player, stashId)
 		if isNew then
+			Events.fire(player, "stashCount", found)
 			PopupSystem.send(player, "announce", 1, if found >= 12 then "STASH HUNTER! ALL 12 FOUND!" else ("STASH FOUND %d/12!"):format(found))
 		end
 	end)

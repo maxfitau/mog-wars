@@ -8,6 +8,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Pace = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Pace"))
 local BotService = require(script.Parent:WaitForChild("BotService"))
 local PopupSystem = require(script.Parent:WaitForChild("PopupSystem"))
+local StealSystem = require(script.Parent:WaitForChild("StealSystem"))
 
 local VoidSystem = {}
 
@@ -32,6 +33,7 @@ function VoidSystem.start()
 				local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 				if root and root:IsA("BasePart") and humanoid and humanoid.Health > 0 and root.Position.Y < Pace.void.killY and not falling[player] then
 					falling[player] = true
+					StealSystem.onFall(player) -- if someone pushed you off, they steal some of your war aura
 					PopupSystem.send(player, "whoosh", 1, "")
 					humanoid.Health = 0 -- FactionSystem puts you back at your team island after the respawn time
 					task.delay(Pace.void.respawnSeconds + 1, function()

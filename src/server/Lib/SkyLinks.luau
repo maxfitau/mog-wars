@@ -4,7 +4,7 @@
 --    next island. The throw is worked out here from the real island positions (LaunchRules), then stored on the pad as a
 --    "Launch" attribute; MovementSystem sends it to the player who touches the pad.
 --  * ZIPLINES (a post with a prompt, a black cable, a post below): hold the prompt and you ride down to the lower island.
---    They only go downhill. ZiplineSystem starts the ride; the rider's own screen moves them along the cable.
+--    They work both ways. ZiplineSystem drives the ride on the server; the rider sees speed lines.
 -- Bots do not use either (they walk the bridges).
 
 local CollectionService = game:GetService("CollectionService")
@@ -73,13 +73,14 @@ local function post(folder: Instance, position: Vector3)
 	return pole
 end
 
--- One zipline from the higher island `a` down to the lower island `b`.
+-- One zipline between island `a` (higher) and island `b`. BOTH ends are start platforms, so you can ride either way: walk onto
+-- a platform (or press E / tap its prompt) and you are carried along the cable to the other end.
 local function zipline(folder: Instance, a: Island, b: Island)
 	local direction = flat(a, b)
 	local side = perpendicular(direction)
 	local startBase = Vector3.new(a.x, a.y, a.z) + direction * (a.r - 10) - side * 14
 	local endBase = Vector3.new(b.x, b.y, b.z) - direction * (b.r - 16) - side * 14
-	local startPole = post(folder, startBase)
+	post(folder, startBase)
 	post(folder, endBase)
 	local startHandle = startBase + Vector3.new(0, 9, 0)
 	local endHandle = endBase + Vector3.new(0, 9, 0)
@@ -94,23 +95,29 @@ local function zipline(folder: Instance, a: Island, b: Island)
 	cable.Color = Color3.fromRGB(35, 35, 42)
 	cable.Material = Enum.Material.Metal
 	cable.Parent = folder
-	local handle = Builder.part("ZiplineHandle", Vector3.new(3, 0.6, 0.6), startHandle - Vector3.new(0, 1.2, 0), Color3.fromRGB(255, 205, 60), folder)
-	handle.CanCollide = false
-	handle.CanQuery = false
-	handle:SetAttribute("StartPos", startHandle)
-	handle:SetAttribute("EndPos", endHandle)
-	local prompt = Instance.new("ProximityPrompt")
-	prompt.ActionText = "Ride the zipline"
-	prompt.ObjectText = "Zipline"
-	prompt.HoldDuration = 0
-	prompt.MaxActivationDistance = 12
-	prompt.RequiresLineOfSight = false
-	prompt.Parent = handle
-	CollectionService:AddTag(handle, "ZiplineStart")
-	startPole:SetAttribute("Zipline", true)
+	for _, end_ in { { startBase, startHandle, endHandle }, { endBase, endHandle, startHandle } } do
+		-- an invisible trigger volume over the platform: touching it starts the ride (the prompt does too)
+		local zone = Builder.part("ZiplineZone", Vector3.new(11, 8, 11), end_[1] + Vector3.new(0, 4.5, 0), Color3.new(1, 1, 1), folder)
+		zone.Transparency = 1
+		zone.CanCollide = false
+		zone.CanQuery = false
+		zone:SetAttribute("StartPos", end_[2])
+		zone:SetAttribute("EndPos", end_[3])
+		local prompt = Instance.new("ProximityPrompt")
+		prompt.ActionText = "Ride the zipline"
+		prompt.ObjectText = "Zipline"
+		prompt.HoldDuration = 0
+		prompt.MaxActivationDistance = 14
+		prompt.RequiresLineOfSight = false
+		prompt.Parent = zone
+		CollectionService:AddTag(zone, "ZiplineStart")
+		local handle = Builder.part("ZiplineHandle", Vector3.new(3, 0.6, 0.6), end_[2] - Vector3.new(0, 1.2, 0), Color3.fromRGB(255, 205, 60), folder)
+		handle.CanCollide = false
+		handle.CanQuery = false
+	end
 end
 
--- `islands` is a map of id to island. Pads go from each team island to the Gold island next to it, from each Gold and
+-- `islands` is a map of id to island. Ziplines work both ways. Pads go from each team island to the Gold island next to it, from each Gold and
 -- Diamond island up to Gigachad Gate, and from the Gate down to each Diamond island. Ziplines run downhill from the Gate.
 function SkyLinks.build(islands: { [string]: Island }, withPads: boolean, withZiplines: boolean)
 	local folder = Instance.new("Folder")

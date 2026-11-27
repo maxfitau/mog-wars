@@ -12,8 +12,9 @@ local Features = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("
 local PopupSystem = {}
 
 local remote: RemoteEvent? = nil
+local fxRemote: RemoteEvent? = nil
 
-local KINDS = { points = true, aura = true, box = true, mogged = true, announce = true, combo = true, rush = true, knockout = true, capture = true, pickup = true, bonk = true, rankup = true, whoosh = true }
+local KINDS = { points = true, aura = true, box = true, mogged = true, announce = true, combo = true, rush = true, knockout = true, capture = true, pickup = true, bonk = true, rankup = true, whoosh = true, crit = true, comboend = true, stolen = true, lost = true }
 
 -- Show a pop-up to one player. Bad kinds and non-positive or non-finite amounts are ignored.
 function PopupSystem.send(player: Player, kind: string, amount: number, detail: string)
@@ -26,7 +27,18 @@ function PopupSystem.send(player: Player, kind: string, amount: number, detail: 
 	remote:FireClient(player, kind, math.floor(amount), detail)
 end
 
+-- A visual effect for everyone (an ability burst, a flag capture burst...): kind, a position and one extra value.
+function PopupSystem.fx(kind: string, position: Vector3, extra: any?)
+	if fxRemote then
+		fxRemote:FireAllClients(kind, position, extra)
+	end
+end
+
 function PopupSystem.init()
+	local created = Instance.new("RemoteEvent")
+	created.Name = "WorldFx"
+	created.Parent = ReplicatedStorage:FindFirstChild("Remotes") or ReplicatedStorage
+	fxRemote = created
 	local folder = ReplicatedStorage:FindFirstChild("Remotes")
 	if not folder then
 		folder = Instance.new("Folder")

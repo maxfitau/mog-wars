@@ -4,14 +4,14 @@
 
 local Stats = {}
 
-export type Tally = { aura: number, mogs: number, assists: number, flags: number }
+export type Tally = { aura: number, mogs: number, assists: number, flags: number, stolen: number }
 
 local tallies: { [Player]: Tally } = setmetatable({}, { __mode = "k" }) :: any
 
 local function tallyOf(player: Player): Tally
 	local tally = tallies[player]
 	if not tally then
-		tally = { aura = 0, mogs = 0, assists = 0, flags = 0 }
+		tally = { aura = 0, mogs = 0, assists = 0, flags = 0, stolen = 0 }
 		tallies[player] = tally
 	end
 	return tally

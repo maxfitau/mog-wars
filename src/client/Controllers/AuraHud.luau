@@ -37,7 +37,7 @@ function AuraHud.init()
 
 	local panel = Instance.new("Frame")
 	panel.Position = UDim2.new(0, 16, 0, 56)
-	panel.Size = UDim2.new(0, 270, 0, 88)
+	panel.Size = UDim2.new(0, 270, 0, 108)
 	panel.BackgroundColor3 = UiTheme.panel
 	panel.Parent = gui
 	UiTheme.round(panel, UDim.new(0, 20))
@@ -113,6 +113,43 @@ function AuraHud.init()
 	stashLabel.Text = ""
 	stashLabel.Parent = panel
 
+	local teaser = Instance.new("TextLabel") -- the next ability, as a teaser
+	teaser.Position = UDim2.new(0, 12, 0, 84)
+	teaser.Size = UDim2.new(1, -24, 0, 18)
+	teaser.BackgroundTransparency = 1
+	teaser.Font = UiTheme.font
+	teaser.TextScaled = true
+	teaser.TextXAlignment = Enum.TextXAlignment.Left
+	teaser.TextColor3 = Color3.fromRGB(190, 235, 255)
+	teaser.TextStrokeColor3 = UiTheme.outline
+	teaser.TextStrokeTransparency = 0
+	teaser.Text = ""
+	teaser.Parent = panel
+
+	local ABILITY_AT = { [2] = "Glow-Up Dash", [3] = "Mog Stare", [4] = "Jawline Slam", [5] = "Hair Flip", [6] = "Mewing Shield", [7] = "Total Mog" }
+	local lastDecile = -1
+	local targetAura, shownAura = 0, 0
+	local function sparkle()
+		for index = 1, 7 do -- a little burst of stars at the end of the bar at every 10 percent
+			local star = Instance.new("Frame")
+			star.Size = UDim2.new(0, 8, 0, 8)
+			star.Position = UDim2.new(fill.Size.X.Scale, 0, 0.5, -4)
+			star.BackgroundColor3 = Color3.fromRGB(255, 240, 150)
+			star.BorderSizePixel = 0
+			star.Rotation = 45
+			star.ZIndex = 4
+			star.Parent = track
+			TweenService:Create(star, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+				Position = star.Position + UDim2.new(0, math.random(-24, 24), 0, math.random(-26, 6)),
+				BackgroundTransparency = 1,
+				Size = UDim2.new(0, 2, 0, 2),
+			}):Play()
+			task.delay(0.65, function()
+				star:Destroy()
+			end)
+		end
+	end
+
 	local last = -1
 	local function refresh()
 		local found, total = player:GetAttribute("StashesFound"), player:GetAttribute("StashesTotal")
@@ -127,14 +164,23 @@ function AuraHud.init()
 		rankLabel.Text = string.upper(Config.ranks[math.clamp(shownRank, 1, #Config.ranks)].name)
 		rankLabel.TextColor3 = color
 		fill.BackgroundColor3 = color
-		auraLabel.Text = ("%s aura"):format(NumberFormat.format(aura))
+		targetAura = aura
 		if ceiling then
 			local fraction = math.clamp((aura - floor) / math.max(1, ceiling - floor), 0, 1)
 			fill.Size = UDim2.new(fraction, 0, 1, 0)
 			barLabel.Text = ("%s / %s"):format(NumberFormat.format(aura), NumberFormat.format(ceiling))
+			local decile = math.floor(fraction * 10)
+			if lastDecile >= 0 and decile > lastDecile then
+				sparkle() -- sparkle (and, once you add a sound id, a ding) at every 10 percent
+			end
+			lastDecile = decile
+			local nextName = ABILITY_AT[shownRank + 1]
+			teaser.Text = if nextName then ("%s unlocks in %s aura!"):format(nextName, NumberFormat.format(ceiling - aura)) else ("Next rank in %s aura!"):format(NumberFormat.format(ceiling - aura))
 		else
 			fill.Size = UDim2.new(1, 0, 1, 0)
 			barLabel.Text = "MAX RANK!"
+			teaser.Text = ""
+			lastDecile = -1
 		end
 		if last >= 0 and aura > last then
 			scale.Scale = 1.1 -- a little bounce whenever your aura goes up
@@ -142,6 +188,13 @@ function AuraHud.init()
 		end
 		last = aura
 	end
+	game:GetService("RunService").RenderStepped:Connect(function(dt) -- the number rolls up instead of jumping
+		shownAura += (targetAura - shownAura) * math.min(1, dt * 8)
+		if math.abs(targetAura - shownAura) < 1 then
+			shownAura = targetAura
+		end
+		auraLabel.Text = ("%s aura"):format(NumberFormat.format(math.floor(shownAura + 0.5)))
+	end)
 	player:GetAttributeChangedSignal("Aura"):Connect(refresh)
 	player:GetAttributeChangedSignal("Rank"):Connect(refresh)
 	player:GetAttributeChangedSignal("StashesFound"):Connect(refresh)

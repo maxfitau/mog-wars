@@ -50,7 +50,7 @@ end
 -- Mirror the Training Arena state to attributes for the client and for CaptureSystem (read only):
 -- TrainingLevel, TrainingProgress (0 to 1 into the current level) and TrainingLeft (seconds left today).
 local STASH_TOTAL = 12
-local UNLOCK_IDS = { shove = true, dash = true, stare = true }
+local UNLOCK_IDS = { shove = true, dash = true, stare = true, slam = true, flip = true, shield = true, total = true }
 
 local function syncUnlocks(player: Player, data: PlayerData.Data)
 	local seen = {}
@@ -66,6 +66,7 @@ local function syncUnlocks(player: Player, data: PlayerData.Data)
 	player:SetAttribute("StashesFound", found)
 	player:SetAttribute("StashesTotal", STASH_TOTAL)
 	player:SetAttribute("StashHunter", found >= STASH_TOTAL)
+	player:SetAttribute("Title", data.title)
 end
 
 local function syncTraining(player: Player, data: PlayerData.Data)
@@ -404,7 +405,31 @@ function DataService.addAura(player: Player, aura: number): number
 	if not data or aura ~= aura or aura <= 0 or aura == math.huge then
 		return 0
 	end
-	local shown = math.floor(aura * DataService.auraMultiplier(player) + 0.5)
+	local base = math.floor(aura * DataService.auraMultiplier(player) + 0.5)
+	local shown = base
+	-- combo (captures, shoves, orbs and stashes close together) and crits (MEGA MOG! x5, ULTRA MOG! x10) multiply the gain
+	local comboValue = player:GetAttribute("ComboMult")
+	local multiplier = if type(comboValue) == "number" and comboValue > 1 then comboValue else 1
+	local critTier: string? = nil
+	if base >= Pace.crit.minAura then
+		local roll = math.random()
+		if roll < Pace.crit.ultraChance then
+			critTier = "ultra"
+			multiplier *= Pace.crit.ultraMultiplier
+		elseif roll < Pace.crit.ultraChance + Pace.crit.megaChance then
+			critTier = "mega"
+			multiplier *= Pace.crit.megaMultiplier
+		end
+	end
+	multiplier = math.min(multiplier, Pace.combo.maxTotalMultiplier)
+	shown = math.floor(base * multiplier + 0.5)
+	if shown > base then
+		local bonus = player:GetAttribute("ComboBonus")
+		player:SetAttribute("ComboBonus", (if type(bonus) == "number" then bonus else 0) + (shown - base))
+	end
+	if critTier and DataService.onCrit then
+		DataService.onCrit(player, critTier, shown)
+	end
 	data.aura += shown
 	player:SetAttribute("Aura", data.aura)
 	local newRank = RankRules.rankForAura(Config, data.aura)
@@ -431,6 +456,49 @@ function DataService.addAura(player: Player, aura: number): number
 		end
 	end
 	return shown
+end
+
+-- Something to call when a gain is a crit ("mega" or "ultra"); set by ComboSystem.
+DataService.onCrit = nil :: ((Player, string, number) -> ())?
+
+-- Lifetime counters the achievements watch. Add to one (returns the new value) or raise it to at least a value.
+function DataService.bumpCounter(player: Player, key: string, amount: number): number
+	local data = DataService.get(player)
+	if not data or #key > 32 or amount ~= amount or amount < 0 then
+		return 0
+	end
+	local value = math.min((data.counters[key] or 0) + math.floor(amount), 1e9)
+	data.counters[key] = value
+	return value
+end
+
+function DataService.raiseCounter(player: Player, key: string, value: number): number
+	local data = DataService.get(player)
+	if not data or #key > 32 or value ~= value or value < 0 then
+		return 0
+	end
+	local whole = math.min(math.floor(value), 1e9)
+	if whole > (data.counters[key] or 0) then
+		data.counters[key] = whole
+	end
+	return data.counters[key] or 0
+end
+
+-- Unlock an achievement once. Returns true the first time.
+function DataService.unlockAchievement(player: Player, id: string): boolean
+	local data = DataService.get(player)
+	if not data then
+		return false
+	end
+	return PlayerData.markSeen(data.achievements, id)
+end
+
+function DataService.setTitle(player: Player, title: string)
+	local data = DataService.get(player)
+	if data and #title <= 24 then
+		data.title = title
+		player:SetAttribute("Title", title)
+	end
 end
 
 -- Something to call when a player earns a new rank (set by PopupSystem wiring in RankVisuals).

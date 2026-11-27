@@ -80,6 +80,44 @@ do
 	check("Rookie takes about a minute of play", seconds > 25 and seconds < 90)
 end
 
+-- dopamine: crits, combos, quests, stealing, achievements, the chest
+do
+	local Achievements = require("../src/shared/Achievements")
+	check("crits: 5 percent MEGA x5, 1 percent ULTRA x10", Pace.crit.megaChance == 0.05 and Pace.crit.megaMultiplier == 5 and Pace.crit.ultraChance == 0.01 and Pace.crit.ultraMultiplier == 10)
+	local rising = true
+	for index = 2, #Pace.combo.tiers do
+		if Pace.combo.tiers[index][1] <= Pace.combo.tiers[index - 1][1] or Pace.combo.tiers[index][2] <= Pace.combo.tiers[index - 1][2] then
+			rising = false
+		end
+	end
+	check("combo tiers rise: x2, x3, x5, x10", rising and Pace.combo.tiers[1][2] == 2 and Pace.combo.tiers[#Pace.combo.tiers][2] == 10 and Pace.combo.windowSeconds == 4)
+	check("combo and crit together are capped", Pace.combo.maxTotalMultiplier >= 10 and Pace.combo.maxTotalMultiplier <= 50)
+	check("three quests a war and at least 8 to choose from", Pace.quests.perWar == 3 and #Pace.quests.pool >= 8)
+	local ids: { [string]: boolean } = {}
+	local unique = true
+	for _, quest in Pace.quests.pool do
+		if ids[quest.id] or quest.goal < 1 or quest.reward < 1 then
+			unique = false
+		end
+		ids[quest.id] = true
+	end
+	check("quest ids are unique and have goals and rewards", unique)
+	check("stealing: 10 percent of war aura, 20 percent from the bounty, never the saved total", Pace.steal.fraction == 0.10 and Pace.steal.bountyFraction == 0.20)
+	local achievementIds: { [string]: boolean } = {}
+	local fine = true
+	for _, achievement in Achievements do
+		if achievementIds[achievement.id] or achievement.goal < 1 then
+			fine = false
+		end
+		achievementIds[achievement.id] = true
+	end
+	check("about 30 achievements, unique ids", #Achievements >= 28 and #Achievements <= 40 and fine)
+	check("the war chest has free rewards only (aura, a free cosmetic, a title)", Pace.chest.weights.aura > 0 and Pace.chest.weights.cosmetic > 0 and Pace.chest.weights.title > 0)
+	check("rifts return after 20 seconds", Pace.rift.offlineSeconds == 20)
+	check("abilities: Slam 10s, Flip 12s, Shield 18s, Total Mog 30s", Pace.abilities.slam.cooldownSeconds == 10 and Pace.abilities.flip.cooldownSeconds == 12 and Pace.abilities.shield.cooldownSeconds == 18 and Pace.abilities.total.cooldownSeconds == 30)
+	check("Total Mog: 2 seconds, half speed, 20 studs", Pace.abilities.total.seconds == 2 and Pace.abilities.total.slow == 0.5 and Pace.abilities.total.radius == 20)
+end
+
 if failures > 0 then
 	error(failures .. " test(s) failed")
 end

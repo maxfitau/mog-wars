@@ -16,6 +16,10 @@ local ShoveRules = require(Shared:WaitForChild("ShoveRules"))
 local BotService = require(script.Parent:WaitForChild("BotService"))
 local CaptureSystem = require(script.Parent:WaitForChild("CaptureSystem"))
 local PopupSystem = require(script.Parent:WaitForChild("PopupSystem"))
+local MovementSystem = require(script.Parent:WaitForChild("MovementSystem"))
+local StealSystem = require(script.Parent:WaitForChild("StealSystem"))
+local Events = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("Events"))
+local Shield = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("Shield"))
 local AmbientNpc = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("AmbientNpc"))
 
 local ShoveSystem = {}
@@ -83,6 +87,12 @@ local function handle(player: Player, knockbackRemote: RemoteEvent)
 	local origin = root.Position
 	local targetId = ShoveRules.pickTarget(origin.X, origin.Y, origin.Z, faction, candidates, Config.shove)
 	local targetBot = if targetId then botById[targetId] else nil
+	if targetBot and Shield.active(targetBot.model) then
+		lastShove[player] = now
+		player:SetAttribute("ShoveReadyAt", now + Config.shove.cooldownSeconds)
+		PopupSystem.send(player, "announce", 1, "BLOCKED!")
+		return
+	end
 	if targetBot then
 		lastShove[player] = now
 		player:SetAttribute("ShoveReadyAt", now + Config.shove.cooldownSeconds)
@@ -90,6 +100,7 @@ local function handle(player: Player, knockbackRemote: RemoteEvent)
 		BotService.weaken(targetBot, now + Config.shove.penaltySeconds)
 		BotService.knockback(targetBot, bx, bz, Config.shove.knockbackStuds)
 		PopupSystem.send(player, "bonk", 1, "")
+		Events.fire(player, "shove_mogling", 1)
 		return -- no contribution for shoving a bot
 	end
 	local target = if targetId then byId[targetId] else nil
@@ -106,6 +117,12 @@ local function handle(player: Player, knockbackRemote: RemoteEvent)
 		return -- nothing else in range: no cooldown is used
 	end
 
+	if Shield.active(target) then -- Mewing Shield: immune to shove
+		lastShove[player] = now
+		player:SetAttribute("ShoveReadyAt", now + Config.shove.cooldownSeconds)
+		PopupSystem.send(player, "announce", 1, "BLOCKED!")
+		return
+	end
 	lastShove[player] = now
 	player:SetAttribute("ShoveReadyAt", now + Config.shove.cooldownSeconds)
 	target:SetAttribute("PushPenaltyUntil", now + Config.shove.penaltySeconds)
@@ -115,6 +132,11 @@ local function handle(player: Player, knockbackRemote: RemoteEvent)
 	PopupSystem.send(player, "bonk", 1, "") -- BONK! for the shover ...
 	PopupSystem.send(target, "bonk", 2, "") -- ... and for whoever got bonked
 	CaptureSystem.creditShove(player, target)
+	Events.fire(player, "shove_player", 1)
+	StealSystem.noteHit(target, player)
+	if MovementSystem.isFrozen(target) then
+		StealSystem.shoveFrozen(target, player) -- freeze them, then shove: they drop aura
+	end
 end
 
 local botNextShove: { [number]: number } = {}
@@ -149,15 +171,16 @@ local function botShoves(knockbackRemote: RemoteEvent)
 			end
 			if best or bestBot then
 				botNextShove[bot.id] = now + Config.shove.cooldownSeconds * (1.5 + math.random() * 2)
-				if best then
+				if best and not Shield.active(best) then
 					local root = rootOf(best)
 					if root then
+						StealSystem.noteHit(best, nil)
 						local dx, dz = ShoveRules.direction(bot.root.Position.X, bot.root.Position.Z, root.Position.X, root.Position.Z)
 						best:SetAttribute("PushPenaltyUntil", now + Config.shove.penaltySeconds)
 						knockbackRemote:FireClient(best, dx, dz, Config.shove.knockbackStuds)
 						PopupSystem.send(best, "bonk", 2, "")
 					end
-				elseif bestBot then
+				elseif bestBot and not Shield.active(bestBot.model) then
 					local dx, dz = ShoveRules.direction(bot.root.Position.X, bot.root.Position.Z, bestBot.root.Position.X, bestBot.root.Position.Z)
 					BotService.weaken(bestBot, now + Config.shove.penaltySeconds)
 					BotService.knockback(bestBot, dx, dz, Config.shove.knockbackStuds)

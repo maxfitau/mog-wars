@@ -112,6 +112,39 @@ return function(folder: Folder, territory: any)
 	k:box("StubWall", 9, 0, -50, 2, 9, 11, STONE, Enum.Material.Cobblestone, { cover = true })
 	Common.stash(folder, k:at(-2, 0, -50), territory.id)
 
+	-- THE BACK: finish every side. A rear courtyard wall with its own gateway, gold pillars with torches and banners, side walls
+	-- running all the way round, banners on the towers' back and outer faces, and hair, ears and trim on the back of the head.
+	for _, side in { -1, 1 } do
+		k:box("RearCourtWall", side * 65, 0, -64, 90, 10, 3, STONE, Enum.Material.Cobblestone, { cover = true })
+		for index = 0, 7 do
+			k:box("Merlon", side * (24 + index * 11), 10, -64, 5, 3, 3, STONE, Enum.Material.Cobblestone, { cover = true })
+		end
+		k:box("CourtWall", side * 108, 0, -33, 3, 10, 62, STONE, Enum.Material.Cobblestone, { cover = true })
+		k:cyl("RearGatePillar", side * 20, 0, -64, 6, 22, GOLD, Enum.Material.Metal)
+		k:box("RearBanner", side * 20, 12, -66, 5, 14, 0.5, PURPLE, Enum.Material.Fabric, { collide = false })
+		local torch = k:ball("RearTorch", side * 20, 23, -64, 2, 2.6, 2, Color3.fromRGB(255, 160, 70), Enum.Material.Neon, { collide = false })
+		local fire = Instance.new("PointLight")
+		fire.Color = Color3.fromRGB(255, 170, 80)
+		fire.Range = 28
+		fire.Brightness = 1.6
+		fire.Parent = torch
+		-- towers: banners on the back and outer faces too, and a torch by each door
+		k:box("Banner", side * 75, 36, -11.4, 7, 18, 0.5, PURPLE, Enum.Material.Fabric, { collide = false })
+		k:box("Banner", side * 86.4, 36, 0, 0.5, 18, 7, PURPLE, Enum.Material.Fabric, { collide = false })
+		local doorTorch = k:ball("TowerTorch", side * 75 + 5, 9, -12.5, 1.8, 2.4, 1.8, Color3.fromRGB(255, 160, 70), Enum.Material.Neon, { collide = false })
+		local doorFire = Instance.new("PointLight")
+		doorFire.Color = Color3.fromRGB(255, 170, 80)
+		doorFire.Range = 22
+		doorFire.Parent = doorTorch
+		-- ears on the sides of the head
+		k:box("Ear", side * 46.5, 36, 2, 3, 12, 9, STONE, Enum.Material.Slate, { collide = false })
+	end
+	k:box("CourtWallRearRun", 0, 0, -64, 30, 0.5, 3, DARK, Enum.Material.Slate, { collide = false }) -- the gateway's threshold
+	for index = -6, 6 do -- stone hair ridges across the back of the head, with a gold trim
+		k:box("HairRidge", index * 6.4, 34 + (index % 2) * 5, -31.6, 5, 24 - (index % 3) * 4, 2, DARK, Enum.Material.Slate, { collide = false })
+	end
+	k:box("BackTrim", 0, 61, -31.8, 92, 1.4, 1.4, GOLD, Enum.Material.Neon, { collide = false })
+	k:box("BackCrest", 0, 66, -26, 16, 8, 4, GOLD, Enum.Material.Metal, { collide = false })
 	Common.sparkles(folder, "GateSparkles", k:at(0, 8, 34), GOLD, 10, 60)
 	Common.ambience(folder, k:at(0, 10, 0), Ambience.gigachad_gate, 0.35)
 end

@@ -33,6 +33,18 @@
 - 12 hidden Aura Stashes (behind waterfalls, on a rooftop, under bridges, in secret rooms) each give +100 aura once per war; "Stashes found n/12" is under your aura counter and finding all 12 earns the Stash Hunter title.
 - Launch pads and ziplines join the islands.
 
+## More reward feedback (dopamine)
+Something small every 2-3 seconds (the +X ticks), something bigger every ~30 seconds (a capture, a combo, a quest), something huge every few minutes (a MEGA/ULTRA MOG!, a bounty, a war chest). Any aura gain of 3 or more has a 5% chance to be a MEGA MOG! (x5, gold) and 1% an ULTRA MOG! (x10, rainbow). Captures, shoves, orb pickups and stashes within 4 seconds of each other build a combo (x2, x3, x5, x10) that multiplies aura, with a screen-edge glow that gets hotter and a soft "combo ended +240" summary. Each war gives 3 mini-quests under the aura box. About 30 achievements (saved, some with titles). The rank bar sparkles at every 10% and says what the next ability is ("Mog Stare unlocks in 120 aura!"). After the results a free war chest drops and pops open (aura, a free trail or aura colour, or a title; never sold). Announcer callouts: DOUBLE SHOVE!, ON FIRE!, UNSTOPPABLE!.
+
+## Abilities (rank-unlocked, never sold; Shove plus your two newest on screen)
+NPC Shove. Rookie Glow-Up Dash (4 s). Sigma Mog Stare (freezes one enemy 1 s, 8 s). Chadlite Jawline Slam (jump + ground pound, knocks back everyone within ~10 studs, 10 s). Chad Hair Flip (a cone gust that pushes enemies back and off flags, 12 s). Gigachad Mewing Shield (3 s immune to shove, stare and knockback, 18 s). Mog God Total Mog (enemies within ~20 studs are REDUCED TO NPC for 2 s: grey, half speed, cannot capture; 30 s). Moglings use them too, at the players' average rank. Rank pacing aims at Rookie ~1 min, Sigma ~10 min, Chadlite ~30 min, Chad ~1 hour, Gigachad ~3 hours, Mog God multi-day.
+
+## Aura stealing and the bounty
+Knock someone off an island, or freeze them and then shove them, and they drop glowing aura orbs worth 10% of the aura they earned THIS WAR (never their saved total). Orbs float and magnet to whoever touches them first ("+45 STOLEN!"); the victim just sees "-45 aura". The player with the most aura this war wears a crown, a tall light beam and a "MOST AURA" tag; knocking them out steals 20% and announces "BOUNTY CLAIMED!". The results screen shows aura stolen.
+
+## Rifts and ziplines
+Seven glowing purple-and-gold rifts throw you into the sky; you glide down with a small glider and land anywhere; a used rift flickers out for 20 seconds. Ziplines work both ways: walk onto a platform (or press E) and the server carries you along the cable.
+
 ## HUD (three things)
 - Top left: your aura and rank, with a bar toward the next rank.
 - Top centre: the war timer and the four team scores, and the capture bar when you stand on a flag.

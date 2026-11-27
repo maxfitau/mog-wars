@@ -16,6 +16,7 @@ local Workspace = game:GetService("Workspace")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Pace = require(Shared:WaitForChild("Pace"))
 local Features = require(Shared:WaitForChild("Features"))
+local Events = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("Events"))
 
 local MovementSystem = {}
 
@@ -23,6 +24,8 @@ type Boost = { id: string, bonus: number, untilTime: number }
 
 local boosts: { [Player]: { Boost } } = {}
 local frozenUntil: { [Player]: number } = {}
+local slowUntil: { [Player]: number } = {}
+local slowFactor: { [Player]: number } = {}
 local lastDash: { [Player]: number } = {}
 local lastPad: { [Player]: number } = {}
 local remotes: { [string]: RemoteEvent } = {}
@@ -62,6 +65,9 @@ function MovementSystem.refresh(player: Player)
 	end
 	local horse = player:GetAttribute("HorseMultiplier")
 	local speed = base.walk * (1 + bonus) * (if type(horse) == "number" then horse else 1)
+	if (slowUntil[player] or 0) > t then
+		speed *= slowFactor[player] or 1 -- slowed (Total Mog)
+	end
 	local frozen = (frozenUntil[player] or 0) > t -- frozen by a Mog Stare
 	if humanoid.WalkSpeed ~= 0 or frozen then -- a stunned player (walk speed 0) stays stunned
 		humanoid.WalkSpeed = if frozen then 0 else speed
@@ -86,6 +92,22 @@ function MovementSystem.boost(player: Player, id: string, bonus: number, seconds
 	if not found then
 		table.insert(list, { id = id, bonus = bonus, untilTime = untilTime })
 	end
+	MovementSystem.refresh(player)
+	task.delay(seconds + 0.05, function()
+		if player.Parent == Players then
+			MovementSystem.refresh(player)
+		end
+	end)
+end
+
+function MovementSystem.isFrozen(player: Player): boolean
+	return (frozenUntil[player] or 0) > now()
+end
+
+-- Slow a player to a share of their speed (0.5 = half) for a moment.
+function MovementSystem.slow(player: Player, factor: number, seconds: number)
+	slowUntil[player] = now() + seconds
+	slowFactor[player] = factor
 	MovementSystem.refresh(player)
 	task.delay(seconds + 0.05, function()
 		if player.Parent == Players then
@@ -222,6 +244,7 @@ local function bindLaunchPad(pad: Instance)
 		end
 		launchDebounce[player] = t
 		MovementSystem.launch(player, vector)
+		Events.fire(player, "launch", 1)
 		playSound(pad, Pace.sounds.whoosh)
 	end)
 end
@@ -267,6 +290,8 @@ function MovementSystem.init()
 	Players.PlayerRemoving:Connect(function(player)
 		boosts[player] = nil
 		frozenUntil[player] = nil
+		slowUntil[player] = nil
+		slowFactor[player] = nil
 		lastDash[player] = nil
 		lastPad[player] = nil
 		launchDebounce[player] = nil

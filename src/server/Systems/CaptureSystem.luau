@@ -31,6 +31,7 @@ local DataService = require(script.Parent:WaitForChild("DataService"))
 local FriendService = require(script.Parent:WaitForChild("FriendService"))
 local PopupSystem = require(script.Parent:WaitForChild("PopupSystem"))
 local SeasonService = require(script.Parent:WaitForChild("SeasonService"))
+local Events = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("Events"))
 local Stats = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("Stats"))
 
 local HEADROOM = 8 -- studs above the zone that still count as standing in it
@@ -158,7 +159,9 @@ local function powersInZone(zone: BasePart): ({ [number]: number }, { [number]: 
 		local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 		local root = character and character:FindFirstChild("HumanoidRootPart")
 		local faction = player:GetAttribute("Faction")
-		if type(faction) == "number" and FactionRules.byId(faction) and humanoid and root and root:IsA("BasePart") and humanoid.Health > 0 then
+		local npcUntil = player:GetAttribute("NpcUntil") -- reduced to NPC (Total Mog): cannot capture
+		local reduced = type(npcUntil) == "number" and npcUntil > now
+		if not reduced and type(faction) == "number" and FactionRules.byId(faction) and humanoid and root and root:IsA("BasePart") and humanoid.Health > 0 then
 			local offset = zone.CFrame:PointToObjectSpace(root.Position)
 			if ZoneGeometry.contains(offset.X, offset.Y, offset.Z, zone.Size.X, zone.Size.Y, zone.Size.Z, HEADROOM) then
 				local penaltyUntil = player:GetAttribute("PushPenaltyUntil")
@@ -174,7 +177,8 @@ local function powersInZone(zone: BasePart): ({ [number]: number }, { [number]: 
 	-- Bots push like anyone else, but they are never paid and never counted as contributors.
 	for _, bot in BotService.list() do
 		local offset = zone.CFrame:PointToObjectSpace(bot.root.Position)
-		if ZoneGeometry.contains(offset.X, offset.Y, offset.Z, zone.Size.X, zone.Size.Y, zone.Size.Z, HEADROOM) then
+		local botNpc = bot.model:GetAttribute("NpcUntil")
+		if ZoneGeometry.contains(offset.X, offset.Y, offset.Z, zone.Size.X, zone.Size.Y, zone.Size.Z, HEADROOM) and not (type(botNpc) == "number" and botNpc > now) then
 			local weight = ShoveRules.powerMultiplier(now, bot.penaltyUntil, Config.shove)
 			powers[bot.faction] = (powers[bot.faction] or 0) + weight * bot.aura
 			table.insert(botsHere, bot)
@@ -318,6 +322,7 @@ local function payOut(territory: TerritoryState, winner: number, factorOwner: nu
 			PopupSystem.send(player, "box", 1, tier.box)
 		end
 		SeasonService.earn(player, "capture", tier.value)
+		Events.fire(player, "territory", 1)
 		DataService.recordCapture(player)
 	end
 	for userId, entry in territory.contribs do
@@ -430,6 +435,8 @@ local function tick(dt: number)
 			for _, player in members[result.newOwner] or {} do
 				giveAura(player, Pace.rewards.flagCapturedAura) -- +25 for everyone helping when a flag flips
 				Stats.add(player, "flags", 1)
+				Events.fire(player, "flag", 1)
+				PopupSystem.fx("flagburst", record.part.Position, ownerColor(result.newOwner)) -- a burst of light in the new owner's colour
 				PopupSystem.send(player, "capture", 1, "")
 			end
 			-- One flag changed hands. The territory changes hands only if one faction now holds ALL its flags.

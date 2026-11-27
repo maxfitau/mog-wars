@@ -18,9 +18,77 @@ Pace.speed = {
 
 -- Rank-unlocked abilities, one button each, earned in the first session and never sold.
 Pace.abilities = {
-	shove = { rank = 1 }, -- NPC: the big button (cooldown is EconomyConfig.shove)
-	dash = { rank = 2 }, -- Rookie: a quick burst (cooldown and speed in Pace.speed.dash)
+	shove = { rank = 1 }, -- NPC: Shove (cooldown is EconomyConfig.shove)
+	dash = { rank = 2 }, -- Rookie: Glow-Up Dash, a sparkly burst forward (cooldown and speed in Pace.speed.dash)
 	stare = { rank = 3, cooldownSeconds = 8, range = 50, freezeSeconds = 1 }, -- Sigma: Mog Stare freezes one enemy
+	slam = { rank = 4, cooldownSeconds = 10, radius = 10, knockbackStuds = 24 }, -- Chadlite: Jawline Slam (jump + ground pound)
+	flip = { rank = 5, cooldownSeconds = 12, range = 26, coneDot = 0.5, knockbackStuds = 32 }, -- Chad: Hair Flip, a cone gust
+	shield = { rank = 6, cooldownSeconds = 18, seconds = 3 }, -- Gigachad: Mewing Shield, immune to shove, stare and knockback
+	total = { rank = 7, cooldownSeconds = 30, radius = 20, seconds = 2, slow = 0.5 }, -- Mog God: Total Mog, enemies REDUCED TO NPC
+	moglingCooldownFactor = 1.5, -- Moglings wait this much longer between abilities
+}
+
+-- Aura stealing: knock someone off an island (or freeze them and then shove them) and they drop glowing aura orbs worth
+-- a share of the aura they earned THIS WAR (never their saved total, so ranks never go down). Orbs go to whoever touches them.
+Pace.steal = {
+	fraction = 0.10,
+	bountyFraction = 0.20, -- stealing from the player with the most aura
+	minWarAura = 40, -- nothing to steal below this
+	bountyMinAura = 300, -- the crown only appears once the leader has this much war aura
+	orbs = 6,
+	orbSeconds = 15,
+	magnetRange = 14,
+	pickupRange = 3.5,
+	attributionSeconds = 6, -- a fall counts as a knock-off if you were shoved this recently
+	victimCooldownSeconds = 8,
+}
+
+-- Rifts: glowing portals that throw you high into the sky, then you glide down with a little glider.
+Pace.rift = {
+	launch = 175, -- upward speed
+	glideFall = 20, -- the slowest you fall while gliding (studs per second)
+	glideSpeed = 38, -- steering speed while gliding
+	offlineSeconds = 20, -- a rift flickers out after use, then returns
+}
+
+-- DOPAMINE: small rewards every few seconds, bigger ones every ~30 s, huge ones every few minutes.
+Pace.crit = {
+	megaChance = 0.05, -- any aura gain: 5 percent becomes MEGA MOG! ...
+	megaMultiplier = 5,
+	ultraChance = 0.01, -- ... and 1 percent becomes ULTRA MOG!
+	ultraMultiplier = 10,
+	minAura = 3, -- gains smaller than this (the +1 ticks) never crit, so the numbers stay readable
+}
+
+Pace.combo = {
+	windowSeconds = 4, -- captures, shoves, orb pickups and stashes this close together build the combo
+	tiers = { { 2, 2 }, { 3, 3 }, { 5, 5 }, { 8, 10 } }, -- { events in a row, aura multiplier }: x2, x3, x5, x10
+	maxTotalMultiplier = 20, -- combo and crit together never pass this
+	callouts = { [3] = "ON FIRE!", [6] = "UNSTOPPABLE!" },
+}
+
+Pace.quests = {
+	perWar = 3,
+	pool = {
+		{ id = "shove_moglings", text = "Shove %d Moglings", kind = "shove_mogling", goal = 5, reward = 60 },
+		{ id = "shove_players", text = "Shove %d players", kind = "shove_player", goal = 3, reward = 80 },
+		{ id = "capture_flags", text = "Capture %d flags", kind = "flag", goal = 2, reward = 100 },
+		{ id = "stash", text = "Find a stash", kind = "stash", goal = 1, reward = 120 },
+		{ id = "zipline", text = "Ride a zipline", kind = "zipline", goal = 1, reward = 60 },
+		{ id = "launch", text = "Use %d launch pads", kind = "launch", goal = 2, reward = 50 },
+		{ id = "territory", text = "Capture a territory", kind = "territory", goal = 1, reward = 150 },
+		{ id = "orbs", text = "Grab %d aura orbs", kind = "orb", goal = 3, reward = 70 },
+		{ id = "freeze", text = "Freeze an enemy", kind = "stare", goal = 1, reward = 70 },
+		{ id = "yeet", text = "Knock someone off an island", kind = "yeet", goal = 1, reward = 120 },
+		{ id = "rift", text = "Use a rift", kind = "rift", goal = 1, reward = 80 },
+	},
+}
+
+Pace.chest = {
+	aura = { min = 50, max = 300 },
+	weights = { aura = 60, cosmetic = 20, title = 20 }, -- a free reward: aura, a free trail or aura colour, or a title
+	titles = { "Lucky", "Chest Goblin", "Treasure Mog", "Shiny" },
+	seconds = 4, -- the chest scene after the results (the gap between wars grows by this much)
 }
 
 Pace.capture = {

@@ -19,6 +19,8 @@ local Features = {
 	moglings = true, -- the fillers are called Moglings
 	blockyMoglings = true, -- Moglings get a simple blocky body built from parts (no avatar download)
 	stashes = true, -- the 12 hidden Aura Stashes
+	stealing = true, -- knock-offs drop aura orbs; a bounty on the aura leader
+	rifts = true, -- portals that throw you into the sky to glide down
 
 	-- OFF: built, but hidden to keep the game simple for little kids
 	combat = false, -- aura blasters, ego, mogging, the kill feed, pickups' ammo
@@ -33,6 +35,8 @@ local Features = {
 	arena = false, -- Update 3
 	dash = true, -- (a rank-unlocked ability now: Rookie)
 	pickups = false,
+	airshipTaxis = false, -- rideable airships (next)
+	tankMode = false, -- the tank power-up (next)
 	discoveryCards = false, -- screens appearing gradually as you play
 	overtime = true, -- the last minute: all aura x2, the timer pulses
 	territoryTrickle = false, -- the old once-a-minute trickle: replaced by +1 a second per territory held

@@ -21,10 +21,14 @@ local showing = false
 
 local ABILITIES: { [string]: { rank: number, title: string, hint: string, color: Color3 } } = {
 	shove = { rank = Pace.abilities.shove.rank, title = "SHOVE!", hint = "Press E, click, or tap SHOVE to BONK enemies off flags", color = Color3.fromRGB(255, 160, 40) },
-	dash = { rank = Pace.abilities.dash.rank, title = "DASH!", hint = "Press Q or tap DASH for a quick burst forward", color = Color3.fromRGB(70, 210, 100) },
-	stare = { rank = Pace.abilities.stare.rank, title = "MOG STARE!", hint = "Press F or tap STARE to freeze an enemy for 1 second", color = Color3.fromRGB(80, 170, 255) },
+	dash = { rank = Pace.abilities.dash.rank, title = "GLOW-UP DASH!", hint = "A sparkly burst forward. Q or tap the button", color = Color3.fromRGB(70, 210, 100) },
+	stare = { rank = Pace.abilities.stare.rank, title = "MOG STARE!", hint = "Freezes one enemy for 1 second", color = Color3.fromRGB(80, 170, 255) },
+	slam = { rank = Pace.abilities.slam.rank, title = "JAWLINE SLAM!", hint = "Jump and pound: knocks back everyone close", color = Color3.fromRGB(255, 130, 60) },
+	flip = { rank = Pace.abilities.flip.rank, title = "HAIR FLIP!", hint = "A big gust pushes enemies back and off flags", color = Color3.fromRGB(255, 110, 190) },
+	shield = { rank = Pace.abilities.shield.rank, title = "MEWING SHIELD!", hint = "3 seconds immune to shoves and freezes", color = Color3.fromRGB(255, 205, 60) },
+	total = { rank = Pace.abilities.total.rank, title = "TOTAL MOG!", hint = "Enemies nearby are REDUCED TO NPC for 2 seconds", color = Color3.fromRGB(190, 110, 255) },
 }
-local ORDER = { "shove", "dash", "stare" }
+local ORDER = { "shove", "dash", "stare", "slam", "flip", "shield", "total" }
 
 local CONFETTI = { Color3.fromRGB(255, 205, 60), Color3.fromRGB(255, 100, 160), Color3.fromRGB(80, 220, 255), Color3.fromRGB(120, 230, 120), Color3.fromRGB(190, 110, 255) }
 
@@ -69,7 +73,7 @@ local function demo(parent: Frame, id: string, color: Color3)
 		elseif id == "dash" then
 			TweenService:Create(hero, TweenInfo.new(0.25, Enum.EasingStyle.Quad), { Position = UDim2.new(0.55, 0, 0.5, 0) }):Play()
 			text.Text = "ZOOM!"
-		else
+		elseif id == "stare" then
 			local beam = Instance.new("Frame")
 			beam.BackgroundColor3 = Color3.fromRGB(150, 230, 255)
 			beam.BorderSizePixel = 0
@@ -80,6 +84,14 @@ local function demo(parent: Frame, id: string, color: Color3)
 			task.wait(0.35)
 			victim.BackgroundColor3 = Color3.fromRGB(160, 225, 255)
 			text.Text = "FROZEN!"
+		else
+			-- slam, flip, shield and total: a burst that blows the other figure away (or a bubble that blocks)
+			text.Text = if id == "shield" then "BLOCKED!" elseif id == "total" then "NPC..." else "WHOOSH!"
+			if id == "total" then
+				victim.BackgroundColor3 = Color3.fromRGB(120, 120, 130)
+			elseif id ~= "shield" then
+				TweenService:Create(victim, TweenInfo.new(0.5, Enum.EasingStyle.Quad), { Position = UDim2.new(1.05, 0, 0.3, 0), Rotation = 360 }):Play()
+			end
 		end
 	end)
 end

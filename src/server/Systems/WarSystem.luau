@@ -18,12 +18,16 @@ local BotService = require(script.Parent:WaitForChild("BotService"))
 local CaptureSystem = require(script.Parent:WaitForChild("CaptureSystem"))
 local DataService = require(script.Parent:WaitForChild("DataService"))
 local SeasonService = require(script.Parent:WaitForChild("SeasonService"))
+local QuestSystem = require(script.Parent:WaitForChild("QuestSystem"))
+local Events = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("Events"))
+local CosmeticCatalog = require(Shared:WaitForChild("CosmeticCatalog"))
 local PopupSystem = require(script.Parent:WaitForChild("PopupSystem"))
 
 local WarSystem = {}
 
 local warNumber = 0
 local resultsRemote: RemoteEvent? = nil
+local chestRemote: RemoteEvent? = nil
 local phase = "Intermission"
 local endsAt = 0
 
@@ -74,6 +78,9 @@ local function finishWar()
 		end
 	end
 
+	for _, player in Players:GetPlayers() do
+		Events.fire(player, "war", 1)
+	end
 	Workspace:SetAttribute("WarWinner", winner)
 	Workspace:SetAttribute("Overtime", false)
 	publishScores()
@@ -97,10 +104,42 @@ local function finishWar()
 		end
 		factionResults[id] = entry
 	end
+	-- the WAR CHEST: after the results, a free chest drops and pops open with a random free reward. Never sold.
+	task.delay(Pace.results.seconds, function()
+		for _, player in Players:GetPlayers() do
+			local weights = Pace.chest.weights
+			local roll = math.random() * (weights.aura + weights.cosmetic + weights.title)
+			local kind, name, amount = "aura", "Aura burst!", 0
+			if roll > weights.aura + weights.cosmetic then
+				kind, name = "title", Pace.chest.titles[math.random(1, #Pace.chest.titles)]
+				DataService.setTitle(player, name)
+			elseif roll > weights.aura then
+				local data = DataService.get(player)
+				local options = {}
+				for _, item in CosmeticCatalog.items do
+					if item.source == "box" and data and not data.cosmetics[item.id] then
+						table.insert(options, item)
+					end
+				end
+				if #options > 0 then
+					local item = options[math.random(1, #options)]
+					if DataService.grantCosmetic(player, item.id) then
+						kind, name = "cosmetic", item.name
+					end
+				end
+			end
+			if kind == "aura" then
+				amount = DataService.addAura(player, math.random(Pace.chest.aura.min, Pace.chest.aura.max))
+			end
+			if chestRemote then
+				chestRemote:FireClient(player, kind, name, amount)
+			end
+		end
+	end)
 	if resultsRemote then
 		for _, player in Players:GetPlayers() do
 			local tally = Stats.get(player)
-			resultsRemote:FireClient(player, factionResults, { aura = tally.aura, mogs = tally.mogs, assists = tally.assists, flags = tally.flags }, winner, Pace.results.seconds)
+			resultsRemote:FireClient(player, factionResults, { aura = tally.aura, mogs = tally.mogs, assists = tally.assists, flags = tally.flags, stolen = tally.stolen }, winner, Pace.results.seconds)
 		end
 	end
 	local winnerFaction = FactionRules.byId(winner)
@@ -110,6 +149,7 @@ end
 local function startWar()
 	warNumber += 1
 	Stats.reset()
+	QuestSystem.assignAll() -- three new mini-quests for everyone
 	Workspace:SetAttribute("Overtime", false)
 	CaptureSystem.resetWar()
 	BotService.onWarStart()
@@ -141,6 +181,10 @@ function WarSystem.init()
 	remote.Name = "WarResults"
 	remote.Parent = folder
 	resultsRemote = remote
+	local chest = Instance.new("RemoteEvent")
+	chest.Name = "WarChest"
+	chest.Parent = folder
+	chestRemote = chest
 end
 
 function WarSystem.start()

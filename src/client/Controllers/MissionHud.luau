@@ -18,8 +18,12 @@ local UiTheme = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("U
 local MissionHud = {}
 
 local player = Players.LocalPlayer
+local NAVY = Color3.fromRGB(18, 22, 58)
 local panel: Frame
-local label: TextLabel
+local panelStroke: UIStroke
+local topLabel: TextLabel
+local nameLabel: TextLabel
+local chipLabel: TextLabel
 local dots: { Part } = {}
 local DOT_COUNT = 10
 local DOT_SPACING = 7
@@ -74,25 +78,32 @@ local function update()
 		end
 	end
 	local target: BasePart? = nil
-	local text = ""
+	local top, name, defending = "CAPTURE", "", false
+	local distance = 0
 	if defendZone then
-		target = defendZone
-		text = ("Defend %s! - %dm"):format(tostring(defendZone:GetAttribute("TerritoryName")), math.floor(defendDistance))
+		target, defending = defendZone, true
+		top, name, distance = "DEFEND", ("%s!"):format(tostring(defendZone:GetAttribute("TerritoryName"))), defendDistance
 	elseif attackZone then
 		target = attackZone
+		distance = attackDistance
 		local owner = attackZone:GetAttribute("OwnerFaction")
-		local name = tostring(attackZone:GetAttribute("TerritoryName"))
+		name = tostring(attackZone:GetAttribute("TerritoryName"))
 		if standingOn == attackZone then
-			text = ("Hold the flag! Capturing %s..."):format(name)
+			top = "HOLD"
 		elseif type(owner) == "number" and owner ~= 0 then
-			text = ("Steal %s from %s! - %dm"):format(name, colourWord(owner), math.floor(attackDistance))
-		else
-			text = ("Capture %s - %dm"):format(name, math.floor(attackDistance))
+			top = ("STEAL FROM %s"):format(colourWord(owner))
 		end
 	else
-		text = "Your team holds everything! Defend it!"
+		top, name = "HOLD", "everything!"
 	end
-	label.Text = text
+	topLabel.Text = top
+	nameLabel.Text = name
+	chipLabel.Text = if target then ("%dm ➜"):format(math.floor(distance)) else "✔"
+	-- navy and yellow normally; red when one of your territories is being attacked
+	panel.BackgroundColor3 = if defending then Color3.fromRGB(190, 35, 50) else NAVY
+	panelStroke.Color = if defending then Color3.new(1, 1, 1) else Color3.fromRGB(255, 205, 60)
+	nameLabel.TextColor3 = if defending then Color3.new(1, 1, 1) else Color3.fromRGB(255, 215, 70)
+	topLabel.TextColor3 = if defending then Color3.fromRGB(255, 215, 215) else Color3.fromRGB(255, 205, 60)
 	panel.Visible = true
 
 	-- the GPS trail: glowing dots on the ground between you and the flag (hidden where there is no ground to put them on)
@@ -129,30 +140,71 @@ function MissionHud.init()
 	gui.Parent = player:WaitForChild("PlayerGui")
 	panel = Instance.new("Frame")
 	panel.AnchorPoint = Vector2.new(0.5, 0)
-	panel.Position = UDim2.new(0.5, 0, 0, 66) -- just under the scoreboard
-	panel.Size = UDim2.new(0, 400, 0, 34)
-	panel.BackgroundColor3 = Color3.fromRGB(255, 190, 50)
+	panel.Position = UDim2.new(0.5, 0, 0, 112) -- just under the scoreboard
+	panel.Size = UDim2.new(0, 360, 0, 46)
+	panel.BackgroundColor3 = NAVY
 	panel.Visible = false
 	panel.Parent = gui
-	UiTheme.round(panel, UDim.new(0, 17))
-	local stroke = Instance.new("UIStroke")
-	stroke.Color = Color3.new(1, 1, 1)
-	stroke.Thickness = 3
-	stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-	stroke.Parent = panel
-	local limit = Instance.new("UISizeConstraint")
-	limit.MinSize = Vector2.new(240, 34)
-	limit.MaxSize = Vector2.new(520, 34)
-	limit.Parent = panel
-	label = Instance.new("TextLabel")
-	label.Size = UDim2.new(1, -16, 1, -6)
-	label.Position = UDim2.new(0, 8, 0, 3)
-	label.BackgroundTransparency = 1
-	label.Font = UiTheme.font
-	label.TextScaled = true
-	label.TextColor3 = Color3.fromRGB(60, 30, 80)
-	label.Text = ""
-	label.Parent = panel
+	UiTheme.round(panel, UDim.new(0, 23)) -- a dark navy pill ...
+	panelStroke = Instance.new("UIStroke") -- ... with a yellow border
+	panelStroke.Color = Color3.fromRGB(255, 205, 60)
+	panelStroke.Thickness = 3
+	panelStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+	panelStroke.Parent = panel
+	local icon = Instance.new("Frame") -- a yellow circle with a little flag
+	icon.Position = UDim2.new(0, 5, 0.5, -17)
+	icon.Size = UDim2.new(0, 34, 0, 34)
+	icon.BackgroundColor3 = Color3.fromRGB(255, 205, 60)
+	icon.Parent = panel
+	UiTheme.round(icon, UDim.new(1, 0))
+	local pole = Instance.new("Frame")
+	pole.Position = UDim2.new(0, 11, 0, 7)
+	pole.Size = UDim2.new(0, 3, 0, 20)
+	pole.BackgroundColor3 = NAVY
+	pole.BorderSizePixel = 0
+	pole.Parent = icon
+	local cloth = Instance.new("Frame")
+	cloth.Position = UDim2.new(0, 14, 0, 7)
+	cloth.Size = UDim2.new(0, 12, 0, 9)
+	cloth.BackgroundColor3 = NAVY
+	cloth.BorderSizePixel = 0
+	cloth.Parent = icon
+	topLabel = Instance.new("TextLabel")
+	topLabel.BackgroundTransparency = 1
+	topLabel.Position = UDim2.new(0, 46, 0, 4)
+	topLabel.Size = UDim2.new(1, -140, 0, 13)
+	topLabel.Font = UiTheme.font
+	topLabel.TextScaled = true
+	topLabel.TextXAlignment = Enum.TextXAlignment.Left
+	topLabel.TextColor3 = Color3.fromRGB(255, 205, 60)
+	topLabel.Text = "CAPTURE"
+	topLabel.Parent = panel
+	nameLabel = Instance.new("TextLabel")
+	nameLabel.BackgroundTransparency = 1
+	nameLabel.Position = UDim2.new(0, 46, 0, 17)
+	nameLabel.Size = UDim2.new(1, -140, 0, 24)
+	nameLabel.Font = UiTheme.font
+	nameLabel.TextScaled = true
+	nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+	nameLabel.TextColor3 = Color3.fromRGB(255, 215, 70)
+	nameLabel.Text = ""
+	nameLabel.Parent = panel
+	local chip = Instance.new("Frame") -- the white distance chip
+	chip.AnchorPoint = Vector2.new(1, 0.5)
+	chip.Position = UDim2.new(1, -8, 0.5, 0)
+	chip.Size = UDim2.new(0, 84, 0, 28)
+	chip.BackgroundColor3 = Color3.new(1, 1, 1)
+	chip.Parent = panel
+	UiTheme.round(chip, UDim.new(0, 14))
+	chipLabel = Instance.new("TextLabel")
+	chipLabel.BackgroundTransparency = 1
+	chipLabel.Size = UDim2.new(1, -8, 1, -4)
+	chipLabel.Position = UDim2.new(0, 4, 0, 2)
+	chipLabel.Font = UiTheme.font
+	chipLabel.TextScaled = true
+	chipLabel.TextColor3 = NAVY
+	chipLabel.Text = ""
+	chipLabel.Parent = chip
 	for _ = 1, DOT_COUNT do
 		local dot = Instance.new("Part")
 		dot.Shape = Enum.PartType.Cylinder

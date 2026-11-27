@@ -38,12 +38,40 @@ return function(folder: Folder, territory: any)
 		TerrainKit.dome(cx - 46, cz + side * 42, 75, 24, Enum.Material.LeafyGrass) -- the way up: a wide, gentle hill from the west
 	end
 
-	-- the rope bridge: planks and rails
-	k:box("BridgePlanks", 0, DECK_Y - 1, 0, 9, 1, 52, PLANK, Enum.Material.WoodPlanks)
+	-- layered pink cliffs: coloured strata bands on both faces of the ravine, and a waterfall pouring into it
+	for _, side in { -1, 1 } do
+		for band, colour in { Color3.fromRGB(255, 160, 205), Color3.fromRGB(235, 110, 170), Color3.fromRGB(255, 190, 220), Color3.fromRGB(205, 85, 150) } do
+			k:box("CliffStrata", 0, (band - 1) * 6, side * 24.4, 70, 3.5, 1, colour, Enum.Material.Limestone, { collide = false })
+		end
+	end
+	local fall = k:box("RavineFall", -22, 0, -24.9, 5, 24, 1, Color3.fromRGB(190, 230, 255), Enum.Material.Glass, { collide = false, transparency = 0.45 })
+	Common.sparkles(folder, "RavineMist", fall.Position - Vector3.new(0, 11, -2), Color3.fromRGB(235, 245, 255), 8, 50)
+	k:cyl("RavinePool", -22, 0, -20, 14, 0.4, Color3.fromRGB(110, 190, 235), Enum.Material.Glass, { collide = false, transparency = 0.3 })
+	-- flowers on both cliff tops
+	for index = 1, 44 do
+		local side = if index % 2 == 0 then 1 else -1
+		local x = ((index * 37) % 64) - 32
+		local z = side * (30 + ((index * 53) % 26))
+		k:cyl("FlowerStem", x, DECK_Y, z, 0.3, 1.8, Color3.fromRGB(70, 150, 70), Enum.Material.Grass, { collide = false })
+		k:ball("Flower", x, DECK_Y + 1.6, z, 1.4, 1.4, 1.4, ({ Color3.fromRGB(255, 120, 190), Color3.new(1, 1, 1), Color3.fromRGB(255, 220, 90), Color3.fromRGB(190, 120, 255) })[index % 4 + 1], Enum.Material.SmoothPlastic, { collide = false })
+	end
+	-- the rope bridge: individual planks (with little gaps) and rails
+	for index = 0, 24 do
+		k:box("BridgePlank", 0, DECK_Y - 1, -24 + index * 2, 9, 0.9, 1.7, PLANK, Enum.Material.WoodPlanks)
+	end
+	k:box("BridgeKeel", 0, DECK_Y - 1.6, 0, 1.2, 0.6, 52, Color3.fromRGB(120, 85, 50), Enum.Material.Wood, { collide = false })
 	for _, side in { -1, 1 } do
 		k:box("RopeRail", side * 4.4, DECK_Y + 3, 0, 0.5, 0.5, 52, ROPE, Enum.Material.Fabric, { collide = false })
 		for _, z in { -24, -12, 0, 12, 24 } do
 			k:box("RopePost", side * 4.4, DECK_Y, z, 0.7, 3.2, 0.7, ROPE, Enum.Material.Wood, { collide = false })
+		end
+		for _, z in { -20, -10, 10, 20 } do -- glowing lanterns hanging along the bridge
+			k:box("LanternCord", side * 4.4, DECK_Y + 3, z, 0.15, 1.2, 0.15, ROPE, Enum.Material.Fabric, { collide = false })
+			local lantern = k:ball("Lantern", side * 4.4, DECK_Y + 1.6, z, 1.5, 1.8, 1.5, Color3.fromRGB(255, 205, 110), Enum.Material.Neon, { collide = false })
+			local glow = Instance.new("PointLight")
+			glow.Color = Color3.fromRGB(255, 200, 120)
+			glow.Range = 12
+			glow.Parent = lantern
 		end
 	end
 

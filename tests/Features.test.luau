@@ -15,12 +15,12 @@ local function check(name: string, condition: boolean)
 	end
 end
 
-for _, name in { "war", "shove", "ranks", "dailyStreak", "cosmeticShop", "bots", "speedPads", "launchPads", "ziplines", "abilities", "moglings", "stashes", "dash", "overtime" } do
+for _, name in { "war", "shove", "ranks", "dailyStreak", "cosmeticShop", "bots", "speedPads", "launchPads", "ziplines", "abilities", "moglings", "stashes", "dash", "overtime", "stealing", "rifts" } do
 	check(name .. " is ON", (Features :: any)[name] == true)
 end
 for _, name in {
 	"combat", "mogOffs", "mogOffsInWar", "trainingIsland", "treadmill", "trainingStations", "boxes", "units", "prestige",
-	"arena", "pickups", "discoveryCards", "territoryTrickle", "seasons", "mogPoints", "squadBonus", "friendPlacement", "barracks",
+	"arena", "pickups", "airshipTaxis", "tankMode", "discoveryCards", "territoryTrickle", "seasons", "mogPoints", "squadBonus", "friendPlacement", "barracks",
 } do
 	check(name .. " is OFF", (Features :: any)[name] == false)
 end

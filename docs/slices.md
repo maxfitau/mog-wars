@@ -113,8 +113,11 @@ war, and sell units for Mog Points.
 
 ## 12. Cosmetic shop
 
-**Build:** a Robux shop for cosmetics only (trails, aura colours, name styles), with real ids once created.
-**Test:** in Studio with real products: buy once, receive once, rejoin and keep it.
+**Build (code written, not yet playtested):** a Robux shop for cosmetics only: trails, auras and fixed titles from
+`src/shared/CosmeticCatalog.luau`, sold as developer products (ids are 0 until you create them on the Creator
+Dashboard). Receipts are applied once; players wear items from the shop screen and everyone sees them.
+**Test:** pure tests for the catalog, equip rules and purchases (`tests/CosmeticCatalog.test.luau`). In Studio with
+real products: buy once, receive once, rejoin and keep it; confirm a retried receipt does not grant twice.
 **Done when:** nothing in the shop changes power, points, ranks, units, boxes or capture speed.
 
 ## 13. Polish: tutorial, effects, sounds, mobile

@@ -25,7 +25,7 @@ change is. Sections A and rows 1 to 5 of B (ranks, boxes, the Training Arena, sp
 | 5 | ~~8 to 12 territories~~ | **Done** (9 zones) | | |
 | 6 | Faction 4 is "Aura Cartel" | Renamed "Aura Collective" (the word "cartel" suggests drug crime, see compliance) | Your call. One line in `src/shared/FactionRules.luau` | Tiny |
 | 7 | Weekly faction season, join a friend's faction, squad capture bonus, weekly events | Not built | Add after the build order is done (new slices) | Large |
-| 8 | Money list includes **gifting** and **private servers** | PRD lists trading as out of scope; shop not built | Check Roblox's current rules on gifting and on unfair gifting between players before building it. Private servers are a Roblox feature to switch on | Check first |
+| 8 | Money list: gifting, private servers, cosmetic season pass | Shop built for trails, auras and titles (decisions 58 to 61); gifting, season pass, banners, emotes, skins and box animations not built | Check Roblox rules on gifting before building it (see compliance section 9) | Check first |
 | 9 | Build order puts the Training Arena before streak, barracks and the shop | Streak and barracks are built first | Fine to leave, but build the arena next | None |
 
 ## C. Already matches

@@ -99,6 +99,10 @@ check("streak day above 7 is invalid", not PlayerData.isValid(save({ streakDay =
 check("negative barracks time is invalid", not PlayerData.isValid(save({ barracksSince = -1 })))
 check("negative training level is invalid", not PlayerData.isValid(save({ trainingLevel = -1 })))
 check("a huge training count is invalid", not PlayerData.isValid(save({ trainingToday = 90000 })))
+check("an equipped entry with an empty id is invalid", not PlayerData.isValid(save({ equipped = { trail = "" } })))
+check("receipts with a bad time are invalid", not PlayerData.isValid(save({ receipts = { p1 = -4 } })))
+local v6: any = { version = 6, points = 3, rank = 2, warsToday = 0, lastWarDay = 0, boxes = {}, units = {}, cosmetics = { trail_spark = true }, boxDay = 0, boxesToday = 0, streakDay = 0, lastClaimDay = 0, barracksSince = 1, trainingLevel = 4, trainingProgress = 7, trainingDay = 0, trainingToday = 0 }
+check("migrate upgrades version 6 and keeps training and cosmetics", PlayerData.migrate(v6) and PlayerData.isValid(v6) and v6.trainingLevel == 4 and v6.cosmetics.trail_spark == true)
 local v5: any = { version = 5, points = 9, rank = 2, warsToday = 0, lastWarDay = 0, boxes = {}, units = {}, cosmetics = {}, boxDay = 0, boxesToday = 0, streakDay = 2, lastClaimDay = 5, barracksSince = 7 }
 check("migrate upgrades version 5 and keeps the streak", PlayerData.migrate(v5) and PlayerData.isValid(v5) and v5.streakDay == 2 and v5.trainingLevel == 0)
 local v4: any = { version = 4, points = 9, rank = 2, warsToday = 0, lastWarDay = 0, boxes = {}, units = {}, cosmetics = {}, boxDay = 0, boxesToday = 0 }

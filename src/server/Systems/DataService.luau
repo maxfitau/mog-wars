@@ -12,6 +12,8 @@ local BoxRoll = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("B
 local BarracksRules = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("BarracksRules"))
 local StreakRules = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("StreakRules"))
 local TrainingRules = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("TrainingRules"))
+local CosmeticCatalog = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("CosmeticCatalog"))
+local CosmeticRules = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("CosmeticRules"))
 local PlayerData = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("PlayerData"))
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("EconomyConfig"))
 
@@ -50,6 +52,20 @@ local function syncTraining(player: Player, data: PlayerData.Data)
 	local cost = TrainingRules.levelCost(data.trainingLevel, settings)
 	player:SetAttribute("TrainingProgress", if data.trainingLevel >= settings.maxLevel then 1 else data.trainingProgress / cost)
 	player:SetAttribute("TrainingLeft", math.max(0, settings.dailyStrideCap - trainedToday))
+end
+
+-- Mirror owned and equipped cosmetics to attributes (read only for the client): "Cosmetics" is the owned ids
+-- joined with commas, and "Equip_<slot>" is the id worn in that slot ("" for none).
+local function syncCosmetics(player: Player, data: PlayerData.Data)
+	local owned = {}
+	for id in data.cosmetics do
+		table.insert(owned, id)
+	end
+	table.sort(owned)
+	player:SetAttribute("Cosmetics", table.concat(owned, ","))
+	for _, slot in CosmeticCatalog.slots do
+		player:SetAttribute("Equip_" .. slot, data.equipped[slot] or "")
+	end
 end
 
 local function load(player: Player)
@@ -97,7 +113,9 @@ local function load(player: Player)
 		profile.Data.barracksSince = os.time() -- the barracks starts building from the first visit
 	end
 	syncRewards(player, profile.Data :: any)
+	CosmeticRules.cleanEquipped(profile.Data :: any, CosmeticCatalog :: any) -- drop anything not owned or no longer valid
 	syncTraining(player, profile.Data :: any)
+	syncCosmetics(player, profile.Data :: any)
 end
 
 -- The live save table for a player, or nil while loading or after they leave.
@@ -276,6 +294,7 @@ function DataService.openBox(player: Player, tierId: any, random: () -> number):
 		player:SetAttribute("Points", data.points)
 	end
 	syncInventory(player, data)
+	syncCosmetics(player, data)
 	return result
 end
 
@@ -306,6 +325,54 @@ function DataService.addTrainingStride(player: Player): (boolean, string, boolea
 	data.trainingToday += allowed
 	syncTraining(player, data)
 	return true, "", gained > 0
+end
+
+-- Wait (up to `seconds`) for a player's data to finish loading. Returns the data or nil.
+function DataService.waitFor(player: Player, seconds: number): PlayerData.Data?
+	local deadline = os.clock() + seconds
+	while os.clock() < deadline do
+		local data = DataService.get(player)
+		if data then
+			return data
+		end
+		if player.Parent ~= Players then
+			return nil
+		end
+		task.wait(0.25)
+	end
+	return DataService.get(player)
+end
+
+-- Apply one Robux cosmetic purchase to the live save, once. Returns the CosmeticRules result string.
+function DataService.applyCosmeticPurchase(player: Player, itemId: string, purchaseId: string): string
+	local data = DataService.get(player)
+	if not data then
+		return "not_loaded"
+	end
+	local result = CosmeticRules.applyPurchase(data :: any, CosmeticCatalog :: any, itemId, purchaseId, os.time())
+	if result == "granted" or result == "already_owned" then
+		syncCosmetics(player, data)
+	end
+	return result
+end
+
+-- Equip (or, with an empty id, remove) a cosmetic in a slot. Returns ok and a stable reason.
+function DataService.equipCosmetic(player: Player, slot: any, id: any): (boolean, string)
+	local data = DataService.get(player)
+	if not data then
+		return false, "not_loaded"
+	end
+	local ok, reason = CosmeticRules.canEquip(data :: any, CosmeticCatalog :: any, slot, id)
+	if not ok then
+		return false, reason or "bad_input"
+	end
+	if id == "" then
+		data.equipped[slot] = nil
+	else
+		data.equipped[slot] = id
+	end
+	syncCosmetics(player, data)
+	return true, ""
 end
 
 -- Refresh the rewards attributes (called on a timer so the numbers stay current).

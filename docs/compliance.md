@@ -73,20 +73,31 @@ accept that boxes then become indirect paid random items.
 
 ## 4. Shop and monetisation plan
 
-Allowed in the shop: cosmetics (trails, aura colours, name styles, emotes) and convenience that gives no
-advantage (extra cosmetic slots). Not allowed:
+**What is built (slice 12):** a cosmetic shop sold as developer products. Items are trails, auras and titles
+(fixed words chosen in `src/shared/CosmeticCatalog.luau`, never free text from players). A test fails if any item
+gains a gameplay field. Banners, emotes, unit skins and box-opening animations from the design brief need art
+first. Private servers are a Roblox setting. A cosmetic season pass and **gifting** are not built (see section 9).
+
+Allowed in the shop: cosmetics (trails, auras, titles, and later banners, emotes, skins) and convenience that gives
+no advantage. Not allowed:
 
 - Mog Points, ranks, rank discounts, boxes, units, capture speed, extra aura or training speed or training time,
   shove or mog-off advantages.
-- Anything random for Robux.
+- Anything random for Robux. Cosmetics found in boxes are never sold, so no paid random item exists.
 - Pressure for children: no fake countdowns, no "last chance" scarcity, no guilt text, no purchase prompts on
-  join or during a war. A purchase only starts from a tap.
+  join or during a war. A purchase only starts from a tap on a Buy button, and Roblox shows the price.
 - Promises of free Robux or items.
 
-Technical: every product needs a real id and is granted through `ProductCatalog` and receipt processing from the
-framework (see `docs/MONETIZATION.md` in `roblox-framework`), tested with a real purchase in Studio. Note the
-framework's documented gap: a paid grant can be lost if a server crashes before saving, so use an immediate
-save if available.
+Technical: every shop item needs a real product id from the Creator Dashboard (until then it shows "Not on sale
+yet" and cannot be bought). `ShopSystem` is the only place that sets `MarketplaceService.ProcessReceipt`. A
+purchase is applied to the save exactly once using Roblox's purchase id, and "granted" is answered only after
+it is recorded. Test with a real purchase in Studio, including a retried receipt.
+
+Known gaps to read before launch:
+- If a server crashes after Roblox takes payment but before the save is written, the item can be lost. Check the
+  real ProfileStore module for an immediate-save call and use it right after a purchase is applied.
+- If a player buys an item they already own (two prompts open at once), they are charged and nothing more is
+  given. The shop hides Buy for owned items, but Roblox's own refund and support routes cover the rare case.
 
 ## 5. Safety for young players
 
@@ -122,3 +133,11 @@ facts from the finished game (violence level of the mog-off, chat, paid random i
 - [ ] All assets licensed or original, sources recorded
 - [ ] Questionnaire answered by you for the final build
 - [ ] You read the four pages linked at the top, in their current form
+
+## 9. Gifting and other money ideas from the design brief
+
+Gifting is on the design brief's money list and is **not built**. Before building it, read Roblox's current rules on
+gifting, on purchases by minors, and on anything that lets players trade or hand over items of value, because it
+can enable scams and pressure between young players. A safe version is a cosmetic gift the buyer picks for a
+friend who is online, with no ability to trade it onward. The season pass should likewise be cosmetic only and
+should show everything it gives before purchase.

@@ -20,17 +20,20 @@ export type Data = {
 	trainingProgress: number, -- strides into the current level
 	trainingDay: number, -- UTC day number the trainingToday count belongs to
 	trainingToday: number, -- strides counted on trainingDay (daily cap)
+	equipped: { [string]: string }, -- cosmetic slot to the cosmetic id worn there
+	receipts: { [string]: number }, -- Robux purchase ids already applied, with when (never grant twice)
 }
 
 local PlayerData = {}
 
-PlayerData.CURRENT_VERSION = 6
+PlayerData.CURRENT_VERSION = 7
+PlayerData.MAX_RECEIPT_ENTRIES = 400
 PlayerData.MAX_UNITS = 1000
 PlayerData.MAX_BOXES_PER_TIER = 1000
 PlayerData.MAX_POINTS = 1_000_000_000 -- far above anything reachable; stops runaway or overflowing values
 
 function PlayerData.template(): Data
-	return { version = PlayerData.CURRENT_VERSION, points = 0, rank = 1, warsToday = 0, lastWarDay = 0, boxes = {}, units = {}, cosmetics = {}, boxDay = 0, boxesToday = 0, streakDay = 0, lastClaimDay = 0, barracksSince = 0, trainingLevel = 0, trainingProgress = 0, trainingDay = 0, trainingToday = 0 }
+	return { version = PlayerData.CURRENT_VERSION, points = 0, rank = 1, warsToday = 0, lastWarDay = 0, boxes = {}, units = {}, cosmetics = {}, boxDay = 0, boxesToday = 0, streakDay = 0, lastClaimDay = 0, barracksSince = 0, trainingLevel = 0, trainingProgress = 0, trainingDay = 0, trainingToday = 0, equipped = {}, receipts = {} }
 end
 
 local function isWholeNumber(value: any): boolean
@@ -73,6 +76,34 @@ function PlayerData.cosmeticsValid(cosmetics: any): boolean
 	end
 	for id, owned in cosmetics do
 		if type(id) ~= "string" or id == "" or owned ~= true then
+			return false
+		end
+	end
+	return true
+end
+
+-- True when `equipped` maps non-empty string slots to non-empty string ids of a sane length.
+function PlayerData.equippedValid(equipped: any): boolean
+	if type(equipped) ~= "table" then
+		return false
+	end
+	for slot, id in equipped do
+		if type(slot) ~= "string" or slot == "" or #slot > 30 or type(id) ~= "string" or id == "" or #id > 60 then
+			return false
+		end
+	end
+	return true
+end
+
+-- True when `receipts` maps purchase id strings to whole-number times, with a sane number of entries.
+function PlayerData.receiptsValid(receipts: any): boolean
+	if type(receipts) ~= "table" then
+		return false
+	end
+	local count = 0
+	for id, stamp in receipts do
+		count += 1
+		if type(id) ~= "string" or id == "" or #id > 100 or not isWholeNumber(stamp) or stamp < 0 or count > PlayerData.MAX_RECEIPT_ENTRIES then
 			return false
 		end
 	end
@@ -192,6 +223,11 @@ function PlayerData.migrate(data: any): boolean
 		data.trainingToday = 0
 		data.version = 6
 	end
+	if data.version == 6 then
+		data.equipped = {}
+		data.receipts = {}
+		data.version = 7
+	end
 	return true
 end
 
@@ -256,6 +292,8 @@ function PlayerData.isValid(data: any): boolean
 		and isWholeNumber(data.trainingToday)
 		and data.trainingToday >= 0
 		and data.trainingToday <= 86400
+		and PlayerData.equippedValid(data.equipped)
+		and PlayerData.receiptsValid(data.receipts)
 end
 
 -- Add points to a save table. Returns true if it changed. Rejects bad amounts and never exceeds the cap.

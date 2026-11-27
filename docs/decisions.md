@@ -61,3 +61,7 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 55 | A treadmill belt sits beside each home base and works any time, not only between wars | The break between wars is only 20 seconds, so "between wars" would allow almost no training; leaving the front to train is a real trade-off |
 | 56 | A stride is one second alive, on a belt and moving (the belt pushes you back, so you must keep walking); only 10 minutes a day count; the full 20 levels take about three weeks | Healthy play, no endless grinding, a medium-term goal between the daily and the long rank goal |
 | 57 | Training can never be bought or sped up with Robux | `DESIGN.md` rule 1 (not pay-to-win); added to docs/compliance.md |
+| 58 | Shop items are developer products (buy more than once is blocked by the screen), applied to the save exactly once using Roblox's purchase id | Same proven pattern as the framework's shop; "small, repeatable buys" from the design brief are different items, not repeats of one |
+| 59 | Only three cosmetic slots are built: trail, aura and title; titles are fixed words from the catalog | Banners, emotes, unit skins and box animations need art; fixed words keep the game safe for children |
+| 60 | Box cosmetics (trail_spark, aura_frost, aura_gold) are never sold, and shop cosmetics never drop from boxes; a test checks both | Keeps boxes earned-only and avoids any paid random item |
+| 61 | Items with product id 0 show "Not on sale yet" and cannot be bought | Nothing can be sold before a real product exists |

@@ -48,6 +48,15 @@ end
 
 local base1 = MapLayout.bases[1]
 
+local function groundByName(name: string): { x: number, z: number, size: number }
+	for _, item in ground do
+		if item.name == name then
+			return item.flag
+		end
+	end
+	error("no ground flag named " .. name)
+end
+
 do
 	local x, z, kind = SpawnRules.spawnPoint(1, zonesOwnedBy({}), base1.x, base1.z, 0)
 	check("a faction with no flags spawns at its base", kind == "base" and x == base1.x and z == base1.z)
@@ -57,18 +66,23 @@ end
 do
 	local zones = zonesOwnedBy({ Flag_gigachad_gate_1 = 1, Flag_locked_in_lighthouse_1 = 1, Flag_gigachad_gate_2 = 2 })
 	local front = SpawnRules.frontZone(1, zones)
-	check("the front flag is the owned flag nearest the centre", front ~= nil and (front :: SpawnRules.ZoneInfo).z == 0 and (front :: SpawnRules.ZoneInfo).x == -30)
+	local nearest = groundByName("Flag_gigachad_gate_1") -- closer to the centre than the lighthouse flag
+	check(
+		"the front flag is the owned flag nearest the centre",
+		front ~= nil and (front :: SpawnRules.ZoneInfo).x == nearest.x and (front :: SpawnRules.ZoneInfo).z == nearest.z
+	)
 	check("another faction's flags are not used", SpawnRules.frontZone(3, zones) == nil)
 end
 
 -- the spawn point sits outside the flag on the side facing the base
 do
+	local flag = groundByName("Flag_gigachad_gate_1")
 	local zones = zonesOwnedBy({ Flag_gigachad_gate_1 = 1 })
 	local x, z, kind = SpawnRules.spawnPoint(1, zones, base1.x, base1.z, 2) -- slot 2 has no sideways shift
 	check("an owned flag gives a flag spawn", kind == "zone")
-	local dx, dz = x - (-30), z - 0
-	check("the spawn is a few studs outside the flag edge", math.max(math.abs(dx), math.abs(dz)) - 18 / 2 >= 4)
-	local toBaseX, toBaseZ = base1.x - (-30), base1.z - 0
+	local dx, dz = x - flag.x, z - flag.z
+	check("the spawn is a few studs outside the flag edge", math.max(math.abs(dx), math.abs(dz)) - flag.size / 2 >= 4)
+	local toBaseX, toBaseZ = base1.x - flag.x, base1.z - flag.z
 	check("the spawn is on the side facing the faction base", dx * toBaseX + dz * toBaseZ > 0)
 	check("the spawn is not inside any flag", not insideAnyFlag(x, z))
 end

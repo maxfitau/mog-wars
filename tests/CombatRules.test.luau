@@ -23,7 +23,13 @@ check("rank 1 does base damage", CombatRules.damage(25, 1, combat) == 25)
 check("high rank bonus is capped at +10 percent", CombatRules.damage(100, 7, combat) == 109 or CombatRules.damage(100, 7, combat) <= 110)
 check("absurd rank never passes +10 percent", CombatRules.damage(100, 9999, combat) == 110)
 check("nan rank gives base damage", CombatRules.damage(25, 0 / 0, combat) == 25)
-check("three hits mog a 100 ego player", select(2, CombatRules.applyDamage(66, 34)) == true and select(2, CombatRules.applyDamage(100, 34)) == false and 3 * blaster.damage >= combat.health and 2 * blaster.damage < combat.health)
+check(
+	"three hits mog a 100 ego player",
+	select(2, CombatRules.applyDamage(66, 34)) == false -- the second hit (100 -> 66 -> 32) does not mog yet
+		and select(2, CombatRules.applyDamage(32, 34)) == true -- the third hit does
+		and 3 * blaster.damage >= combat.health
+		and 2 * blaster.damage < combat.health
+)
 check("health never below 0", (CombatRules.applyDamage(10, 50)) == 0)
 check("bad damage is ignored", (CombatRules.applyDamage(100, -5)) == 100 and (CombatRules.applyDamage(100, 0 / 0)) == 100)
 

@@ -28,9 +28,16 @@ check("roll just under 1 gives the last drop", BoxRoll.roll(gold, function() ret
 check("a bad random value is safe", BoxRoll.roll(gold, function() return 0 / 0 end) == gold.drops[1])
 check("a random value of 1 is safe", BoxRoll.roll(gold, function() return 1 end) == gold.drops[#gold.drops])
 
--- boundary: 50 percent is where the first drop ends
-check("0.499 is still the first drop", BoxRoll.roll(gold, function() return 0.499 end) == gold.drops[1])
-check("0.501 is the second drop", BoxRoll.roll(gold, function() return 0.501 end) == gold.drops[2])
+-- boundary: the first drop's own weight is where it ends
+local firstWeight = gold.drops[1].weight
+check(
+	(firstWeight - 0.01) .. " is still the first drop",
+	BoxRoll.roll(gold, function() return (firstWeight - 0.01) / 100 end) == gold.drops[1]
+)
+check(
+	(firstWeight + 0.01) .. " is the second drop",
+	BoxRoll.roll(gold, function() return (firstWeight + 0.01) / 100 end) == gold.drops[2]
+)
 
 -- odds shown equal the weights
 local shown = BoxRoll.odds(gold)

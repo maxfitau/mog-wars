@@ -27,6 +27,7 @@ export type Rank = {
 export type Config = {
 	war: {
 		durationSeconds: number,
+		intermissionSeconds: number,
 		playersPerServer: number,
 		winnerBonusPoints: number,
 		participantBonusPoints: number,
@@ -71,6 +72,7 @@ export type Config = {
 local config: Config = {
 	war = {
 		durationSeconds = 600,
+		intermissionSeconds = 20, -- break between wars while the map resets and winners are shown
 		playersPerServer = 16,
 		winnerBonusPoints = 60,
 		participantBonusPoints = 20,

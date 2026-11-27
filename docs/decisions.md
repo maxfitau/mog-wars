@@ -27,3 +27,7 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 21 | The HUD reads zone attributes only (no remotes) and works out "which zone am I in" for display only | The server stays the only source of capture state; nothing the client shows can change a result |
 | 22 | Only players on the capturing faction are paid, by pushing time; a player who leaves before the capture loses their share | Simple and cheat-proof; revisit if it feels unfair in playtests |
 | 23 | `src/server/Lib/ProfileStore.luau` is a Studio-only mock that errors outside Studio | A published game can never pretend to save; the real module must be vendored first (docs/DATA.md) |
+| 24 | A war is a 20-second intermission then a 10-minute war, repeating; zones only move during a war | Gives a clear start and end, and a moment to show the winner and reset |
+| 25 | War winner is the highest zone-value total; ties go to more captures; still tied is a draw with no winner bonus | Simple, explainable tie-break (WarRules.winner) |
+| 26 | Everyone who contributed at least 5 units gets 20 points; contributors on the winning faction get 60 more | Matches the economy numbers; idle players earn nothing |
+| 27 | After 8 finished wars in a UTC day, capture and war rewards are halved (PlayerData v2 adds warsToday and lastWarDay) | Healthy-play rule from the economy doc, enforced by the server |

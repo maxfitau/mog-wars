@@ -62,7 +62,7 @@ check points saved (needs a scratch place with live stores).
 
 ## 5. War rounds and winners
 
-**Build:** a 10-minute war timer, zone-control score, a winner and bonus, an intermission, and a map reset.
+**Build (code written, not yet playtested):** a 10-minute war timer, zone-control score, a winner and bonus, an intermission, and a map reset.
 **Test:** pure tests for scoring and tie-breaks. In Studio: play a full war with two clients.
 **Done when:** a war starts, ends, awards the bonus once, and resets without leftovers.
 

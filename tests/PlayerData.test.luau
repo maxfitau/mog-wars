@@ -37,9 +37,38 @@ PlayerData.addPoints(rich, 100)
 check("points never pass the cap", rich.points == PlayerData.MAX_POINTS)
 
 check("bad shapes are invalid", not PlayerData.isValid(nil) and not PlayerData.isValid({}))
-check("wrong version is invalid", not PlayerData.isValid({ version = 0, points = 0, rank = 1 }))
-check("negative points are invalid", not PlayerData.isValid({ version = 1, points = -1, rank = 1 }))
-check("rank 0 is invalid", not PlayerData.isValid({ version = 1, points = 0, rank = 0 }))
+local function save(overrides: { [string]: any }): any
+	local copy: any = PlayerData.template()
+	for key, value in overrides do
+		copy[key] = value
+	end
+	return copy
+end
+check("wrong version is invalid", not PlayerData.isValid(save({ version = 0 })))
+check("negative points are invalid", not PlayerData.isValid(save({ points = -1 })))
+check("rank 0 is invalid", not PlayerData.isValid(save({ rank = 0 })))
+check("negative wars are invalid", not PlayerData.isValid(save({ warsToday = -1 })))
+
+-- migration from version 1
+local old: any = { version = 1, points = 120, rank = 3 }
+check("migrate upgrades version 1", PlayerData.migrate(old) and old.version == 2 and old.warsToday == 0)
+check("migrated save is valid and keeps progress", PlayerData.isValid(old) and old.points == 120 and old.rank == 3)
+check("migrate rejects non-tables", not PlayerData.migrate(nil))
+
+-- daily war limit
+local day = PlayerData.dayNumber(86400 * 20000 + 5)
+check("day number is days since 1970", day == 20000)
+local player = PlayerData.template()
+check("new player gets full rewards", PlayerData.rewardMultiplier(player, day, 8, 0.5) == 1)
+for _ = 1, 7 do
+	PlayerData.recordWar(player, day)
+end
+check("7 wars still full", PlayerData.rewardMultiplier(player, day, 8, 0.5) == 1)
+PlayerData.recordWar(player, day)
+check("8 wars then reduced", PlayerData.rewardMultiplier(player, day, 8, 0.5) == 0.5)
+check("a new day resets the multiplier", PlayerData.rewardMultiplier(player, day + 1, 8, 0.5) == 1)
+PlayerData.recordWar(player, day + 1)
+check("a new day restarts the war count", player.warsToday == 1 and player.lastWarDay == day + 1)
 
 if failures > 0 then
 	error(failures .. " test(s) failed")

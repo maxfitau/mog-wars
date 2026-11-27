@@ -8,6 +8,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local ProfileStore = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("ProfileStore"))
 local PlayerData = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("PlayerData"))
+local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("EconomyConfig"))
 
 local store = nil :: ProfileStore.Store?
 local profiles: { [Player]: ProfileStore.Profile } = {}
@@ -29,6 +30,7 @@ local function load(player: Player)
 	end
 	profile:AddUserId(player.UserId)
 	profile:Reconcile()
+	PlayerData.migrate(profile.Data)
 	if not PlayerData.isValid(profile.Data) then
 		-- Never run with data we cannot trust.
 		profile:EndSession()
@@ -71,6 +73,28 @@ function DataService.spendPoints(player: Player, amount: number): boolean
 	end
 	player:SetAttribute("Points", data.points)
 	return true
+end
+
+-- 1 for full rewards, or the reduced multiplier after the daily full-reward wars. 1 if data is not loaded.
+function DataService.rewardMultiplier(player: Player): number
+	local data = DataService.get(player)
+	if not data then
+		return 1
+	end
+	return PlayerData.rewardMultiplier(
+		data,
+		PlayerData.dayNumber(os.time()),
+		Config.war.fullRewardWarsPerDay,
+		Config.war.reducedRewardMultiplier
+	)
+end
+
+-- Count a finished war for this player today.
+function DataService.recordWar(player: Player)
+	local data = DataService.get(player)
+	if data then
+		PlayerData.recordWar(data, PlayerData.dayNumber(os.time()))
+	end
 end
 
 function DataService.init()

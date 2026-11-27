@@ -13,6 +13,7 @@ local CaptureBar = require(Shared:WaitForChild("CaptureBar"))
 local Config = require(Shared:WaitForChild("EconomyConfig"))
 local FactionRules = require(Shared:WaitForChild("FactionRules"))
 local ContributionScoring = require(Shared:WaitForChild("ContributionScoring"))
+local WarRules = require(Shared:WaitForChild("WarRules"))
 local ZoneGeometry = require(Shared:WaitForChild("ZoneGeometry"))
 local DataService = require(script.Parent:WaitForChild("DataService"))
 
@@ -29,6 +30,9 @@ type ZoneRecord = {
 
 local zones: { [BasePart]: ZoneRecord } = {}
 local accumulator = 0
+local active = true -- zones only move during a war
+local warUnits: { [number]: number } = {} -- contribution per user id this war
+local warCaptures: { [number]: number } = {} -- captures per faction this war
 
 local params: CaptureBar.Params = {
 	secondsForOneAura = Config.capture.secondsForOneAura,
@@ -138,13 +142,16 @@ local function payOut(record: ZoneRecord, winner: number)
 	for userId, amount in payouts do
 		local player = Players:GetPlayerByUserId(userId)
 		if player then
-			DataService.addPoints(player, amount) -- a player who left before payout loses that share
+			DataService.addPoints(player, WarRules.applyMultiplier(amount, DataService.rewardMultiplier(player))) -- a player who left before payout loses that share
 		end
 	end
 	record.contribs = {}
 end
 
 local function tick(dt: number)
+	if not active then
+		return
+	end
 	for _, record in zones do
 		local powers, members = powersInZone(record.part)
 
@@ -157,7 +164,9 @@ local function tick(dt: number)
 					entry = { faction = leaderId, units = 0 }
 					record.contribs[player.UserId] = entry
 				end
-				entry.units += ContributionScoring.fromPush(1, dt)
+				local gained = ContributionScoring.fromPush(1, dt)
+				entry.units += gained
+				warUnits[player.UserId] = (warUnits[player.UserId] or 0) + gained
 			end
 		end
 
@@ -165,12 +174,45 @@ local function tick(dt: number)
 		record.state = result.state
 		if result.captured then
 			print(("[mog-wars] zone %s captured by faction %d"):format(record.part.Name, result.newOwner))
+			warCaptures[result.newOwner] = (warCaptures[result.newOwner] or 0) + 1
 			payOut(record, result.newOwner)
 		elseif record.state.capturer == 0 and record.state.progress == 0 and leaderId == 0 then
 			record.contribs = {} -- the zone went idle, so old pushing no longer counts
 		end
 		show(record)
 	end
+end
+
+-- Zones only move while active. WarSystem turns this off between wars.
+function CaptureSystem.setActive(value: boolean)
+	active = value
+end
+
+-- Start a clean war: every zone unowned and empty, and the war tallies cleared.
+function CaptureSystem.resetWar()
+	warUnits = {}
+	warCaptures = {}
+	for _, record in zones do
+		record.state = CaptureBar.newState()
+		record.contribs = {}
+		record.shownProgress = -1
+		show(record)
+	end
+end
+
+-- Zone owners and values, for scoring.
+function CaptureSystem.zoneSummary(): { WarRules.ZoneSummary }
+	local list: { WarRules.ZoneSummary } = {}
+	for _, record in zones do
+		local value = record.part:GetAttribute("Value")
+		table.insert(list, { owner = record.state.owner, value = if type(value) == "number" then value else 1 })
+	end
+	return list
+end
+
+-- Copies of this war's contribution per user id and captures per faction.
+function CaptureSystem.warTallies(): ({ [number]: number }, { [number]: number })
+	return table.clone(warUnits), table.clone(warCaptures)
 end
 
 function CaptureSystem.init()

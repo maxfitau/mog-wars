@@ -23,7 +23,7 @@ local TIER_COLORS = {
 }
 
 -- Real materials instead of plain plastic, chosen from each part's name (anything not listed stays as it is).
-local MATERIALS: { { string, Enum.Material } } = {
+local MATERIALS: { { any } } = {
 	{ "Tower", Enum.Material.Cobblestone }, { "CastleWall", Enum.Material.Cobblestone }, { "Merlon", Enum.Material.Cobblestone },
 	{ "Jaw", Enum.Material.Slate }, { "UpperHead", Enum.Material.Slate }, { "Nose", Enum.Material.Slate }, { "Brow", Enum.Material.Slate },
 	{ "Banner", Enum.Material.Fabric }, { "HeadRamp", Enum.Material.Concrete },
@@ -45,7 +45,7 @@ local function applyMaterials(folder: Folder)
 					break
 				end
 				if string.sub(part.Name, 1, #entry[1]) == entry[1] then
-					part.Material = entry[2]
+					part.Material = entry[2] :: Enum.Material
 					break
 				end
 			end

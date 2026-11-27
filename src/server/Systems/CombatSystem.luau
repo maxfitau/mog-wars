@@ -546,7 +546,6 @@ local function onPlayer(player: Player)
 end
 
 function CombatSystem.init()
-	Players.RespawnTime = combat.respawnSeconds
 	local folder = ReplicatedStorage:FindFirstChild("Remotes")
 	if not folder then
 		folder = Instance.new("Folder")
@@ -581,6 +580,12 @@ function CombatSystem.init()
 			startReload(state)
 		end
 	end)
+	local okRespawn = pcall(function()
+		Players.RespawnTime = combat.respawnSeconds
+	end)
+	if not okRespawn then
+		warn("[mog-wars] could not set Players.RespawnTime; set it to 3 in the Players service")
+	end
 	Players.PlayerAdded:Connect(onPlayer)
 	Players.PlayerRemoving:Connect(function(player)
 		states[player.UserId] = nil

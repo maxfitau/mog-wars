@@ -73,12 +73,11 @@ change is. Sections A and rows 1 to 5 of B (ranks, boxes, the Training Arena, sp
    off and turned on in later weekly updates. The first session is kept simple: new players only see the zone bar.
 6. Release order: Update 1 = per-rank training stations, Update 2 = prestige and the skill tree, Update 3 = Mog Arena.
 
-## F. New open questions
+## F. Answered by the owner (third round: "all yes")
 
-1. **Barracks:** it is not in your launch list, so I switched it off at launch (it is replaced by arena recruits in Update 3, so it may
-   never come back). Is that what you want? One flag in `Features.luau`.
-2. **Friend placement:** I grouped it with the squad bonus, so it is also off at launch. Do you want friends placed together from day one?
-3. **Shove and mog-offs:** I counted them as part of "the war", so they are on at launch (a new player only sees them after their first
-   finished war, apart from the mog-off screen, which appears whenever a duel starts). Fine?
-4. **Reveal speed:** the screens appear after the first capture, first, second and third finished wars. Faster, slower, or tied to
-   rank instead?
+1. Barracks is switched off at launch (it will be replaced by arena recruits in Update 3).
+2. Friend placement is off at launch with the squad bonus.
+3. Shove and mog-offs are on at launch as part of the war.
+4. Screens appear after the first capture, then after the first, second and third finished wars.
+
+No open questions remain from the owner's side. The next open items are testing items: see `docs/code-review-1.md`.

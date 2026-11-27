@@ -90,3 +90,4 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 84 | The first session shows a hint and an arrow to the nearest zone until the first capture, and zones glow | A new player only sees the zone bar, which only appears inside a zone, so they need to be told where to go |
 | 85 | Zones are switched off until the first war starts | Fix from code review 1: they were live during the first intermission |
 | 86 | docs/LAUNCH.md holds the truthful feature list and checklist status; nothing may be advertised until it has been tested in Studio | The roblox-launch skill's rule |
+| 87 | Owner confirmed: barracks off at launch, friend placement off at launch, shove and mog-offs on at launch, reveal speed as built | Answers to design-reconciliation F1 to F4 (supersedes the "assumed" note in decision 81) |

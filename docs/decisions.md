@@ -168,3 +168,4 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 161 | Moglings have a blocky body built from parts (no avatar download); a simple procedural walk swings the limbs | Faster to spawn, and removes the avatar-asset suspect for the ContentId message |
 | 162 | The AssetCheck debug scripts were removed as asked. If "ContentId rbxassetid://203785492" is still printed, it comes from Studio or from the place file itself, not from our scripts | We could not find it in our objects; the bots were the main suspect and no longer download an avatar |
 | 163 | The 12 Aura Stashes give +100 once per war each; the first time ever each counts toward the saved "found n/12"; the crate is not solid | The owner's design; a solid crate in a tunnel was what trapped players |
+| 164 | Gigachad Gate's radius is 140, not 128 | Rizz Ravine grew to radius 130 when islands were spaced out, which made it bigger than the Gate; the Gate must stay the biggest island |

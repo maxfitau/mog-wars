@@ -60,7 +60,7 @@ Territories.list = {
 		x = 0,
 		z = 0,
 		height = GATE,
-		radius = 128,
+		radius = 140, -- must stay the biggest island; Rizz Ravine is the next largest at 130
 		-- A giant stone face with sunglasses. Its mouth is a tunnel you walk through; inside the head is the throne room
 		-- (reached from the two spiral-staircase towers by covered corridors). One flag on top of each tower, one in the
 		-- throne room.

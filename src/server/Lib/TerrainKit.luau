@@ -7,6 +7,14 @@ local Workspace = game:GetService("Workspace")
 
 local TerrainKit = {}
 
+-- Everything below is placed relative to a BASE HEIGHT, so a territory module can build on its own floating island:
+-- call TerrainKit.setBase(islandTopHeight) first and then use y = 0 for "the island surface".
+TerrainKit.base = 0
+
+function TerrainKit.setBase(y: number)
+	TerrainKit.base = y
+end
+
 local WATER_SURFACE = -1.5
 
 local function terrain(): Terrain
@@ -15,30 +23,30 @@ end
 
 -- A box of terrain whose BOTTOM is at y0.
 function TerrainKit.block(x: number, y0: number, z: number, sx: number, sy: number, sz: number, material: Enum.Material)
-	terrain():FillBlock(CFrame.new(x, y0 + sy / 2, z), Vector3.new(sx, sy, sz), material)
+	terrain():FillBlock(CFrame.new(x, TerrainKit.base + y0 + sy / 2, z), Vector3.new(sx, sy, sz), material)
 end
 
 -- A flat-topped round column of terrain whose BOTTOM is at y0.
 function TerrainKit.cylinder(x: number, y0: number, z: number, radius: number, height: number, material: Enum.Material)
-	terrain():FillCylinder(CFrame.new(x, y0 + height / 2, z), height, radius, material)
+	terrain():FillCylinder(CFrame.new(x, TerrainKit.base + y0 + height / 2, z), height, radius, material)
 end
 
 -- A smooth dome: `height` tall, `baseRadius` wide at the ground. Wide domes make gentle, walkable hills.
 function TerrainKit.dome(x: number, z: number, baseRadius: number, height: number, material: Enum.Material)
 	local radius = (baseRadius * baseRadius + height * height) / (2 * height)
-	terrain():FillBall(Vector3.new(x, height - radius, z), radius, material)
+	terrain():FillBall(Vector3.new(x, TerrainKit.base + height - radius, z), radius, material)
 end
 
 -- Dig out a box (air). Used for caves, secret rooms and trenches.
 function TerrainKit.carve(x: number, y0: number, z: number, sx: number, sy: number, sz: number)
-	terrain():FillBlock(CFrame.new(x, y0 + sy / 2, z), Vector3.new(sx, sy, sz), Enum.Material.Air)
+	terrain():FillBlock(CFrame.new(x, TerrainKit.base + y0 + sy / 2, z), Vector3.new(sx, sy, sz), Enum.Material.Air)
 end
 
 -- A round pond: dug `depth` deep and filled with water up to just below the ground.
 function TerrainKit.pond(x: number, z: number, radius: number, depth: number)
-	terrain():FillCylinder(CFrame.new(x, -depth / 2, z), depth, radius, Enum.Material.Air)
+	terrain():FillCylinder(CFrame.new(x, TerrainKit.base - depth / 2, z), depth, radius, Enum.Material.Air)
 	local waterHeight = depth + WATER_SURFACE
-	terrain():FillCylinder(CFrame.new(x, -depth + waterHeight / 2, z), waterHeight, radius, Enum.Material.Water)
+	terrain():FillCylinder(CFrame.new(x, TerrainKit.base - depth + waterHeight / 2, z), waterHeight, radius, Enum.Material.Water)
 end
 
 -- Bright, cartoon terrain colours (each material has one colour for the whole map).

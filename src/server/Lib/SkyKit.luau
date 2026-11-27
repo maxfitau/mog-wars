@@ -13,15 +13,20 @@ local WOOD = Color3.fromRGB(150, 105, 62)
 local ROPE = Color3.fromRGB(232, 215, 180)
 
 -- An island body: a grassy top (its surface is at `topY`) over a rock underside that tapers like an upside-down cone.
-function SkyKit.island(cx: number, cz: number, topY: number, radius: number, depth: number)
-	local slices = 7
+-- `taper` above 1 keeps the rock wider for longer (room for caves). Uses absolute heights (it ignores TerrainKit.base).
+function SkyKit.island(cx: number, cz: number, topY: number, radius: number, depth: number, taper: number?)
+	local saved = TerrainKit.base
+	TerrainKit.setBase(0)
+	local slices = 8
+	local power = taper or 0.85
 	TerrainKit.cylinder(cx, topY - 5, cz, radius, 5, Enum.Material.Grass) -- grass top
 	local sliceHeight = depth / slices
 	for index = 1, slices do
 		local fraction = index / (slices + 1)
-		local sliceRadius = radius * (1 - fraction ^ 0.85) + 8
+		local sliceRadius = radius * (1 - fraction ^ power) + 8
 		TerrainKit.cylinder(cx, topY - 5 - index * sliceHeight, cz, sliceRadius, sliceHeight + 1, Enum.Material.Rock)
 	end
+	TerrainKit.setBase(saved)
 end
 
 -- Roots and vines dangling from the rim and down the underside.
@@ -125,6 +130,63 @@ function SkyKit.cloudSea()
 		puff.CanQuery = false
 	end
 	return sea
+end
+
+-- Life between the islands: three airships (a fat balloon over a wooden gondola) circling slowly, and floating mini rocks.
+function SkyKit.decor()
+	local folder = Instance.new("Folder")
+	folder.Name = "SkyDecor"
+	folder.Parent = Workspace
+	local rng = Random.new(5)
+	for _ = 1, 26 do
+		local angle = rng:NextNumber() * math.pi * 2
+		local radius = 150 + rng:NextNumber() * 420
+		local size = 4 + rng:NextNumber() * 9
+		local rock = Builder.ball("FloatingRock", Vector3.new(size, size * 0.8, size), Vector3.new(math.cos(angle) * radius, 30 + rng:NextNumber() * 190, math.sin(angle) * radius), Color3.fromRGB(110, 100, 120), folder)
+		rock.Material = Enum.Material.Rock
+		rock.CanCollide = false
+		rock.CanQuery = false
+	end
+	local ships: { { model: Model, radius: number, speed: number, angle: number, height: number } } = {}
+	local colors = { Color3.fromRGB(235, 215, 170), Color3.fromRGB(110, 175, 110), Color3.fromRGB(200, 120, 90) }
+	for index = 1, 3 do
+		local model = Instance.new("Model")
+		model.Name = "Airship" .. index
+		local balloon = Builder.ball("Balloon", Vector3.new(30, 38, 30), Vector3.new(0, 26, 0), colors[index], model)
+		balloon.Material = Enum.Material.Fabric
+		local stripe = Builder.ball("BalloonStripe", Vector3.new(31, 8, 31), Vector3.new(0, 26, 0), Color3.fromRGB(70, 50, 40), model)
+		stripe.Material = Enum.Material.Fabric
+		local hull = Builder.part("Gondola", Vector3.new(16, 5, 6), Vector3.new(0, 0, 0), Color3.fromRGB(120, 82, 50), model)
+		hull.Material = Enum.Material.WoodPlanks
+		local rail = Builder.part("GondolaRail", Vector3.new(17, 1.2, 7), Vector3.new(0, 3.2, 0), Color3.fromRGB(95, 66, 40), model)
+		rail.Material = Enum.Material.Wood
+		for _, dx in { -5, 5 } do
+			local rope = Builder.part("Rope", Vector3.new(0.3, 20, 0.3), Vector3.new(dx, 12, 0), Color3.fromRGB(230, 215, 180), model)
+			rope.CanCollide = false
+		end
+		local propeller = Builder.part("Propeller", Vector3.new(0.5, 6, 1), Vector3.new(-9, 1, 0), Color3.fromRGB(80, 60, 45), model)
+		propeller.CanCollide = false
+		for _, child in model:GetChildren() do
+			if child:IsA("BasePart") then
+				child.CanCollide = false
+				child.CanQuery = false
+			end
+		end
+		model.PrimaryPart = hull
+		model.Parent = folder
+		table.insert(ships, { model = model, radius = 190 + index * 40, speed = (if index % 2 == 0 then -1 else 1) * (0.012 + index * 0.003), angle = index * 2.1, height = 150 + index * 18 })
+	end
+	task.spawn(function()
+		while folder.Parent do
+			task.wait(0.1)
+			for _, ship in ships do
+				ship.angle += ship.speed
+				local position = Vector3.new(math.cos(ship.angle) * ship.radius, ship.height + math.sin(ship.angle * 3) * 3, math.sin(ship.angle) * ship.radius)
+				local heading = Vector3.new(-math.sin(ship.angle) * math.sign(ship.speed), 0, math.cos(ship.angle) * math.sign(ship.speed))
+				ship.model:PivotTo(CFrame.lookAt(position, position + heading))
+			end
+		end
+	end)
 end
 
 return SkyKit

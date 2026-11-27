@@ -344,3 +344,8 @@ Speed 22/55 on War Island, speed pads, dash, launch pads, AURA RUSH; 6-minute wa
 One sentence: run to a flag, stand on it to win it for your team, and your aura goes up; get the most aura to go from NPC to Mog God. Everything else is switched off behind flags in `src/shared/Features.luau` (combat, mog-offs, Training Island, boxes, units, pickups, dash, discovery cards, overtime, seasons, prestige, arena). Ranks are earned by total aura (save version 11). The HUD is three things. Shove is the only way to fight (BONK!, 1.5 s cooldown, bots shove too). New territory layouts with interiors, secrets and pathfinding bots.
 **Test:** `tests/Features.test.luau`, `tests/RankRules.test.luau`, `tests/PlayerData.test.luau`, `tests/Territories.test.luau`; see `docs/PLAYTEST.md`.
 **Done when:** a new player sees only the three HUD pieces and an arrow, captures a Gold flag in about 4 seconds, and every switched-off feature is invisible.
+
+## Slice 30: Sky Islands stage 2 and Chud Chambers
+Every territory is its own floating island (see DESIGN.md), joined by rope bridges; four team islands; airships and floating rocks; the fall respawn; ambient NPCs (Lib/AmbientNpc); and the new Diamond territory Chud Chambers under the Gate island.
+**Test:** `tests/Territories.test.luau`, `tests/SpawnRules.test.luau`, `tests/MapLayout.test.luau`; see `docs/PLAYTEST.md`.
+**Done when:** every island can be reached from a team island in about 20 seconds, every staircase and ladder works, and both Chud flags can be captured.

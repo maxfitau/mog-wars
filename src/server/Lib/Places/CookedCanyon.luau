@@ -12,6 +12,7 @@ local Cover = require(script.Parent.Parent:WaitForChild("Cover"))
 local Common = require(script.Parent:WaitForChild("Common"))
 local Kit = require(script.Parent.Parent:WaitForChild("Kit"))
 local TerrainKit = require(script.Parent.Parent:WaitForChild("TerrainKit"))
+local SkyKit = require(script.Parent.Parent:WaitForChild("SkyKit"))
 
 local RED = Color3.fromRGB(190, 80, 52)
 local RED_DARK = Color3.fromRGB(150, 60, 42)
@@ -22,8 +23,10 @@ local PAN_Y = 16 -- bottom of the pan; its top is at y = 18, where the flag stan
 
 return function(folder: Folder, territory: any)
 	local cx, cz = territory.x, territory.z
-	local k = Kit.new(folder, cx, cz, 0)
+	local k = Kit.new(folder, cx, cz, territory.height)
 	Cover.reserve(cx, cz, 100, 110)
+	SkyKit.island(cx, cz, territory.height, territory.radius, 60)
+	SkyKit.vines(folder, cx, cz, territory.height, territory.radius, 14)
 	TerrainKit.cylinder(cx, -6, cz, 100, 6, Enum.Material.Sandstone) -- red canyon floor
 	-- canyon walls, 40 high, running north to south on both sides
 	TerrainKit.block(cx - 68, 0, cz, 24, 40, 160, Enum.Material.Sandstone)

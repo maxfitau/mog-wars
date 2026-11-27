@@ -88,19 +88,19 @@ function BotService.list(): { Bot }
 end
 
 -- A faction's home base position: the real SpawnLocation marked HomeBase if there is one, else the layout.
-local function baseOf(faction: number): (number, number)
+local function baseOf(faction: number): (number, number, number)
 	for _, child in Workspace:GetChildren() do
 		if child:IsA("SpawnLocation") and child:GetAttribute("HomeBase") == faction then
-			return child.Position.X, child.Position.Z
+			return child.Position.X, child.Position.Z, child.Position.Y
 		end
 	end
 	local fallback = MapLayout.bases[faction]
-	return if fallback then fallback.x else 0, if fallback then fallback.z else 0
+	return if fallback then fallback.x else 0, if fallback then fallback.z else 0, MapLayout.baseIslandHeight
 end
 
 local function baseSpot(faction: number, slot: number): Vector3
-	local x, z = baseOf(faction)
-	return Vector3.new(x + ((slot % 5) - 2) * 3, 4, z + 8)
+	local x, z, y = baseOf(faction)
+	return Vector3.new(x + ((slot % 5) - 2) * 3, y + 4, z + 8)
 end
 
 local function humanStats(): (number, { [number]: number }, number, number)

@@ -20,7 +20,6 @@ export type Flag = {
 	pole: number?, -- flag pole height (shorter indoors)
 	beam: number?, -- height of the thin beam shown while the flag is neutral or contested
 	noSpawn: boolean?, -- true if players must never be spawned beside this flag (for example inside a hollow brain)
-	approach: { x: number, z: number }?, -- open ground by the territory where front-line spawns land (raised or indoor flags use this)
 }
 
 export type Territory = {
@@ -29,6 +28,8 @@ export type Territory = {
 	tier: string,
 	x: number, -- middle of the territory
 	z: number,
+	height: number, -- height of its island surface (a cave's floor), in studs above the cloud sea
+	radius: number, -- island radius (0 for a cave inside another island)
 	flags: { Flag },
 }
 
@@ -44,8 +45,11 @@ Territories.tiers = {
 	ultra = { label = "Ultra", value = 3, aura = 1000, trickle = 50, box = "ultra" },
 } :: { [string]: Tier }
 
--- Gigachad Gate floats: its island top is this many studs above the sea of clouds / the main island
-Territories.gateHeight = 70
+-- WAR ISLAND IS A SKY OF FLOATING ISLANDS. Each territory is its own island at its own height (flag heights below are
+-- the island height plus the height above that island's surface). Gigachad Gate is the biggest and highest, in the
+-- middle; Chud Chambers is a cave hanging under it; two Diamond islands sit at mid height; three Gold islands lower,
+-- near the team spawn islands (see MapLayout.bases). Rope bridges join them (built in PlaceholderMap).
+Territories.gateHeight = 110
 local GATE = Territories.gateHeight
 
 Territories.list = {
@@ -55,70 +59,98 @@ Territories.list = {
 		tier = "ultra",
 		x = 0,
 		z = 0,
+		height = GATE,
+		radius = 128,
 		-- A giant stone face with sunglasses. Its mouth is a tunnel you walk through; inside the head is the throne room
 		-- (reached from the two spiral-staircase towers by covered corridors). One flag on top of each tower, one in the
 		-- throne room.
 		flags = {
-			{ name = "Left Tower", x = -75, z = 0, y = GATE + 60, size = 14, pole = 9, beam = 22, approach = { x = -75, z = 68 } },
-			{ name = "Right Tower", x = 75, z = 0, y = GATE + 60, size = 14, pole = 9, beam = 22, approach = { x = 75, z = 68 } },
-			{ name = "Throne Room", x = 0, z = 0, y = GATE + 26, size = 22, pole = 10, beam = 14, approach = { x = 0, z = 80 } },
+			{ name = "Left Tower", x = -75, z = 0, y = GATE + 60, size = 14, pole = 9, beam = 22 },
+			{ name = "Right Tower", x = 75, z = 0, y = GATE + 60, size = 14, pole = 9, beam = 22 },
+			{ name = "Throne Room", x = 0, z = 0, y = GATE + 26, size = 22, pole = 10, beam = 14 },
+		},
+	},
+	{
+		id = "chud_chambers",
+		name = "Chud Chambers",
+		tier = "diamond",
+		x = 0,
+		z = 0,
+		height = 40, -- the cave floor, hanging under the Gate island
+		radius = 0,
+		-- A cave under Gigachad Gate: a hall with a giant grumpy stone face, the Snack Hoard (flag on the snack mountain)
+		-- and the Gamer Throne (flag behind the throne). Entrances: spiral stairs and a drop from the castle courtyard,
+		-- and a rope ladder from the island's edge.
+		flags = {
+			{ name = "Snack Hoard", x = -68, z = 0, y = 49.6, size = 12, pole = 6, beam = 10 },
+			{ name = "Gamer Throne", x = 60, z = 0, y = 40, size = 12, pole = 6, beam = 10 },
 		},
 	},
 	{
 		id = "rizz_ravine",
 		name = "Rizz Ravine",
 		tier = "diamond",
-		x = 215,
-		z = -70,
+		x = 330,
+		z = -60,
+		height = 70,
+		radius = 130,
 		-- A deep pink-rock ravine with a rope bridge; a flag on top of each cliff; a hollow heart on the bridge.
 		flags = {
-			{ name = "North Cliff", x = 215, z = -112, y = 24, size = 20, pole = 14, beam = 30, approach = { x = 100, z = -112 } },
-			{ name = "South Cliff", x = 215, z = -28, y = 24, size = 20, pole = 14, beam = 30, approach = { x = 100, z = -28 } },
+			{ name = "North Cliff", x = 330, z = -102, y = 94, size = 20, pole = 14, beam = 30 },
+			{ name = "South Cliff", x = 330, z = -18, y = 94, size = 20, pole = 14, beam = 30 },
 		},
 	},
 	{
 		id = "locked_in_lighthouse",
 		name = "Locked-In Lighthouse",
 		tier = "diamond",
-		x = -185,
-		z = 45,
+		x = -330,
+		z = 40,
+		height = 70,
+		radius = 95,
 		-- A striped lighthouse on a rocky island, spiral stairs inside, and a giant golden padlock for a lamp room.
 		flags = {
-			{ name = "Lighthouse Base", x = -148, z = 45, y = 12, size = 16, pole = 12, beam = 30, approach = { x = -98, z = 45 } },
-			{ name = "Lighthouse Top", x = -165, z = 45, y = 84, size = 14, pole = 9, beam = 16, approach = { x = -98, z = 45 } },
+			{ name = "Lighthouse Base", x = -293, z = 40, y = 70, size = 16, pole = 12, beam = 30 },
+			{ name = "Lighthouse Top", x = -310, z = 40, y = 142, size = 14, pole = 9, beam = 16 },
 		},
 	},
 	{
 		id = "npc_village",
 		name = "NPC Village",
 		tier = "gold",
-		x = -100,
-		z = -170,
-		-- A blocky village of enterable houses and a giant grey NPC statue climbed by scaffolding. Flag on its head.
+		x = -200,
+		z = -300,
+		height = 35,
+		radius = 105,
+		-- A blocky village of enterable houses and a giant grey NPC statue climbed by wooden scaffolding. Flag on its head.
 		flags = {
-			{ name = "Statue Head", x = -100, z = -190, y = 84, size = 14, pole = 9, beam = 20, approach = { x = -100, z = -98 } },
+			{ name = "Statue Head", x = -200, z = -320, y = 119, size = 14, pole = 9, beam = 20 },
 		},
 	},
 	{
 		id = "brainrot_bog",
 		name = "Brainrot Bog",
 		tier = "gold",
-		x = -110,
-		z = 190,
+		x = -190,
+		z = 300,
+		height = 35,
+		radius = 105,
 		-- A foggy green swamp and a giant HOLLOW pink brain. Flag in the middle of its fleshy tunnels.
 		flags = {
-			{ name = "Brain Core", x = -110, z = 190, y = 0, size = 18, pole = 9, beam = 12, noSpawn = true, approach = { x = -110, z = 140 } },
+			{ name = "Brain Core", x = -190, z = 300, y = 35, size = 18, pole = 9, beam = 12, noSpawn = true },
 		},
 	},
 	{
 		id = "cooked_canyon",
 		name = "Cooked Canyon",
 		tier = "gold",
-		x = 120,
-		z = 190,
+		x = 200,
+		z = 300,
+		height = 35,
+		radius = 105,
 		-- A red canyon with a lava river, rock jumps up to a giant frying pan, and the flag in the yolk.
 		flags = {
-			{ name = "The Yolk", x = 120, z = 190, y = 18, size = 22, pole = 12, beam = 26, approach = { x = 88, z = 112 } },
+			{ name = "The Yolk", x = 200, z = 300, y = 53, size = 22, pole = 12, beam = 26 },
 		},
 	},
 } :: { Territory }

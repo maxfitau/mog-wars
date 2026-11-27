@@ -108,6 +108,16 @@ function ShoveController.init()
 		end
 	end)
 
+	-- a gentle wind push (added to your own movement)
+	local pushRemote = remotes:WaitForChild("WorldPush") :: RemoteEvent
+	pushRemote.OnClientEvent:Connect(function(velocity: any)
+		local character = Players.LocalPlayer.Character
+		local root = character and character:FindFirstChild("HumanoidRootPart")
+		if root and root:IsA("BasePart") and typeof(velocity) == "Vector3" and velocity.Magnitude < 40 then
+			root.AssemblyLinearVelocity += velocity
+		end
+	end)
+
 	-- jump pads and launch pads throw you (the server sends the throw)
 	local launch = remotes:WaitForChild("WorldLaunch") :: RemoteEvent
 	launch.OnClientEvent:Connect(function(velocity: any)

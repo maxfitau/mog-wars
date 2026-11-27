@@ -10,6 +10,7 @@ local Workspace = game:GetService("Workspace")
 local Territories = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Territories"))
 local Builder = require(script.Parent:WaitForChild("Builder"))
 local Places = script.Parent:WaitForChild("Places")
+local TerrainKit = require(script.Parent:WaitForChild("TerrainKit"))
 
 local TerritoryScenery = {}
 
@@ -27,6 +28,7 @@ local SIGN_HEIGHT: { [string]: number } = {
 	npc_village = 98,
 	brainrot_bog = 48,
 	cooked_canyon = 46,
+	chud_chambers = 22,
 }
 
 local builders: { [string]: string } = {
@@ -36,10 +38,11 @@ local builders: { [string]: string } = {
 	npc_village = "NpcVillage",
 	brainrot_bog = "BrainrotBog",
 	cooked_canyon = "CookedCanyon",
+	chud_chambers = "ChudChambers",
 }
 
 local function sign(folder: Folder, territory: Territories.Territory)
-	local anchor = Builder.part("SignAnchor", Vector3.one, Vector3.new(territory.x, SIGN_HEIGHT[territory.id] or 50, territory.z), Color3.new(1, 1, 1), folder)
+	local anchor = Builder.part("SignAnchor", Vector3.one, Vector3.new(territory.x, (SIGN_HEIGHT[territory.id] or 50) + territory.height, territory.z), Color3.new(1, 1, 1), folder)
 	anchor.Transparency = 1
 	anchor.CanCollide = false
 	anchor.CanQuery = false
@@ -96,6 +99,7 @@ function TerritoryScenery.build()
 		folder.Name = territory.id
 		folder.Parent = root
 		local moduleName = builders[territory.id]
+		TerrainKit.setBase(territory.height) -- the module builds relative to its own island
 		local ok, err = pcall(function()
 			local build = require(Places:WaitForChild(moduleName)) :: (Folder, any) -> ()
 			build(folder, territory)
@@ -103,6 +107,7 @@ function TerritoryScenery.build()
 		if not ok then
 			warn(("[mog-wars] FAILED building %s: %s"):format(territory.name, tostring(err)))
 		end
+		TerrainKit.setBase(0)
 		pcall(sign, folder, territory)
 	end
 end

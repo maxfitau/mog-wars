@@ -12,28 +12,29 @@ local Cover = require(script.Parent.Parent:WaitForChild("Cover"))
 local Common = require(script.Parent:WaitForChild("Common"))
 local Kit = require(script.Parent.Parent:WaitForChild("Kit"))
 local TerrainKit = require(script.Parent.Parent:WaitForChild("TerrainKit"))
+local SkyKit = require(script.Parent.Parent:WaitForChild("SkyKit"))
 
 local RED = Color3.fromRGB(215, 55, 55)
 local WHITE = Color3.fromRGB(245, 245, 245)
 local GOLD = Color3.fromRGB(255, 200, 40)
 local STONE = Color3.fromRGB(105, 95, 115)
-local ISLAND_Y = 12 -- the rock island's flat top, where the tower stands
+local ISLAND_Y = 0 -- the island top is the ground (Kit is built on it)
 local DECK = 72 -- height of the lamp deck above the island
 
 return function(folder: Folder, territory: any)
 	local cx, cz = territory.x, territory.z
 	Cover.reserve(cx, cz, 78, 78)
 
-	-- the moat, the rocky island in it, and a sand causeway from the east
-	TerrainKit.pond(cx, cz, 72, 10)
-	TerrainKit.cylinder(cx, -10, cz, 36, 22, Enum.Material.Rock) -- flat top at y = 12
-	TerrainKit.dome(cx, cz, 62, 12, Enum.Material.Rock)
-	TerrainKit.block(cx + 58, -2, cz, 40, 2, 12, Enum.Material.Sand)
-	-- the secret cave: carved into the rock from the west, behind two boulders
-	TerrainKit.carve(cx - 26, 0, cz + 10, 16, 8, 16)
-	TerrainKit.carve(cx - 44, 0, cz + 10, 24, 8, 4)
+	-- the rocky island itself, a flat top where the tower stands, with roots and waterfalls round the rim
+	SkyKit.island(cx, cz, territory.height, territory.radius, 70)
+	SkyKit.vines(folder, cx, cz, territory.height, territory.radius, 14)
+	SkyKit.waterfall(folder, Vector3.new(cx + territory.radius - 3, territory.height, cz + 14), Vector3.new(1, 0, 0), 45)
+	TerrainKit.cylinder(cx, -3, cz, 60, 3, Enum.Material.Rock) -- bare rock round the tower
+	-- the secret: a cellar carved into the rock, down a shaft with a ladder (4 studs wide, so the edges are clean)
+	TerrainKit.carve(cx - 26, -16, cz + 10, 16, 12, 16)
+	TerrainKit.carve(cx - 26, -4, cz + 10, 4, 4, 4)
 
-	local k = Kit.new(folder, cx, cz, ISLAND_Y)
+	local k = Kit.new(folder, cx, cz, territory.height)
 	-- the tower: eight walls in a ring, five red and white stripes each, a doorway on the east side
 	local stripe = DECK / 5
 	for index = 0, 7 do
@@ -104,9 +105,9 @@ return function(folder: Folder, territory: any)
 			k:box("Crate", spot[1] + 5, 0, spot[2], 4, 4, 4, Color3.fromRGB(190, 140, 80), Enum.Material.WoodPlanks, { cover = true })
 		end
 	end
-	k:ball("CaveBoulder", -46, -ISLAND_Y + 1, 8, 7, 6, 7, STONE, Enum.Material.Rock, { cover = true })
-	k:ball("CaveBoulder", -46, -ISLAND_Y + 1, 15, 8, 6, 6, STONE, Enum.Material.Rock, { cover = true })
-	Common.stash(folder, k:at(-26, -ISLAND_Y, 10), territory.id)
+	k:box("CellarRim", -26, 0, 10, 6, 1.5, 6, STONE, Enum.Material.Cobblestone) -- the hatch frame: a ladder goes down the shaft
+	k:truss("CellarLadder", -25, -16, 10, 17)
+	Common.stash(folder, k:at(-30, -16, 14), territory.id)
 	for index = 0, 5 do
 		local ring = index / 6 * math.pi * 2
 		Common.sparkles(folder, "Foam" .. index, k:at(math.cos(ring) * 68, -ISLAND_Y + 0.5, math.sin(ring) * 68), Color3.new(1, 1, 1), 4, 90)

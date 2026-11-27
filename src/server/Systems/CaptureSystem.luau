@@ -55,7 +55,6 @@ type ZoneRecord = {
 	territory: TerritoryState,
 	height: number, -- how high the flag's ground is (raised flags are skipped for spawning)
 	noSpawn: boolean, -- never spawn players beside this flag
-	approach: { x: number, z: number }?, -- open ground where front-line spawns land for raised or indoor flags
 	boosts: { [number]: number }, -- tank boost per faction in this zone (set by UnitSystem)
 	beacon: BasePart?, -- the tall glowing pillar over the zone, recoloured with it
 	light: PointLight?,
@@ -115,7 +114,6 @@ local function register(instance: Instance)
 		territory = territory,
 		height = if flagInfo then flagInfo.y else 0,
 		noSpawn = if flagInfo then flagInfo.noSpawn == true else false,
-		approach = if flagInfo then flagInfo.approach else nil,
 		boosts = {},
 		beacon = instance:FindFirstChild("Beacon") :: BasePart?,
 		light = instance:FindFirstChildOfClass("PointLight"),
@@ -550,9 +548,7 @@ end
 function CaptureSystem.zoneList(): { SpawnRules.ZoneInfo }
 	local list: { SpawnRules.ZoneInfo } = {}
 	for _, record in zones do
-		if record.approach then -- front-line spawns land on open ground by the territory, never inside it
-			table.insert(list, { x = record.approach.x, z = record.approach.z, size = record.part.Size.X, owner = record.state.owner })
-		elseif record.height <= 3 and not record.noSpawn then
+		if record.height <= 3 and not record.noSpawn then -- (front-line spawns are off on the sky islands, so this stays empty)
 			local position = record.part.Position
 			table.insert(list, { x = position.X, z = position.Z, size = record.part.Size.X, owner = record.state.owner })
 		end

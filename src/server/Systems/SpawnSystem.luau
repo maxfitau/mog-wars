@@ -45,6 +45,9 @@ local function place(player: Player, character: Model)
 	if type(faction) ~= "number" or Workspace:GetAttribute("WarPhase") ~= "War" then
 		return -- no faction yet, or not a war: stay at the home base
 	end
+	if true then
+		return -- on the sky islands everyone starts on their team island; bridges reach every island in about 20 seconds
+	end
 	local root = character:WaitForChild("HumanoidRootPart", 5)
 	if not root or not root:IsA("BasePart") or not character.Parent then
 		return

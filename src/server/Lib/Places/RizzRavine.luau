@@ -12,6 +12,7 @@ local Cover = require(script.Parent.Parent:WaitForChild("Cover"))
 local Common = require(script.Parent:WaitForChild("Common"))
 local Kit = require(script.Parent.Parent:WaitForChild("Kit"))
 local TerrainKit = require(script.Parent.Parent:WaitForChild("TerrainKit"))
+local SkyKit = require(script.Parent.Parent:WaitForChild("SkyKit"))
 
 local PINK = Color3.fromRGB(255, 95, 165)
 local ROSE = Color3.fromRGB(240, 130, 180)
@@ -21,8 +22,12 @@ local DECK_Y = 24 -- the bridge deck and both cliff tops
 
 return function(folder: Folder, territory: any)
 	local cx, cz = territory.x, territory.z
-	local k = Kit.new(folder, cx, cz, 0)
+	local k = Kit.new(folder, cx, cz, territory.height)
 	Cover.reserve(cx + 10, cz, 50, 75)
+	SkyKit.island(cx, cz, territory.height, territory.radius, 70)
+	SkyKit.vines(folder, cx, cz, territory.height, territory.radius, 16)
+	SkyKit.waterfall(folder, Vector3.new(cx - territory.radius + 3, territory.height, cz + 30), Vector3.new(-1, 0, 0), 45)
+	SkyKit.waterfall(folder, Vector3.new(cx + territory.radius - 3, territory.height, cz - 30), Vector3.new(1, 0, 0), 45)
 
 	-- the ravine: pink limestone cliffs 24 high on the north and south, a pink floor between, grassy caps on top
 	TerrainKit.block(cx, -2, cz, 72, 2, 64, Enum.Material.Limestone) -- ravine floor

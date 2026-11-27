@@ -16,6 +16,7 @@ local ShoveRules = require(Shared:WaitForChild("ShoveRules"))
 local BotService = require(script.Parent:WaitForChild("BotService"))
 local CaptureSystem = require(script.Parent:WaitForChild("CaptureSystem"))
 local PopupSystem = require(script.Parent:WaitForChild("PopupSystem"))
+local AmbientNpc = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("AmbientNpc"))
 
 local ShoveSystem = {}
 
@@ -94,7 +95,15 @@ local function handle(player: Player, knockbackRemote: RemoteEvent)
 	local target = if targetId then byId[targetId] else nil
 	local targetRoot = if target then rootOf(target) else nil
 	if not target or not targetRoot then
-		return -- nothing in range: no cooldown is used
+		-- no player or bot in range: a villager (ambient NPC) will do. It tips over comically and gets back up.
+		local villager = AmbientNpc.nearest(origin, Config.shove.range)
+		if villager then
+			lastShove[player] = now
+			player:SetAttribute("ShoveReadyAt", now + Config.shove.cooldownSeconds)
+			villager:SetAttribute("BonkedAt", now)
+			PopupSystem.send(player, "bonk", 1, "")
+		end
+		return -- nothing else in range: no cooldown is used
 	end
 
 	lastShove[player] = now

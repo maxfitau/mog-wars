@@ -9,6 +9,7 @@ local Ambience = {
 	rizz_ravine = "", -- wind through the ravine, soft chimes
 	locked_in_lighthouse = "", -- waves and gulls
 	gigachad_gate = "", -- a low heroic drone
+	chud_chambers = "", -- dripping water, a low rumble, distant gamer noises
 	moments = { rizz_heart = "", geyser = "", gate_flex = "", brain_pulse = "", stare = "", lamp = "" },
 }
 

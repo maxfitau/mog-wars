@@ -99,6 +99,13 @@ function MovementSystem.launch(player: Player, velocity: Vector3)
 	end
 end
 
+-- A gentle push (added to what the player is already doing), for wind.
+function MovementSystem.push(player: Player, velocity: Vector3)
+	if remotes.WorldPush then
+		remotes.WorldPush:FireClient(player, velocity)
+	end
+end
+
 -- A short glowing trail behind the player while a speed boost lasts.
 local function addTrail(player: Player, seconds: number)
 	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
@@ -213,7 +220,7 @@ function MovementSystem.init()
 		folder.Name = "Remotes"
 		folder.Parent = ReplicatedStorage
 	end
-	for _, name in { "DashRequest", "DashGo", "WorldLaunch" } do
+	for _, name in { "DashRequest", "DashGo", "WorldLaunch", "WorldPush" } do
 		local remote = Instance.new("RemoteEvent")
 		remote.Name = name
 		remote.Parent = folder

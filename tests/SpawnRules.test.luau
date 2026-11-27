@@ -6,7 +6,6 @@
 
 local MapLayout = require("../src/shared/MapLayout")
 local SpawnRules = require("../src/shared/SpawnRules")
-local Territories = require("../src/shared/Territories")
 
 local failures = 0
 
@@ -21,13 +20,15 @@ end
 
 -- every ground flag, with an owner taken from `owners` (keyed by the flag's part name)
 local ground = {}
-for _, entry in Territories.allFlags() do
-	-- front-line spawns use the flag's open-ground approach point when it has one (raised and indoor flags do)
-	local spot = entry.flag.approach or entry.flag
-	if entry.flag.approach or entry.flag.y <= 3 then
-		table.insert(ground, { name = Territories.partName(entry.territory, entry.index), flag = { x = spot.x, z = spot.z, size = entry.flag.size } })
-	end
+-- front-line spawning is switched off on the sky islands, but the rules still work, so they are tested on a few
+-- pretend ground flags
+for index, spot in { { -150, -100 }, { 150, -100 }, { 150, 100 }, { 0, 0 } } do
+	table.insert(ground, { name = "Flag_gigachad_gate_" .. index, flag = { x = spot[1], z = spot[2], size = 18 } })
 end
+-- (names the tests below use)
+ground[1].name = "Flag_gigachad_gate_1"
+ground[2].name = "Flag_gigachad_gate_2"
+ground[3].name = "Flag_locked_in_lighthouse_1"
 
 local function zonesOwnedBy(owners: { [string]: number }): { SpawnRules.ZoneInfo }
 	local list = {}

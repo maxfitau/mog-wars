@@ -22,7 +22,25 @@ end
 
 -- ---------- the six territories from the design ----------
 local byId = Territories.byId
-check("six territories", #Territories.list == 6)
+check("seven territories", #Territories.list == 7)
+check("Chud Chambers: Diamond, 2 flags, a cave under the Gate", byId.chud_chambers.tier == "diamond" and #byId.chud_chambers.flags == 2 and byId.chud_chambers.radius == 0 and byId.chud_chambers.height < byId.gigachad_gate.height and byId.chud_chambers.flags[1].name == "Snack Hoard" and byId.chud_chambers.flags[2].name == "Gamer Throne")
+check("every territory has an island height; only the cave has no island", (function()
+	for _, territory in Territories.list do
+		if type(territory.height) ~= "number" or (territory.radius <= 0 and territory.id ~= "chud_chambers") then
+			return false
+		end
+	end
+	return true
+end)())
+check("Gigachad Gate is the biggest and highest island", (function()
+	for _, territory in Territories.list do
+		if territory.id ~= "gigachad_gate" and (territory.height >= byId.gigachad_gate.height or territory.radius >= byId.gigachad_gate.radius + 1) then
+			return territory.id == "chud_chambers"
+		end
+	end
+	return true
+end)())
+check("the Diamond islands are higher than the Gold islands", byId.rizz_ravine.height > byId.npc_village.height and byId.locked_in_lighthouse.height > byId.brainrot_bog.height and byId.rizz_ravine.height > byId.cooked_canyon.height)
 check("Gigachad Gate: Ultra, 3 flags", byId.gigachad_gate.tier == "ultra" and #byId.gigachad_gate.flags == 3)
 check("Rizz Ravine: Diamond, 2 flags", byId.rizz_ravine.tier == "diamond" and #byId.rizz_ravine.flags == 2)
 check("Locked-In Lighthouse: Diamond, 2 flags", byId.locked_in_lighthouse.tier == "diamond" and #byId.locked_in_lighthouse.flags == 2)
@@ -31,11 +49,11 @@ check("Brainrot Bog: Gold, 1 flag", byId.brainrot_bog.tier == "gold" and #byId.b
 check("Cooked Canyon: Gold, 1 flag", byId.cooked_canyon.tier == "gold" and #byId.cooked_canyon.flags == 1)
 check("Gigachad Gate flags: both tower roofs and the throne room inside the head", byId.gigachad_gate.flags[1].name == "Left Tower" and byId.gigachad_gate.flags[2].name == "Right Tower" and byId.gigachad_gate.flags[3].name == "Throne Room" and byId.gigachad_gate.flags[3].y > 20 and byId.gigachad_gate.flags[1].y > 50)
 check("NPC Village flag is on the statue's head (raised)", byId.npc_village.flags[1].y > 20)
-check("Brainrot Bog flag is in the middle of the hollow brain, on the ground", byId.brainrot_bog.flags[1].y == 0 and byId.brainrot_bog.flags[1].noSpawn == true)
+check("Brainrot Bog flag is in the middle of the hollow brain, on the ground", byId.brainrot_bog.flags[1].y == byId.brainrot_bog.height and byId.brainrot_bog.flags[1].noSpawn == true)
 check("Cooked Canyon flag is in the yolk on the pan (raised)", byId.cooked_canyon.flags[1].y > 10)
 check("Rizz Ravine has a flag on each cliff", byId.rizz_ravine.flags[1].name == "North Cliff" and byId.rizz_ravine.flags[2].name == "South Cliff")
-check("Lighthouse has a base flag and a top flag in the lamp room", byId.locked_in_lighthouse.flags[1].y < 20 and byId.locked_in_lighthouse.flags[2].y > 60)
-check("ten flags in all", #Territories.allFlags() == 10)
+check("Lighthouse has a base flag and a top flag in the lamp room", byId.locked_in_lighthouse.flags[2].y - byId.locked_in_lighthouse.flags[1].y > 60)
+check("twelve flags in all", #Territories.allFlags() == 12)
 
 -- ---------- rewards ----------
 check("aura rewards are 100, 300 and 1000", Territories.tiers.gold.aura == 100 and Territories.tiers.diamond.aura == 300 and Territories.tiers.ultra.aura == 1000)

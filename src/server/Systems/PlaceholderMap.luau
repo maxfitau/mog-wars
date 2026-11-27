@@ -91,56 +91,80 @@ function PlaceholderMap.start()
 	end
 
 	IslandTerrain.lighting()
-	IslandTerrain.build() -- real terrain: grass, sand, water, hills and paths (the surface is at y = 0)
+	IslandTerrain.build() -- clears the terrain and sets the colours; every island builds its own ground
 	SkyKit.cloudSea() -- the endless cloud sea far below
 
-	-- One safe home base per faction. Spawn pads share the faction's team colour, so Roblox sends each player
-	-- to their own base first; SpawnSystem then moves them to the front line during a war.
+	-- The four team spawn islands, low and near the corners: a grassy island each, the team's SpawnLocation, and banners
+	-- in the team colour. Players start here (and come back here after a fall).
+	local baseHeight, baseRadius = MapLayout.baseIslandHeight, MapLayout.baseIslandRadius
 	for index, faction in FactionRules.factions do
 		local base = MapLayout.bases[index]
+		SkyKit.island(base.x, base.z, baseHeight, baseRadius, 36)
+		SkyKit.vines(Workspace, base.x, base.z, baseHeight, baseRadius, 8)
 		local spawn = Instance.new("SpawnLocation")
 		spawn.Name = "Base_" .. faction.name
 		spawn.Size = Vector3.new(MapLayout.baseSize, 1, MapLayout.baseSize)
-		spawn.Position = Vector3.new(base.x, 0.5, base.z)
+		spawn.Position = Vector3.new(base.x, baseHeight + 0.5, base.z)
 		spawn.Anchored = true
 		spawn.Neutral = false
 		spawn.TeamColor = BrickColor.new(faction.brickColor)
 		spawn.Color = FactionRules.color(faction)
 		spawn:SetAttribute("HomeBase", faction.id)
 		spawn.Parent = Workspace
+		for _, corner in { { -1, -1 }, { 1, -1 }, { 1, 1 }, { -1, 1 } } do
+			local px, pz = base.x + corner[1] * (baseRadius - 12), base.z + corner[2] * (baseRadius - 12)
+			local pole = Builder.cylinder("BannerPole", 0.8, 14, Vector3.new(px, baseHeight + 7, pz), Color3.fromRGB(110, 78, 48), Workspace)
+			pole.Material = Enum.Material.Wood
+			local cloth = Builder.part("BannerCloth", Vector3.new(5, 8, 0.3), Vector3.new(px + 2.8, baseHeight + 9.5, pz), FactionRules.color(faction), Workspace)
+			cloth.Material = Enum.Material.Fabric
+			cloth.CanCollide = false
+			cloth.CanQuery = false
+		end
 	end
 
-	-- Speed pads on the dirt paths from each base to its nearest territory (+50 percent speed for 3 seconds);
-	-- MovementSystem makes them work. Launch pads (combat respawns) only exist when combat is switched on.
-	if Features.speedPads then
-		for pathIndex = 1, 4 do
-			local path = IslandTerrain.paths[pathIndex]
-			for _, t in { 0.3, 0.62 } do
-				local x = path[1][1] + (path[2][1] - path[1][1]) * t
-				local z = path[1][2] + (path[2][2] - path[1][2]) * t
-				local pad = makePart("SpeedPad", Vector3.new(7, 0.6, 12), Vector3.new(x, 0.3, z), Color3.fromRGB(70, 220, 255))
-				pad.CFrame = CFrame.lookAt(pad.Position, Vector3.new(path[2][1], 0.3, path[2][2]))
-				pad.Material = Enum.Material.Neon
-				pad.CanCollide = false
-				pad.CanQuery = false
-				pad.Transparency = 0.15
-				CollectionService:AddTag(pad, "SpeedPad")
+	-- Rope bridges join the islands so that every island is reachable in about 20 seconds. Speed pads sit on them
+	-- (+50 percent speed for 3 seconds); MovementSystem makes the pads work.
+	local islands: { [string]: { x: number, z: number, y: number, r: number } } = {}
+	for index, base in MapLayout.bases do
+		islands["base" .. index] = { x = base.x, z = base.z, y = baseHeight, r = baseRadius }
+	end
+	for _, territory in Territories.list do
+		if territory.radius > 0 then
+			islands[territory.id] = { x = territory.x, z = territory.z, y = territory.height, r = territory.radius }
+		end
+	end
+	local links = {
+		{ "base1", "npc_village" }, { "base2", "rizz_ravine" }, { "base3", "cooked_canyon" }, { "base4", "brainrot_bog" },
+		{ "npc_village", "locked_in_lighthouse" }, { "brainrot_bog", "locked_in_lighthouse" }, { "cooked_canyon", "rizz_ravine" },
+		{ "locked_in_lighthouse", "gigachad_gate" }, { "rizz_ravine", "gigachad_gate" }, { "npc_village", "gigachad_gate" },
+		{ "brainrot_bog", "gigachad_gate" }, { "cooked_canyon", "gigachad_gate" },
+	}
+	local bridges = Instance.new("Folder")
+	bridges.Name = "Bridges"
+	bridges.Parent = Workspace
+	for _, link in links do
+		local a, b = islands[link[1]], islands[link[2]]
+		if a and b then
+			local flat = Vector3.new(b.x - a.x, 0, b.z - a.z).Unit
+			local from = Vector3.new(a.x, a.y, a.z) + flat * (a.r - 4)
+			local to = Vector3.new(b.x, b.y, b.z) - flat * (b.r - 4)
+			SkyKit.bridge(bridges, from, to, 10)
+			if Features.speedPads then
+				for _, t in { 0.33, 0.66 } do
+					local middle = from:Lerp(to, t)
+					local pad = makePart("SpeedPad", Vector3.new(7, 0.4, 10), middle + Vector3.new(0, 0.2, 0), Color3.fromRGB(70, 220, 255))
+					pad.CFrame = CFrame.lookAt(middle + Vector3.new(0, 0.2, 0), to + Vector3.new(0, 0.2, 0))
+					pad.Material = Enum.Material.Neon
+					pad.CanCollide = false
+					pad.CanQuery = false
+					pad.Transparency = 0.15
+					pad.Parent = bridges
+					CollectionService:AddTag(pad, "SpeedPad")
+				end
 			end
 		end
 	end
-	if Features.combat then
-		local Pace = require(Shared:WaitForChild("Pace"))
-		for index, base in MapLayout.bases do
-			local length = math.sqrt(base.x * base.x + base.z * base.z)
-			local dirX, dirZ = -base.x / length, -base.z / length
-			local launch = makePart("LaunchPad_" .. index, Vector3.new(9, 1, 9), Vector3.new(base.x + dirX * 14, 0.5, base.z + dirZ * 14), Color3.fromRGB(255, 120, 200))
-			launch.Material = Enum.Material.Neon
-			launch.CanCollide = false
-			launch.CanQuery = false
-			launch:SetAttribute("Launch", Vector3.new(dirX * Pace.speed.launchPad.horizontal, Pace.speed.launchPad.vertical, dirZ * Pace.speed.launchPad.horizontal))
-			CollectionService:AddTag(launch, "LaunchPad")
-		end
-	end
+	SkyKit.decor() -- circling airships and floating mini rocks
 
 	-- The flags: one glowing zone per flag, tagged "Zone". CaptureSystem runs one capture bar per flag and groups
 	-- them into territories by the "Territory" attribute. Each flag also gets a tall see-through pillar of light

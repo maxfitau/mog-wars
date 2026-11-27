@@ -10,6 +10,7 @@ local Cover = require(script.Parent.Parent:WaitForChild("Cover"))
 local Common = require(script.Parent:WaitForChild("Common"))
 local Kit = require(script.Parent.Parent:WaitForChild("Kit"))
 local TerrainKit = require(script.Parent.Parent:WaitForChild("TerrainKit"))
+local SkyKit = require(script.Parent.Parent:WaitForChild("SkyKit"))
 
 local PINK = Color3.fromRGB(255, 135, 178)
 local PINK_DARK = Color3.fromRGB(232, 98, 150)
@@ -73,8 +74,11 @@ end
 
 return function(folder: Folder, territory: any)
 	local cx, cz = territory.x, territory.z
-	local k = Kit.new(folder, cx, cz, 0)
+	local k = Kit.new(folder, cx, cz, territory.height)
 	Cover.reserve(cx, cz, 105, 105)
+	SkyKit.island(cx, cz, territory.height, territory.radius, 60)
+	SkyKit.vines(folder, cx, cz, territory.height, territory.radius, 16)
+	SkyKit.waterfall(folder, Vector3.new(cx - territory.radius + 3, territory.height, cz - 20), Vector3.new(-1, 0, 0), 40)
 	TerrainKit.cylinder(cx, -6, cz, 105, 6, Enum.Material.Mud) -- swamp ground
 
 	-- ponds, each with a ring of lily pads to jump across

@@ -31,7 +31,7 @@ local function free(x: number, z: number, gap: number): boolean
 		end
 	end
 	for _, base in MapLayout.bases do
-		if (base.x - x) ^ 2 + (base.z - z) ^ 2 < 24 * 24 then
+		if (base.x - x) ^ 2 + (base.z - z) ^ 2 < 12 * 12 then
 			return false
 		end
 	end
@@ -49,33 +49,34 @@ local function tag(part: Part): Part
 	return part
 end
 
-local function crate(folder: Folder, x: number, z: number)
+local function crate(folder: Folder, x: number, y: number, z: number)
 	local size = 4 + rng:NextInteger(0, 2)
-	local part = tag(Builder.part("Crate", Vector3.new(size, size, size), Vector3.new(x, size / 2, z), Color3.fromRGB(200, 150, 80), folder))
+	local part = tag(Builder.part("Crate", Vector3.new(size, size, size), Vector3.new(x, y + size / 2, z), Color3.fromRGB(200, 150, 80), folder))
 	part.Material = Enum.Material.WoodPlanks
-	part.CFrame = CFrame.new(x, size / 2, z) * CFrame.Angles(0, rng:NextNumber() * math.pi, 0)
+	part.CFrame = CFrame.new(x, y + size / 2, z) * CFrame.Angles(0, rng:NextNumber() * math.pi, 0)
 end
 
-local function wall(folder: Folder, x: number, z: number)
-	local part = tag(Builder.part("CoverWall", Vector3.new(12, 6, 2), Vector3.new(x, 3, z), Color3.fromRGB(150, 150, 160), folder))
+local function wall(folder: Folder, x: number, y: number, z: number)
+	local part = tag(Builder.part("CoverWall", Vector3.new(12, 6, 2), Vector3.new(x, y + 3, z), Color3.fromRGB(150, 150, 160), folder))
 	part.Material = Enum.Material.Slate
-	part.CFrame = CFrame.new(x, 3, z) * CFrame.Angles(0, rng:NextNumber() * math.pi, 0)
+	part.CFrame = CFrame.new(x, y + 3, z) * CFrame.Angles(0, rng:NextNumber() * math.pi, 0)
 end
 
-local function barrel(folder: Folder, x: number, z: number)
-	local part = tag(Builder.cylinder("Barrel", 3.4, 5, Vector3.new(x, 2.5, z), Color3.fromRGB(215, 70, 60), folder))
+local function barrel(folder: Folder, x: number, y: number, z: number)
+	local part = tag(Builder.cylinder("Barrel", 3.4, 5, Vector3.new(x, y + 2.5, z), Color3.fromRGB(215, 70, 60), folder))
 	part.Material = Enum.Material.Metal
 end
 
-local function bush(folder: Folder, x: number, z: number)
-	local part = tag(Builder.ball("Bush", Vector3.new(6, 5, 6), Vector3.new(x, 2.2, z), Color3.fromRGB(70, 175, 65), folder))
+local function bush(folder: Folder, x: number, y: number, z: number)
+	local part = tag(Builder.ball("Bush", Vector3.new(6, 5, 6), Vector3.new(x, y + 2.2, z), Color3.fromRGB(70, 175, 65), folder))
 	part.Material = Enum.Material.Grass
 end
 
 local makers = { crate, wall, barrel, bush }
 
--- Scatter `count` pieces in a ring around (cx, cz). Only on flat ground at y = 0 (checked with a ray).
-function Cover.scatter(folder: Folder, cx: number, cz: number, count: number, minRadius: number, maxRadius: number)
+-- Scatter `count` pieces in a ring around (cx, cz) on an island whose surface is at `groundY`. Only on flat ground at that
+-- height (checked with a ray).
+function Cover.scatter(folder: Folder, cx: number, cz: number, count: number, minRadius: number, maxRadius: number, groundY: number)
 	local made = 0
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
@@ -88,9 +89,9 @@ function Cover.scatter(folder: Folder, cx: number, cz: number, count: number, mi
 		local radius = minRadius + rng:NextNumber() * (maxRadius - minRadius)
 		local x, z = cx + math.cos(angle) * radius, cz + math.sin(angle) * radius
 		if free(x, z, 9) then
-			local result = Workspace:Raycast(Vector3.new(x, 120, z), Vector3.new(0, -240, 0), params)
-			if result and result.Material ~= Enum.Material.Water and math.abs(result.Position.Y) < 1.5 and result.Normal.Y > 0.9 then
-				makers[rng:NextInteger(1, #makers)](folder, x, z)
+			local result = Workspace:Raycast(Vector3.new(x, groundY + 60, z), Vector3.new(0, -120, 0), params)
+			if result and result.Material ~= Enum.Material.Water and math.abs(result.Position.Y - groundY) < 1.5 and result.Normal.Y > 0.9 then
+				makers[rng:NextInteger(1, #makers)](folder, x, groundY, z)
 				table.insert(placed, Vector3.new(x, 0, z))
 				made += 1
 			end
@@ -102,17 +103,15 @@ function Cover.build()
 	local folder = Instance.new("Folder")
 	folder.Name = "Cover"
 	folder.Parent = Workspace
-	-- plenty around every territory
+	-- plenty on every island (the cave has its own props)
 	for _, territory in Territories.list do
-		Cover.scatter(folder, territory.x, territory.z, 16, 35, 105)
-	end
-	-- along each base's way out, and in front of each base
-	for _, base in MapLayout.bases do
-		for step = 1, 3 do
-			local t = step / 4
-			Cover.scatter(folder, base.x * (1 - t), base.z * (1 - t), 2, 8, 16)
+		if territory.radius > 0 then
+			Cover.scatter(folder, territory.x, territory.z, 16, 35, math.max(60, territory.radius - 12), territory.height)
 		end
-		Cover.scatter(folder, base.x * 0.9, base.z * 0.9, 4, 14, 30)
+	end
+	-- and a little on each team island
+	for _, base in MapLayout.bases do
+		Cover.scatter(folder, base.x, base.z, 4, 14, MapLayout.baseIslandRadius - 8, MapLayout.baseIslandHeight)
 	end
 end
 

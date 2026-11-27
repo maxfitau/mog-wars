@@ -7,6 +7,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local ProfileStore = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("ProfileStore"))
+local RankRules = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("RankRules"))
 local PlayerData = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("PlayerData"))
 local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("EconomyConfig"))
 
@@ -47,6 +48,7 @@ local function load(player: Player)
 	end
 	profiles[player] = profile
 	player:SetAttribute("Points", profile.Data.points)
+	player:SetAttribute("Rank", profile.Data.rank)
 end
 
 -- The live save table for a player, or nil while loading or after they leave.
@@ -95,6 +97,27 @@ function DataService.recordWar(player: Player)
 	if data then
 		PlayerData.recordWar(data, PlayerData.dayNumber(os.time()))
 	end
+end
+
+-- Server-only rank-up. All or nothing: points, rank and the reward box change together in one step
+-- with no yielding, or nothing changes. Returns ok and a stable reason string when it fails.
+function DataService.tryRankUp(player: Player): (boolean, string?)
+	local data = DataService.get(player)
+	if not data then
+		return false, "not_loaded"
+	end
+	local result = RankRules.tryRankUp(Config, data.rank, data.points)
+	if not result.ok then
+		return false, result.reason
+	end
+	if result.rewardBox ~= "" and not PlayerData.addBox(data, result.rewardBox) then
+		return false, "boxes_full" -- nothing was changed yet, so the player keeps their points
+	end
+	data.points = result.points
+	data.rank = result.rank
+	player:SetAttribute("Points", data.points)
+	player:SetAttribute("Rank", data.rank)
+	return true, nil
 end
 
 function DataService.init()

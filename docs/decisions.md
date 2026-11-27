@@ -38,3 +38,6 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 32 | Ties go to the defender (the duellist whose faction holds the zone); with no defender it is a draw with no loser | Follows decision 8 and avoids punishing anyone when nobody has the advantage |
 | 33 | Taps are capped at 10 per second on the server (max about 50 per duel) | A flood or autoclicker cannot win; the cap is in MogOffRules and tested |
 | 34 | The loser's messages are gentle ("Nice try! Shake it off.") and they are stunned for 1.5s | Child-friendly tone from docs/compliance.md section 1 |
+| 35 | Rank-up reward boxes are stored on the player's save (PlayerData v3 `boxes`) until slice 9 adds opening them | Rewards are never lost between slices; boxes are capped at 1000 per tier |
+| 36 | Aura scales a player's push strength in the capture bar; contribution for payouts stays based on time spent pushing | Rank speeds captures a little without letting a high rank take a whole zone's pool |
+| 37 | The rank-up request carries no data and is limited to one every 0.5 seconds; a full box stack blocks the rank-up before any points are spent | The server decides everything, and nothing is half-applied |

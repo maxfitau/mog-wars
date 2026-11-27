@@ -84,7 +84,7 @@ uses an autoclicker-like burst and is capped.
 
 ## 8. Ranks and aura power
 
-**Build:** the ten ranks (`src/shared/RankRules.luau`), a rank-up screen, spending Mog Points, and aura power
+**Build (code written, not yet playtested):** the ten ranks (`src/shared/RankRules.luau`), a rank-up screen, spending Mog Points, and aura power
 scaling.
 **Test:** pure tests for costs and rank-up. In Studio: earn points, rank up, check the aura effect.
 **Done when:** rank-up is server-only, atomic, and the costs match `docs/economy.md`.

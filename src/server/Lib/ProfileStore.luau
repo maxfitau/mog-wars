@@ -26,6 +26,17 @@ export type Store = {
 
 local ProfileStore = {}
 
+local function deepCopy(value: any): any
+	if type(value) ~= "table" then
+		return value
+	end
+	local copy = {}
+	for key, inner in value do
+		copy[key] = deepCopy(inner)
+	end
+	return copy
+end
+
 function ProfileStore.New(_name: string, template: { [string]: any }): Store
 	if not RunService:IsStudio() then
 		error("ProfileStore.luau is a placeholder. Vendor the real module before publishing (see docs/DATA.md).")
@@ -51,7 +62,7 @@ function ProfileStore.New(_name: string, template: { [string]: any }): Store
 		function profile.Reconcile(self: Profile)
 			for field, value in template do
 				if self.Data[field] == nil then
-					self.Data[field] = value
+					self.Data[field] = deepCopy(value)
 				end
 			end
 		end

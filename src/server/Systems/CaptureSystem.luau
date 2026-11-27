@@ -14,6 +14,7 @@ local CaptureBar = require(Shared:WaitForChild("CaptureBar"))
 local Config = require(Shared:WaitForChild("EconomyConfig"))
 local FactionRules = require(Shared:WaitForChild("FactionRules"))
 local ContributionScoring = require(Shared:WaitForChild("ContributionScoring"))
+local RankRules = require(Shared:WaitForChild("RankRules"))
 local ShoveRules = require(Shared:WaitForChild("ShoveRules"))
 local WarRules = require(Shared:WaitForChild("WarRules"))
 local ZoneGeometry = require(Shared:WaitForChild("ZoneGeometry"))
@@ -67,7 +68,8 @@ local function unregister(instance: Instance)
 	end
 end
 
--- Aura power per faction of everyone alive and standing in the zone. Rank scaling arrives in slice 8.
+-- Aura power per faction of everyone alive and standing in the zone. Aura grows with rank; a recent shove
+-- or mog-off loss weakens it for a few seconds.
 local function powersInZone(zone: BasePart): ({ [number]: number }, { [number]: { Player } })
 	local powers: { [number]: number } = {}
 	local members: { [number]: { Player } } = {}
@@ -95,7 +97,9 @@ local function powersInZone(zone: BasePart): ({ [number]: number }, { [number]: 
 					if type(penaltyUntil) == "number" then penaltyUntil else 0,
 					Config.shove
 				)
-				powers[faction] = (powers[faction] or 0) + weight
+				local rank = player:GetAttribute("Rank")
+				local aura = RankRules.auraMultiplier(Config, if type(rank) == "number" then rank else 1)
+				powers[faction] = (powers[faction] or 0) + weight * aura
 				members[faction] = members[faction] or {}
 				table.insert(members[faction], player)
 			end

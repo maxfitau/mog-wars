@@ -51,9 +51,21 @@ check("negative wars are invalid", not PlayerData.isValid(save({ warsToday = -1 
 
 -- migration from version 1
 local old: any = { version = 1, points = 120, rank = 3 }
-check("migrate upgrades version 1", PlayerData.migrate(old) and old.version == 2 and old.warsToday == 0)
+check("migrate upgrades version 1 to the current version", PlayerData.migrate(old) and old.version == PlayerData.CURRENT_VERSION and old.warsToday == 0 and next(old.boxes) == nil)
 check("migrated save is valid and keeps progress", PlayerData.isValid(old) and old.points == 120 and old.rank == 3)
 check("migrate rejects non-tables", not PlayerData.migrate(nil))
+local v2: any = { version = 2, points = 5, rank = 2, warsToday = 1, lastWarDay = 7 }
+check("migrate upgrades version 2", PlayerData.migrate(v2) and PlayerData.isValid(v2) and v2.warsToday == 1)
+
+-- boxes
+local boxy = PlayerData.template()
+check("adding a box works", PlayerData.addBox(boxy, "recruit") and boxy.boxes.recruit == 1)
+check("an empty tier name is rejected", not PlayerData.addBox(boxy, ""))
+boxy.boxes.recruit = PlayerData.MAX_BOXES_PER_TIER
+check("a full stack is rejected", not PlayerData.addBox(boxy, "recruit"))
+check("boxes with a negative count are invalid", not PlayerData.isValid(save({ boxes = { recruit = -1 } })))
+check("boxes with a fractional count are invalid", not PlayerData.isValid(save({ boxes = { recruit = 1.5 } })))
+check("boxes that are not a table are invalid", not PlayerData.isValid(save({ boxes = 5 })))
 
 -- daily war limit
 local day = PlayerData.dayNumber(86400 * 20000 + 5)

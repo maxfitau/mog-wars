@@ -46,7 +46,7 @@ each spawns at their base; a player cannot change faction mid-war.
 
 ## 3. Contested capture and the capture bar HUD
 
-**Build:** several zones, per-faction presence, teammates stacking, enemies pushing back, per-zone progress sent
+**Build (code written, not yet playtested):** five zones (four side, one centre worth double), per-faction presence, teammates stacking, enemies pushing back, per-zone progress sent
 to clients, and a simple on-screen bar for the zone you stand in.
 **Test:** pure scenarios (alone, two teammates, one enemy, two enemies from different factions, empty zone). In
 Studio with 2 clients on different factions.

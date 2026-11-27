@@ -45,6 +45,10 @@ local function register(instance: Instance)
 	}
 	instance:SetAttribute("OwnerFaction", 0)
 	instance:SetAttribute("Progress", 0)
+	instance:SetAttribute("CapturerFaction", 0)
+	if instance:GetAttribute("Value") == nil then
+		instance:SetAttribute("Value", 1)
+	end
 end
 
 local function unregister(instance: Instance)
@@ -93,11 +97,15 @@ local function show(record: ZoneRecord)
 	if rounded ~= record.shownProgress then
 		record.shownProgress = rounded
 		record.part:SetAttribute("Progress", rounded)
+		record.part:SetAttribute("CapturerFaction", state.capturer)
 		if state.owner ~= 0 then
 			record.part.Color = ownerColor(state.owner)
 		else
 			record.part.Color = UNOWNED_COLOR:Lerp(PUSH_COLOR, rounded)
 		end
+	end
+	if record.part:GetAttribute("CapturerFaction") ~= state.capturer then
+		record.part:SetAttribute("CapturerFaction", state.capturer)
 	end
 	if record.part:GetAttribute("OwnerFaction") ~= state.owner then
 		record.part:SetAttribute("OwnerFaction", state.owner)

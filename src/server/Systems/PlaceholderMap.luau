@@ -1,5 +1,5 @@
 --!strict
--- Slice 1 placeholder map: a baseplate, four faction home bases and one capture zone, all made by code so no Studio
+-- Slice 1 placeholder map: a baseplate, four faction home bases and five capture zones, all made by code so no Studio
 -- editing is needed. Skipped if the place already has a part tagged "Zone" (a real map replaces this).
 
 local CollectionService = game:GetService("CollectionService")
@@ -48,10 +48,22 @@ function PlaceholderMap.start()
 		spawn.Parent = Workspace
 	end
 
-	local zone = makePart("Zone", Vector3.new(30, 1, 30), Vector3.new(0, 0.5, 0), Color3.fromRGB(200, 200, 200))
-	zone.CanCollide = false -- players walk straight onto it
-	zone.Transparency = 0.3
-	CollectionService:AddTag(zone, "Zone")
+	-- Four side zones (worth 1) and a centre zone (worth 2), all open ground between the bases.
+	local zoneSpots = {
+		{ name = "Zone_North", position = Vector3.new(0, 0.5, -60), value = 1 },
+		{ name = "Zone_East", position = Vector3.new(60, 0.5, 0), value = 1 },
+		{ name = "Zone_South", position = Vector3.new(0, 0.5, 60), value = 1 },
+		{ name = "Zone_West", position = Vector3.new(-60, 0.5, 0), value = 1 },
+		{ name = "Zone_Centre", position = Vector3.new(0, 0.5, 0), value = 2 },
+	}
+	for _, spot in zoneSpots do
+		local size = if spot.value == 2 then Vector3.new(36, 1, 36) else Vector3.new(28, 1, 28)
+		local zone = makePart(spot.name, size, spot.position, Color3.fromRGB(200, 200, 200))
+		zone.CanCollide = false -- players walk straight onto it
+		zone.Transparency = 0.3
+		zone:SetAttribute("Value", spot.value)
+		CollectionService:AddTag(zone, "Zone")
+	end
 end
 
 return PlaceholderMap

@@ -24,3 +24,4 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 18 | Zone state is exposed as part attributes (`OwnerFaction`, `Progress`) and there are no remotes | Clients can read but never write; a HUD can read attributes later |
 | 19 | Faction 4 is named "Aura Collective" in code (placeholder "Aura Cartel" renamed) | Avoids the drug-cartel connotation flagged in docs/compliance.md; one line in FactionRules.luau changes it back |
 | 20 | Factions use Roblox Teams and matching spawn pad colours; no remote can change a faction | Built-in spawning does the base routing; server-only assignment stops cheating |
+| 21 | The HUD reads zone attributes only (no remotes) and works out "which zone am I in" for display only | The server stays the only source of capture state; nothing the client shows can change a result |

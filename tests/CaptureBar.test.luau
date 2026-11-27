@@ -60,6 +60,14 @@ do
 	check("2 vs 1 vs 1 is a stalemate", state.progress == 0 and state.owner == 0)
 end
 
+-- net power sets the speed: three against one pushes at power 2
+do
+	local _, early = run(CaptureBar.newState(), { [1] = 3, [2] = 1 }, 11, 0.25)
+	local _, late = run(CaptureBar.newState(), { [1] = 3, [2] = 1 }, 12.5, 0.25)
+	check("3 vs 1 is not captured at 11s", early == 0)
+	check("3 vs 1 is captured by 12.5s", late == 1)
+end
+
 -- empty zone decays
 do
 	local state = CaptureBar.newState()

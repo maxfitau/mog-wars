@@ -55,6 +55,7 @@ export type Config = {
 		firstLevelSeconds: number,
 		stepSeconds: number,
 		dailyStrideCap: number,
+		auraPerStride: number,
 	},
 	shove: {
 		cooldownSeconds: number,
@@ -148,6 +149,7 @@ local config: Config = {
 		firstLevelSeconds = 45, -- seconds of running to reach level 1
 		stepSeconds = 60, -- each later level needs this many more seconds than the one before
 		dailyStrideCap = 600, -- at most 10 minutes of training count per UTC day (healthy play)
+		auraPerStride = 10, -- one second on a treadmill is 10 aura; territory rewards are paid in the same aura points
 	},
 	shove = {
 		cooldownSeconds = 6, -- time before the same player can shove again
@@ -195,12 +197,12 @@ local config: Config = {
 	},
 	ranks = {
 		{ name = "NPC", cost = 0 },
-		{ name = "Rookie", cost = 320 },
-		{ name = "Sigma", cost = 720 },
-		{ name = "Chadlite", cost = 1350 },
-		{ name = "Chad", cost = 2350 },
-		{ name = "Gigachad", cost = 8800 },
-		{ name = "Mog God", cost = 21000 },
+		{ name = "Rookie", cost = 500 },
+		{ name = "Sigma", cost = 1150 },
+		{ name = "Chadlite", cost = 2150 },
+		{ name = "Chad", cost = 3750 },
+		{ name = "Gigachad", cost = 14000 },
+		{ name = "Mog God", cost = 34000 },
 	},
 	boxes = {
 		dailyCap = 12, -- most boxes a player can earn from captures in one UTC day

@@ -13,7 +13,6 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local CaptureBar = require(Shared:WaitForChild("CaptureBar"))
 local Config = require(Shared:WaitForChild("EconomyConfig"))
 local FactionRules = require(Shared:WaitForChild("FactionRules"))
-local BoxRoll = require(Shared:WaitForChild("BoxRoll"))
 local ContributionScoring = require(Shared:WaitForChild("ContributionScoring"))
 local TrainingRules = require(Shared:WaitForChild("TrainingRules"))
 local SpawnRules = require(Shared:WaitForChild("SpawnRules"))
@@ -24,26 +23,43 @@ local UnitRules = require(Shared:WaitForChild("UnitRules"))
 local WarRules = require(Shared:WaitForChild("WarRules"))
 local ZoneGeometry = require(Shared:WaitForChild("ZoneGeometry"))
 local BotRules = require(Shared:WaitForChild("BotRules"))
+local Territories = require(Shared:WaitForChild("Territories"))
+local TerritoryRules = require(Shared:WaitForChild("TerritoryRules"))
 local BotService = require(script.Parent:WaitForChild("BotService"))
 local DataService = require(script.Parent:WaitForChild("DataService"))
 local FriendService = require(script.Parent:WaitForChild("FriendService"))
+local PopupSystem = require(script.Parent:WaitForChild("PopupSystem"))
 local SeasonService = require(script.Parent:WaitForChild("SeasonService"))
 
 local HEADROOM = 8 -- studs above the zone that still count as standing in it
 local UNOWNED_COLOR = Color3.fromRGB(0, 235, 255) -- bright glowing cyan: nobody owns it yet
 local PUSH_COLOR = Color3.fromRGB(255, 235, 40) -- turns bright yellow as it fills
 
+-- A territory groups one or more flags. A faction owns it only when it holds ALL of its flags. Contributions are
+-- gathered per territory (across all its flags) and paid when a faction completes it.
+type TerritoryState = {
+	id: string,
+	name: string,
+	tier: string,
+	owner: number, -- 0 until one faction holds every flag
+	contribs: { [number]: { faction: number, units: number } }, -- by user id
+	flags: { ZoneRecord },
+}
+
 type ZoneRecord = {
 	part: BasePart,
 	state: CaptureBar.State,
 	shownProgress: number,
-	contribs: { [number]: { faction: number, units: number } }, -- by user id, for the next payout
+	territory: TerritoryState,
+	height: number, -- how high the flag's ground is (raised flags are skipped for spawning)
+	route: { Territories.Waypoint }?, -- waypoints bots follow to reach a raised flag
 	boosts: { [number]: number }, -- tank boost per faction in this zone (set by UnitSystem)
 	beacon: BasePart?, -- the tall glowing pillar over the zone, recoloured with it
 	light: PointLight?,
 }
 
 local zones: { [BasePart]: ZoneRecord } = {}
+local territories: { [string]: TerritoryState } = {}
 local accumulator = 0
 local active = true -- zones only move during a war
 local warUnits: { [number]: number } = {} -- contribution per user id this war
@@ -60,15 +76,41 @@ local function register(instance: Instance)
 	if not instance:IsA("BasePart") or zones[instance] then
 		return
 	end
+	-- Find (or create) the territory this flag belongs to. A part without territory attributes is its own
+	-- one-flag Gold territory, so a hand-made map still works.
+	local territoryId = instance:GetAttribute("Territory")
+	if type(territoryId) ~= "string" then
+		territoryId = instance.Name
+	end
+	local territory = territories[territoryId]
+	if not territory then
+		local info = Territories.byId[territoryId]
+		territory = {
+			id = territoryId,
+			name = if info then info.name else territoryId,
+			tier = if info then info.tier else "gold",
+			owner = 0,
+			contribs = {},
+			flags = {},
+		}
+		territories[territoryId] = territory
+	end
+	local flagIndex = instance:GetAttribute("FlagIndex")
+	local info = Territories.byId[territoryId]
+	local flagInfo = if info and type(flagIndex) == "number" then info.flags[flagIndex] else nil
 	zones[instance] = {
 		part = instance,
 		state = CaptureBar.newState(),
 		shownProgress = -1,
-		contribs = {},
+		territory = territory,
+		height = if flagInfo then flagInfo.y else 0,
+		route = if flagInfo then flagInfo.route else nil,
 		boosts = {},
 		beacon = instance:FindFirstChild("Beacon") :: BasePart?,
 		light = instance:FindFirstChildOfClass("PointLight"),
 	}
+	table.insert(territory.flags, zones[instance])
+	instance:SetAttribute("TerritoryOwner", 0)
 	instance:SetAttribute("OwnerFaction", 0)
 	instance:SetAttribute("Progress", 0)
 	instance:SetAttribute("CapturerFaction", 0)
@@ -79,7 +121,15 @@ end
 
 local function unregister(instance: Instance)
 	if instance:IsA("BasePart") then
+		local record = zones[instance]
 		zones[instance] = nil
+		if record then
+			local list = record.territory.flags
+			local at = table.find(list, record)
+			if at then
+				table.remove(list, at)
+			end
+		end
 	end
 end
 
@@ -158,7 +208,6 @@ local function show(record: ZoneRecord)
 	end
 end
 
--- Pay out a captured zone: the pool is split by contribution among players of the capturing faction.
 -- How many real players are fighting on a faction (bots never count).
 local function humansOn(faction: number): number
 	local count = 0
@@ -170,15 +219,15 @@ local function humansOn(faction: number): number
 	return count
 end
 
-local function payOut(record: ZoneRecord, winner: number, previousOwner: number)
-	local value = record.part:GetAttribute("Value")
-	local zoneValue = if type(value) == "number" then value else 1
-	-- Taking a zone from a faction that has no real players (only bots) pays fewer Mog Points.
-	local factor = BotRules.capturePoolFactor(previousOwner, humansOn(previousOwner), Config.bots)
-	local pool = math.floor(Config.capture.basePool * zoneValue * factor)
-	local boxTier = BoxRoll.tierForValue(zoneValue, Config.boxes.tierForValue)
+-- Pay out a captured TERRITORY (the capturing faction now holds all its flags). Everyone who helped, by
+-- contribution, gets a share of the Mog Points pool, the territory's aura reward and a box of its tier.
+-- Taking it from a faction that has no real players (only bots) pays fewer Mog Points.
+local function payOut(territory: TerritoryState, winner: number, factorOwner: number)
+	local tier = Territories.tiers[territory.tier]
+	local factor = BotRules.capturePoolFactor(factorOwner, humansOn(factorOwner), Config.bots)
+	local pool = math.floor(Config.capture.basePool * tier.value * factor)
 	local units: { [number]: number } = {}
-	for userId, entry in record.contribs do
+	for userId, entry in territory.contribs do
 		if entry.faction == winner then
 			units[userId] = entry.units
 		end
@@ -206,14 +255,38 @@ local function payOut(record: ZoneRecord, winner: number, previousOwner: number)
 	end)
 	for userId, player in present do
 		local bonus = SquadRules.bonusPoints(finalAmounts[userId], friendCounts[userId] or 0, Config.squad)
-		DataService.addPoints(player, finalAmounts[userId] + bonus)
-		if boxTier then
-			DataService.earnBox(player, boxTier) -- every paid contributor also earns a box, up to the daily cap
+		local points = finalAmounts[userId] + bonus
+		DataService.addPoints(player, points)
+		PopupSystem.send(player, "points", points, "")
+		local aura = DataService.addAura(player, tier.aura)
+		if aura > 0 then
+			PopupSystem.send(player, "aura", aura, "")
 		end
-		SeasonService.earn(player, "capture", zoneValue)
+		if DataService.earnBox(player, tier.box) then -- every paid contributor also earns a box, up to the daily cap
+			PopupSystem.send(player, "box", 1, tier.box)
+		end
+		SeasonService.earn(player, "capture", tier.value)
 		DataService.recordCapture(player)
 	end
-	record.contribs = {}
+	for userId, entry in territory.contribs do
+		if entry.faction == winner then
+			territory.contribs[userId] = nil -- paid; other factions' contributions stay
+		end
+	end
+end
+
+-- Recompute who owns a territory from its flags and publish it on each flag (for the HUD).
+local function refreshTerritory(territory: TerritoryState): number
+	local owners: { number } = {}
+	for _, flag in territory.flags do
+		table.insert(owners, flag.state.owner)
+	end
+	local before = territory.owner
+	territory.owner = TerritoryRules.owner(owners)
+	for _, flag in territory.flags do
+		flag.part:SetAttribute("TerritoryOwner", territory.owner)
+	end
+	return before
 end
 
 local function tick(dt: number)
@@ -233,10 +306,10 @@ local function tick(dt: number)
 		local leaderId = CaptureBar.leader(powers)
 		if leaderId ~= 0 and leaderId ~= record.state.owner and members[leaderId] then
 			for _, player in members[leaderId] do
-				local entry = record.contribs[player.UserId]
+				local entry = record.territory.contribs[player.UserId]
 				if not entry or entry.faction ~= leaderId then
 					entry = { faction = leaderId, units = 0 }
-					record.contribs[player.UserId] = entry
+					record.territory.contribs[player.UserId] = entry
 				end
 				local gained = ContributionScoring.fromPush(1, dt)
 				entry.units += gained
@@ -247,11 +320,17 @@ local function tick(dt: number)
 		local result = CaptureBar.step(record.state, powers, dt, params)
 		record.state = result.state
 		if result.captured then
-			print(("[mog-wars] zone %s captured by faction %d"):format(record.part.Name, result.newOwner))
-			warCaptures[result.newOwner] = (warCaptures[result.newOwner] or 0) + 1
-			payOut(record, result.newOwner, previousOwner)
-		elseif record.state.capturer == 0 and record.state.progress == 0 and leaderId == 0 then
-			record.contribs = {} -- the zone went idle, so old pushing no longer counts
+			-- One flag changed hands. The territory changes hands only if one faction now holds ALL its flags.
+			local territory = record.territory
+			local ownerBefore = refreshTerritory(territory)
+			print(("[mog-wars] flag %s (%s) captured by faction %d: territory owner is now %d"):format(
+				tostring(record.part:GetAttribute("FlagName")), territory.name, result.newOwner, territory.owner
+			))
+			if TerritoryRules.justCaptured(ownerBefore, territory.owner) then
+				print(("[mog-wars] TERRITORY %s captured by faction %d"):format(territory.name, territory.owner))
+				warCaptures[territory.owner] = (warCaptures[territory.owner] or 0) + 1
+				payOut(territory, territory.owner, if ownerBefore ~= 0 then ownerBefore else previousOwner)
+			end
 		end
 		show(record)
 	end
@@ -268,18 +347,32 @@ function CaptureSystem.resetWar()
 	warCaptures = {}
 	for _, record in zones do
 		record.state = CaptureBar.newState()
-		record.contribs = {}
 		record.shownProgress = -1
 		show(record)
 	end
+	for _, territory in territories do
+		territory.owner = 0
+		territory.contribs = {}
+		for _, flag in territory.flags do
+			flag.part:SetAttribute("TerritoryOwner", 0)
+		end
+	end
 end
 
--- Zone owners and values, for scoring.
+-- Territory owners and values, for scoring a war (a territory counts only when held with all its flags).
 function CaptureSystem.zoneSummary(): { WarRules.ZoneSummary }
 	local list: { WarRules.ZoneSummary } = {}
-	for _, record in zones do
-		local value = record.part:GetAttribute("Value")
-		table.insert(list, { owner = record.state.owner, value = if type(value) == "number" then value else 1 })
+	for _, territory in territories do
+		table.insert(list, { owner = territory.owner, value = Territories.tiers[territory.tier].value })
+	end
+	return list
+end
+
+-- Every territory with its tier and current owner (0 = nobody), for the aura trickle.
+function CaptureSystem.territoryList(): { { id: string, tier: string, owner: number } }
+	local list = {}
+	for _, territory in territories do
+		table.insert(list, { id = territory.id, tier = territory.tier, owner = territory.owner })
 	end
 	return list
 end
@@ -307,10 +400,10 @@ local function credit(player: Player, other: Player?, amount: number)
 	end
 	for _, record in zones do
 		if record.state.owner ~= faction and playerInZone(player, record.part) and (other == nil or playerInZone(other, record.part)) then
-			local entry = record.contribs[player.UserId]
+			local entry = record.territory.contribs[player.UserId]
 			if not entry or entry.faction ~= faction then
 				entry = { faction = faction, units = 0 }
-				record.contribs[player.UserId] = entry
+				record.territory.contribs[player.UserId] = entry
 			end
 			entry.units += amount
 			warUnits[player.UserId] = (warUnits[player.UserId] or 0) + amount
@@ -328,12 +421,14 @@ function CaptureSystem.creditMogOffWin(winner: Player, loser: Player?, factor: n
 	credit(winner, loser, Config.capture.mogOffWin * (factor or 1))
 end
 
--- Every zone with its position, size and current owner, for the spawn system.
+-- Every ground-level flag with its position, size and current owner, for the spawn system.
 function CaptureSystem.zoneList(): { SpawnRules.ZoneInfo }
 	local list: { SpawnRules.ZoneInfo } = {}
 	for _, record in zones do
-		local position = record.part.Position
-		table.insert(list, { x = position.X, z = position.Z, size = record.part.Size.X, owner = record.state.owner })
+		if record.height <= 3 then -- raised flags (cliffs, the lighthouse top) are not used for spawning
+			local position = record.part.Position
+			table.insert(list, { x = position.X, z = position.Z, size = record.part.Size.X, owner = record.state.owner })
+		end
 	end
 	return list
 end
@@ -384,14 +479,15 @@ end
 function CaptureSystem.zoneViews(): { BotService.ZoneView }
 	local list: { BotService.ZoneView } = {}
 	for _, record in zones do
-		local value = record.part:GetAttribute("Value")
 		table.insert(list, {
 			part = record.part,
 			x = record.part.Position.X,
 			z = record.part.Position.Z,
+			y = record.height,
 			size = record.part.Size.X,
 			owner = record.state.owner,
-			value = if type(value) == "number" then value else 1,
+			value = Territories.tiers[record.territory.tier].value,
+			route = record.route,
 		})
 	end
 	return list

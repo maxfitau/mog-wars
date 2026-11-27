@@ -1,6 +1,7 @@
 --!strict
 -- Placeholder map built by code from src/shared/MapLayout.luau, in two islands in one place:
---   War Island: a baseplate, four faction home bases, the capture zones and a portal by each base.
+--   War Island: a baseplate, four corner home bases, six territories (ten capture flags) with simple
+--   scenery and signs, and a portal to Training Island at the top edge.
 --   Training Island: one platform far away with all the treadmills, the shop, a portal back to the war,
 --   and empty reserved space for the prestige altar and the Mog Arena plots (nothing is built there yet).
 -- Skipped if the place already has a part tagged "Zone" (a real map replaces this one).
@@ -12,6 +13,8 @@ local Workspace = game:GetService("Workspace")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local FactionRules = require(Shared:WaitForChild("FactionRules"))
 local MapLayout = require(Shared:WaitForChild("MapLayout"))
+local Territories = require(Shared:WaitForChild("Territories"))
+local TerritoryScenery = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("TerritoryScenery"))
 
 local PlaceholderMap = {}
 
@@ -100,16 +103,24 @@ function PlaceholderMap.start()
 		spawn.Parent = Workspace
 	end
 
-	for _, spec in MapLayout.zones do
-		local glow = Color3.fromRGB(0, 235, 255) -- bright cyan until someone owns it (CaptureSystem recolours it)
-		local zone = makePart(spec.name, Vector3.new(spec.size, 1, spec.size), Vector3.new(spec.x, 0.5, spec.z), glow)
+	-- The flags: one glowing zone per flag, tagged "Zone". CaptureSystem runs one capture bar per flag and groups
+	-- them into territories by the "Territory" attribute. Each flag also gets a tall see-through pillar of light
+	-- ("Beacon") and a point light so a child can spot it from across the map; CaptureSystem recolours them.
+	for _, entry in Territories.allFlags() do
+		local territory, flag = entry.territory, entry.flag
+		local glow = Color3.fromRGB(0, 235, 255) -- bright cyan until someone owns it
+		local zone = makePart(Territories.partName(territory, entry.index), Vector3.new(flag.size, 1, flag.size), Vector3.new(flag.x, flag.y + 0.5, flag.z), glow)
 		zone.CanCollide = false -- players walk straight onto it
 		zone.Transparency = 0.15
 		zone.Material = Enum.Material.Neon -- glows
-		zone:SetAttribute("Value", spec.value)
+		zone:SetAttribute("Value", Territories.tiers[territory.tier].value)
+		zone:SetAttribute("Territory", territory.id)
+		zone:SetAttribute("TerritoryName", territory.name)
+		zone:SetAttribute("FlagName", flag.name)
+		zone:SetAttribute("FlagIndex", entry.index)
+		zone:SetAttribute("FlagCount", #territory.flags)
 
-		-- A tall see-through pillar of light so a child can spot every zone from across the map.
-		local beacon = makePart("Beacon", Vector3.new(3, 70, 3), Vector3.new(spec.x, 35.5, spec.z), glow)
+		local beacon = makePart("Beacon", Vector3.new(3, 70, 3), Vector3.new(flag.x, flag.y + 35.5, flag.z), glow)
 		beacon.CanCollide = false
 		beacon.CanQuery = false
 		beacon.CanTouch = false
@@ -125,17 +136,17 @@ function PlaceholderMap.start()
 		CollectionService:AddTag(zone, "Zone")
 	end
 
-	-- A portal beside each home base: walk in to go to Training Island.
+	-- The six territories' scenery and name signs (simple placeholder shapes).
+	TerritoryScenery.build()
+
+	-- The portal to Training Island, at the top (north) edge. One sign beside it.
 	for index, portal in MapLayout.warPortals do
 		makePortal("Portal_Train_" .. index, portal.x, portal.z, portal.size, Color3.fromRGB(255, 170, 40), "training")
-		-- one sign per portal, a few studs toward the middle of the map, facing the middle
-		local length = math.sqrt(portal.x * portal.x + portal.z * portal.z)
-		local towardX, towardZ = -portal.x / length, -portal.z / length
 		makeSign(
 			"Sign_Train_" .. index,
 			"TRAIN",
-			Vector3.new(portal.x + towardX * 12, 0, portal.z + towardZ * 12),
-			Vector3.new(0, 0, 0),
+			Vector3.new(portal.x + 18, 0, portal.z),
+			Vector3.new(portal.x + 18, 0, portal.z + 40), -- faces south, toward the map
 			16,
 			5,
 			Color3.fromRGB(255, 150, 20)
@@ -186,7 +197,7 @@ function PlaceholderMap.start()
 	local arriveX, arriveZ = at(island.arrival.x, island.arrival.z)
 	makeSign("Sign_BackToWar", "BACK TO WAR", Vector3.new(backX - 16, 0, backZ - 4), Vector3.new(arriveX, 0, arriveZ - 30), 20, 5, Color3.fromRGB(60, 190, 100))
 	-- The reserved areas (prestige altar, Mog Arena plots) are deliberately left empty.
-	print("[mog-wars] map built: War Island and Training Island")
+	print("[mog-wars] map built: War Island (6 territories, 10 flags) and Training Island")
 end
 
 return PlaceholderMap

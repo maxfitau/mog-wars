@@ -2,9 +2,11 @@
 -- Plain-Luau tests, no Roblox needed. Run from the repo root with the standalone Luau runtime:
 --   luau tests/SpawnRules.test.luau
 -- STATUS: written but NOT yet run (no Luau runtime in the cloud session). Run it on a PC first.
+-- Only flags on the ground are used for front-line spawning (raised flags such as the lighthouse top are skipped).
 
 local MapLayout = require("../src/shared/MapLayout")
 local SpawnRules = require("../src/shared/SpawnRules")
+local Territories = require("../src/shared/Territories")
 
 local failures = 0
 
@@ -17,61 +19,69 @@ local function check(name: string, condition: boolean)
 	end
 end
 
+-- every ground flag, with an owner taken from `owners` (keyed by the flag's part name)
+local ground = {}
+for _, entry in Territories.allFlags() do
+	if entry.flag.y <= 3 then
+		table.insert(ground, { name = Territories.partName(entry.territory, entry.index), flag = entry.flag })
+	end
+end
+
 local function zonesOwnedBy(owners: { [string]: number }): { SpawnRules.ZoneInfo }
 	local list = {}
-	for _, spec in MapLayout.zones do
-		table.insert(list, { x = spec.x, z = spec.z, size = spec.size, owner = owners[spec.name] or 0 })
+	for _, item in ground do
+		table.insert(list, { x = item.flag.x, z = item.flag.z, size = item.flag.size, owner = owners[item.name] or 0 })
 	end
 	return list
 end
 
+local function insideAnyFlag(x: number, z: number): boolean
+	for _, item in ground do
+		if math.abs(x - item.flag.x) <= item.flag.size / 2 and math.abs(z - item.flag.z) <= item.flag.size / 2 then
+			return true
+		end
+	end
+	return false
+end
+
 local base1 = MapLayout.bases[1]
 
--- no zones owned: spawn at the base
 do
 	local x, z, kind = SpawnRules.spawnPoint(1, zonesOwnedBy({}), base1.x, base1.z, 0)
-	check("a faction with no zones spawns at its base", kind == "base" and x == base1.x and z == base1.z)
+	check("a faction with no flags spawns at its base", kind == "base" and x == base1.x and z == base1.z)
 end
 
--- front zone is the owned zone nearest the centre
+-- the front line is the owned flag nearest the centre
 do
-	local zones = zonesOwnedBy({ Zone_NorthWest = 1, Zone_North = 1, Zone_East = 2 })
+	local zones = zonesOwnedBy({ Flag_npc_village_1 = 1, Flag_brainrot_bog_1 = 1, Flag_cooked_canyon_1 = 2 })
 	local front = SpawnRules.frontZone(1, zones)
-	check("the front zone is the owned zone nearest the centre", front ~= nil and (front :: SpawnRules.ZoneInfo).x == 0 and (front :: SpawnRules.ZoneInfo).z == -60)
-	check("another faction's zones are not used", (SpawnRules.frontZone(3, zones)) == nil)
+	check("the front flag is the owned flag nearest the centre", front ~= nil and (front :: SpawnRules.ZoneInfo).z == -105 and (front :: SpawnRules.ZoneInfo).x == 0)
+	check("another faction's flags are not used", SpawnRules.frontZone(3, zones) == nil)
 end
 
--- the spawn point sits outside the zone on the side facing the base
+-- the spawn point sits outside the flag on the side facing the base
 do
-	local zones = zonesOwnedBy({ Zone_North = 1 })
+	local zones = zonesOwnedBy({ Flag_npc_village_1 = 1 })
 	local x, z, kind = SpawnRules.spawnPoint(1, zones, base1.x, base1.z, 2) -- slot 2 has no sideways shift
-	check("owned zone gives a zone spawn", kind == "zone")
-	local dx, dz = x - 0, z - (-60)
-	check("the spawn is a few studs outside the zone edge", math.max(math.abs(dx), math.abs(dz)) - 28 / 2 >= 4)
-	local toBaseX, toBaseZ = base1.x - 0, base1.z - (-60)
+	check("an owned flag gives a flag spawn", kind == "zone")
+	local dx, dz = x - 0, z - (-105)
+	check("the spawn is a few studs outside the flag edge", math.max(math.abs(dx), math.abs(dz)) - 24 / 2 >= 4)
+	local toBaseX, toBaseZ = base1.x - 0, base1.z - (-105)
 	check("the spawn is on the side facing the faction base", dx * toBaseX + dz * toBaseZ > 0)
-	check("the spawn is not inside any zone", (function()
-		for _, spec in MapLayout.zones do
-			if math.abs(x - spec.x) <= spec.size / 2 and math.abs(z - spec.z) <= spec.size / 2 then
-				return false
-			end
-		end
-		return true
-	end)())
+	check("the spawn is not inside any flag", not insideAnyFlag(x, z))
 end
 
--- every owned zone, for every base and slot, gives a spot outside all zones and on the plate
+-- every owned ground flag, for every base and slot, gives a spot outside all flags and on the plate
 do
 	local clear = true
-	for _, owned in MapLayout.zones do
-		local zones = zonesOwnedBy({ [owned.name] = 1 })
+	for _, item in ground do
+		local zones = zonesOwnedBy({ [item.name] = 1 })
 		for _, base in MapLayout.bases do
 			for slot = 0, 4 do
 				local x, z = SpawnRules.spawnPoint(1, zones, base.x, base.z, slot)
-				for _, spec in MapLayout.zones do
-					if math.abs(x - spec.x) <= spec.size / 2 and math.abs(z - spec.z) <= spec.size / 2 then
-						clear = false
-					end
+				if insideAnyFlag(x, z) then
+					clear = false
+					print("spawn inside a flag for " .. item.name)
 				end
 				if math.abs(x) > MapLayout.baseplateSize / 2 or math.abs(z) > MapLayout.baseplateSize / 2 then
 					clear = false
@@ -79,12 +89,12 @@ do
 			end
 		end
 	end
-	check("no spawn spot lands inside a zone or off the plate", clear)
+	check("no spawn spot lands inside a flag or off the plate", clear)
 end
 
 -- slots spread players out and repeat
 do
-	local zones = zonesOwnedBy({ Zone_North = 1 })
+	local zones = zonesOwnedBy({ Flag_npc_village_1 = 1 })
 	local x0, z0 = SpawnRules.spawnPoint(1, zones, base1.x, base1.z, 0)
 	local x1, z1 = SpawnRules.spawnPoint(1, zones, base1.x, base1.z, 1)
 	local x5, z5 = SpawnRules.spawnPoint(1, zones, base1.x, base1.z, 5)
@@ -95,9 +105,9 @@ end
 -- bad input does not break it
 do
 	local zones: { SpawnRules.ZoneInfo } = { { x = 0 / 0, z = 0, size = 28, owner = 1 } }
-	check("a zone with nan position is ignored", SpawnRules.frontZone(1, zones) == nil)
+	check("a flag with nan position is ignored", SpawnRules.frontZone(1, zones) == nil)
 	local x, z, kind = SpawnRules.spawnPoint(1, { { x = 5, z = 5, size = 28, owner = 1 } }, 5, 5, 0)
-	check("a base on top of the zone still gives a finite spawn", kind == "zone" and x == x and z == z)
+	check("a base on top of the flag still gives a finite spawn", kind == "zone" and x == x and z == z)
 end
 
 if failures > 0 then

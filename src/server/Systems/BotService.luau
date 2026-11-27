@@ -32,11 +32,23 @@ export type Bot = {
 	aura: number,
 	penaltyUntil: number, -- pushes at reduced power until this server time (after a shove or a lost mog-off)
 	target: BasePart?,
+	route: { Waypoint }?, -- waypoints still to walk through on the way to the target
+	routeIndex: number,
 	thinkAt: number,
 	moveAt: number,
 }
 
-export type ZoneView = { part: BasePart, x: number, z: number, size: number, owner: number, value: number }
+export type Waypoint = { x: number, z: number, y: number }
+export type ZoneView = {
+	part: BasePart,
+	x: number,
+	z: number,
+	y: number, -- how high the flag's ground is
+	size: number,
+	owner: number,
+	value: number,
+	route: { Waypoint }?, -- ramp waypoints to walk through to reach a raised flag
+}
 
 local NAMES = { "Rex", "Blaze", "Nova", "Zed", "Kodo", "Pixel", "Turbo", "Sprout", "Echo", "Mango", "Pip", "Ziggy", "Bolt", "Ember", "Fuzz", "Gizmo" }
 
@@ -188,6 +200,8 @@ local function spawnBot(faction: number)
 		aura = 1,
 		penaltyUntil = 0,
 		target = nil,
+		route = nil,
+		routeIndex = 0,
 		thinkAt = 0,
 		moveAt = 0,
 	}
@@ -256,7 +270,7 @@ end
 
 local function jitteredPoint(zone: BasePart): Vector3
 	local reach = zone.Size.X * 0.35
-	return Vector3.new(zone.Position.X + (random() * 2 - 1) * reach, 4, zone.Position.Z + (random() * 2 - 1) * reach)
+	return Vector3.new(zone.Position.X + (random() * 2 - 1) * reach, zone.Position.Y + 3, zone.Position.Z + (random() * 2 - 1) * reach)
 end
 
 -- Decide where each bot runs. Called a few times a second.
@@ -290,14 +304,39 @@ local function think()
 				if now >= bot.thinkAt or not bot.target then
 					local index = BotRules.chooseZone(bot.faction, bot.root.Position.X, bot.root.Position.Z, flat, assigned, random)
 					if index and views[index] then
-						bot.target = views[index].part
+						local view = views[index]
+						bot.target = view.part
 						assigned[index] = (assigned[index] or 0) + 1
+						-- a raised flag (cliff, lighthouse top) is reached by walking its ramp route first
+						if view.route and #view.route > 0 and bot.root.Position.Y < view.y + 2 then -- the bot is standing below the flag's level
+							bot.route = view.route
+							bot.routeIndex = 1
+						else
+							bot.route = nil
+							bot.routeIndex = 0
+						end
 					end
 					bot.thinkAt = now + 6 + random() * 6
 					bot.moveAt = 0
 				end
 				local target = bot.target
-				if target and now >= bot.moveAt then
+				local route = bot.route
+				if route and bot.routeIndex > 0 then
+					-- walk the waypoints in order, moving on when close to the current one
+					local waypoint = route[bot.routeIndex]
+					local flatDistance = math.sqrt((bot.root.Position.X - waypoint.x) ^ 2 + (bot.root.Position.Z - waypoint.z) ^ 2)
+					if flatDistance < 5 then
+						bot.routeIndex += 1
+						if bot.routeIndex > #route then
+							bot.routeIndex = 0
+							bot.route = nil
+						end
+						bot.moveAt = 0
+					elseif now >= bot.moveAt then
+						bot.humanoid:MoveTo(Vector3.new(waypoint.x, waypoint.y, waypoint.z))
+						bot.moveAt = now + 1.5
+					end
+				elseif target and now >= bot.moveAt then
 					bot.humanoid:MoveTo(jitteredPoint(target))
 					bot.moveAt = now + 2.5 + random() * 1.5
 				end
@@ -311,6 +350,8 @@ function BotService.onWarStart()
 	for _, bot in bots do
 		if BotService.isAlive(bot) then
 			bot.target = nil
+			bot.route = nil
+			bot.routeIndex = 0
 			bot.thinkAt = 0
 			bot.moveAt = 0
 			bot.model:PivotTo(CFrame.new(baseSpot(bot.faction, -bot.id)))

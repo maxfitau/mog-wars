@@ -2,6 +2,7 @@
 -- Plain-Luau tests, no Roblox needed. Run from the repo root with the standalone Luau runtime:
 --   luau tests/MapLayout.test.luau
 -- STATUS: written but NOT yet run (no Luau runtime in the cloud session). Run it on a PC first.
+-- The territories and flags are tested in tests/Territories.test.luau.
 
 local MapLayout = require("../src/shared/MapLayout")
 
@@ -16,88 +17,40 @@ local function check(name: string, condition: boolean)
 	end
 end
 
-local zones = MapLayout.zones
 local half = MapLayout.baseplateSize / 2
 
-check("8 to 12 territories (DESIGN.md)", #zones >= 8 and #zones <= 12)
+-- four corner bases, on the plate
 check("one home base per faction", #MapLayout.bases == 4)
-
-local names: { [string]: boolean } = {}
-local unique = true
-local sane = true
-local inside = true
-for _, zone in zones do
-	if names[zone.name] then
-		unique = false
-	end
-	names[zone.name] = true
-	if zone.value < 1 or zone.value ~= math.floor(zone.value) or zone.size <= 0 then
-		sane = false
-	end
-	if math.abs(zone.x) + zone.size / 2 > half or math.abs(zone.z) + zone.size / 2 > half then
-		inside = false
-	end
-end
-check("zone names are unique", unique)
-check("zone values and sizes make sense", sane)
-check("every zone is on the baseplate", inside)
-
--- no two zones touch (at least 8 studs between them) so a player is only ever in one zone
-local apart = true
-for i = 1, #zones do
-	for j = i + 1, #zones do
-		local a, b = zones[i], zones[j]
-		local gapX = math.abs(a.x - b.x) - (a.size + b.size) / 2
-		local gapZ = math.abs(a.z - b.z) - (a.size + b.size) / 2
-		if math.max(gapX, gapZ) < 8 then
-			apart = false
-		end
-	end
-end
-check("zones do not touch each other", apart)
-
--- bases are safe: on the plate and well away from every zone
-local safe = true
-local onPlate = true
-for _, base in MapLayout.bases do
-	if math.abs(base.x) + MapLayout.baseSize / 2 > half or math.abs(base.z) + MapLayout.baseSize / 2 > half then
-		onPlate = false
-	end
-	for _, zone in zones do
-		local gapX = math.abs(base.x - zone.x) - (MapLayout.baseSize + zone.size) / 2
-		local gapZ = math.abs(base.z - zone.z) - (MapLayout.baseSize + zone.size) / 2
-		if math.max(gapX, gapZ) < 8 then
-			safe = false
-		end
-	end
-end
-check("bases are on the baseplate", onPlate)
-check("bases are at least 8 studs from every zone", safe)
-
--- War Island portals: one by every base, on the plate, clear of zones and bases
-check("one portal by every base", #MapLayout.warPortals == #MapLayout.bases)
 do
+	local onPlate = true
+	local corners = true
+	for _, base in MapLayout.bases do
+		if math.abs(base.x) + MapLayout.baseSize / 2 > half or math.abs(base.z) + MapLayout.baseSize / 2 > half then
+			onPlate = false
+		end
+		if math.abs(base.x) < half * 0.6 or math.abs(base.z) < half * 0.6 then
+			corners = false
+		end
+	end
+	check("bases are on the baseplate", onPlate)
+	check("the bases are in the four corners", corners)
+end
+
+-- one portal to Training Island, at the top (north) edge, on the plate
+check("one portal on War Island", #MapLayout.warPortals == 1)
+do
+	local portal = MapLayout.warPortals[1]
+	check("the portal is at the top edge, in the middle", portal.z < -half * 0.8 and portal.x == 0)
+	check("the portal is on the plate", math.abs(portal.z) + portal.size / 2 <= half)
 	local clear = true
-	for _, portal in MapLayout.warPortals do
-		if math.abs(portal.x) + portal.size / 2 > half or math.abs(portal.z) + portal.size / 2 > half then
+	for _, base in MapLayout.bases do
+		local gapX = math.abs(portal.x - base.x) - (portal.size + MapLayout.baseSize) / 2
+		local gapZ = math.abs(portal.z - base.z) - (portal.size + MapLayout.baseSize) / 2
+		if math.max(gapX, gapZ) < 8 then
 			clear = false
 		end
-		for _, zone in zones do
-			local gapX = math.abs(portal.x - zone.x) - (portal.size + zone.size) / 2
-			local gapZ = math.abs(portal.z - zone.z) - (portal.size + zone.size) / 2
-			if math.max(gapX, gapZ) < 8 then
-				clear = false
-			end
-		end
-		for _, base in MapLayout.bases do
-			local gapX = math.abs(portal.x - base.x) - (portal.size + MapLayout.baseSize) / 2
-			local gapZ = math.abs(portal.z - base.z) - (portal.size + MapLayout.baseSize) / 2
-			if math.max(gapX, gapZ) < 4 then
-				clear = false
-			end
-		end
 	end
-	check("war portals are on the plate and clear of zones and bases", clear)
+	check("the portal is clear of every base", clear)
 end
 
 -- Training Island

@@ -8,6 +8,8 @@ local order = { "CaptureHud", "PointsHud", "WarHud", "ShoveController", "MogOffC
 if Features.seasons then
 	table.insert(order, "SeasonHud") -- switched off at launch
 end
+table.insert(order, "PopupController")
+table.insert(order, "AssetCheckController")
 table.insert(order, "TravelHud")
 table.insert(order, "TutorialHint")
 table.insert(order, "RevealController") -- last: it shows each screen only once the player has reached it

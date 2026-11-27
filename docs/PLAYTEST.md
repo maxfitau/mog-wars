@@ -67,3 +67,17 @@ Nothing has been run yet, so expect to find errors. Write down or paste anything
    kiosk, BACK TO WAR by the return portal), with nothing floating on top of each other.
 8. Go to Training Island: the "Run to a glowing zone" hint must not show there.
 9. Max players: in Game Settings > Players set **Maximum Players** to 16.
+
+## Territories (new)
+1. Play. You should see 6 territories: **Gigachad Gate** (stone fortress, purple banners) in the middle; **Rizz Ravine** (two cliffs, rope
+   bridge) to the east; **Locked-In Lighthouse** (red and white tower with a long ramp) to the west; **NPC Village**, **Brainrot Bog**
+   and **Cooked Canyon** in the outer ring. Every flag is a bright glowing zone with a light pillar. The portal to Training Island is at
+   the top edge.
+2. Stand in one flag of Gigachad Gate. The bar shows "Gigachad Gate: 0/3 flags" and the flag's name. Capture it: "1/3 flags". Nothing is
+   paid yet. Capture all three (with bots or a second client helping): you should get floating "+... Mog Points", "+1K aura" and
+   "+1 Ultra Box" numbers.
+3. Capture NPC Village (1 flag): "+100 aura" and a Gold box.
+4. Stay in a territory you hold: about every minute a small "+10 aura" (Gold), "+20" (Diamond) or "+50" (Ultra) appears.
+5. Bots should spread over a territory's flags, climb the ramps to the cliffs and lighthouse top, and fight over the Gate.
+6. The first-session arrow should point to the nearest 1-flag territory (a Gold one).
+7. Output: no "[mog-wars] FAILED" lines. Look for "[mog-wars] ASSET 203785492 was found on ..." or "... is not on any server-side object" and the CLIENT version.

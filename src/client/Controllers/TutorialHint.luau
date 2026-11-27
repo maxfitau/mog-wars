@@ -33,8 +33,11 @@ local function update()
 		return
 	end
 
+	-- Point at the nearest territory with only ONE flag (the easiest) if there is one; otherwise any flag.
 	local zones = {}
 	local parts: { BasePart } = {}
+	local easyZones = {}
+	local easyParts: { BasePart } = {}
 	for _, zone in CollectionService:GetTagged("Zone") do
 		if zone:IsA("BasePart") then
 			local offset = zone.CFrame:PointToObjectSpace(root.Position)
@@ -44,14 +47,19 @@ local function update()
 			end
 			table.insert(zones, { x = zone.Position.X, z = zone.Position.Z })
 			table.insert(parts, zone)
+			if zone:GetAttribute("FlagCount") == 1 and zone:GetAttribute("OwnerFaction") == 0 then
+				table.insert(easyZones, { x = zone.Position.X, z = zone.Position.Z })
+				table.insert(easyParts, zone)
+			end
 		end
 	end
-	local index = HintRules.nearest(root.Position.X, root.Position.Z, zones)
+	local useEasy = #easyZones > 0
+	local index = HintRules.nearest(root.Position.X, root.Position.Z, if useEasy then easyZones else zones)
 	if not index then
 		frame.Visible = false
 		return
 	end
-	local target = parts[index].Position
+	local target = (if useEasy then easyParts[index] else parts[index]).Position
 	local look = camera.CFrame.LookVector
 	arrow.Rotation = HintRules.arrowAngle(target.X - root.Position.X, target.Z - root.Position.Z, look.X, look.Z)
 	frame.Visible = true

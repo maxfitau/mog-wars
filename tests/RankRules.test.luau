@@ -20,18 +20,18 @@ end
 check("seven ranks", RankRules.maxRank(Config) == 7)
 check("the ranks are in the design order", Config.ranks[1].name == "NPC" and Config.ranks[2].name == "Rookie" and Config.ranks[3].name == "Sigma" and Config.ranks[4].name == "Chadlite" and Config.ranks[5].name == "Chad" and Config.ranks[6].name == "Gigachad" and Config.ranks[7].name == "Mog God")
 check("NPC is free", Config.ranks[1].cost == 0)
-check("total to Chad", RankRules.totalToReach(Config, 5) == 320 + 720 + 1350 + 2350)
-check("total to Mog God", RankRules.totalToReach(Config, 7) == 320 + 720 + 1350 + 2350 + 8800 + 21000)
-check("next cost from NPC", RankRules.nextCost(Config, 1) == 320)
+check("total to Chad", RankRules.totalToReach(Config, 5) == 500 + 1150 + 2150 + 3750)
+check("total to Mog God", RankRules.totalToReach(Config, 7) == 500 + 1150 + 2150 + 3750 + 14000 + 34000)
+check("next cost from NPC", RankRules.nextCost(Config, 1) == 500)
 check("no next cost at the top", RankRules.nextCost(Config, 7) == nil)
 
 do
-	local result = RankRules.tryRankUp(Config, 1, 370)
+	local result = RankRules.tryRankUp(Config, 1, 550)
 	check("rank up spends points", result.ok and result.rank == 2 and result.points == 50)
 end
 do
-	local result = RankRules.tryRankUp(Config, 1, 319)
-	check("not enough points changes nothing", not result.ok and result.reason == "not_enough_points" and result.rank == 1 and result.points == 319)
+	local result = RankRules.tryRankUp(Config, 1, 499)
+	check("not enough points changes nothing", not result.ok and result.reason == "not_enough_points" and result.rank == 1 and result.points == 499)
 end
 do
 	local result = RankRules.tryRankUp(Config, 7, 99999)

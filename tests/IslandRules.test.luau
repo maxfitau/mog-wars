@@ -5,6 +5,7 @@
 
 local IslandRules = require("../src/shared/IslandRules")
 local MapLayout = require("../src/shared/MapLayout")
+local Territories = require("../src/shared/Territories")
 
 local failures = 0
 
@@ -28,9 +29,9 @@ check("every war base is on war", (function()
 	end
 	return true
 end)())
-check("every zone is on war", (function()
-	for _, zone in MapLayout.zones do
-		if IslandRules.islandAt(zone.x, zone.z, island) ~= "war" then
+check("every flag is on war", (function()
+	for _, entry in Territories.allFlags() do
+		if IslandRules.islandAt(entry.flag.x, entry.flag.z, island) ~= "war" then
 			return false
 		end
 	end

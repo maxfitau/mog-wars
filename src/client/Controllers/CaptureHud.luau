@@ -58,15 +58,31 @@ local function update()
 	local progress = zone:GetAttribute("Progress")
 	local owner = zone:GetAttribute("OwnerFaction")
 	local capturer = zone:GetAttribute("CapturerFaction")
+	local territoryName = zone:GetAttribute("TerritoryName")
+	local flagName = zone:GetAttribute("FlagName")
+	local territoryId = zone:GetAttribute("Territory")
+	local flagCount = zone:GetAttribute("FlagCount")
 	local value = zone:GetAttribute("Value")
 	local shown = if type(progress) == "number" then math.clamp(progress, 0, 1) else 0
 	fill.Size = UDim2.new(shown, 0, 1, 0)
 	fill.BackgroundColor3 = if shown > 0 then factionColor(capturer) else factionColor(owner)
-	title.Text = ("%s%s"):format(zone.Name:gsub("^Zone_", ""), if value == 2 then " (worth double)" else "")
+	-- "Gigachad Gate: 2/3 flags": how many of this territory's flags YOUR faction holds. A territory is only owned
+	-- when one faction holds all of them.
+	local myFaction = Players.LocalPlayer:GetAttribute("Faction")
+	local total = if type(flagCount) == "number" then flagCount else 1
+	local held = 0
+	for _, other in CollectionService:GetTagged("Zone") do
+		if other:GetAttribute("Territory") == territoryId and other:GetAttribute("OwnerFaction") == myFaction and myFaction ~= nil then
+			held += 1
+		end
+	end
+	local name = if type(territoryName) == "string" then territoryName else zone.Name
+	title.Text = ("%s: %d/%d flag%s"):format(name, held, total, if total == 1 then "" else "s")
+	local flagLabel = if type(flagName) == "string" and total > 1 then flagName .. ". " else ""
 	if shown > 0 then
-		subtitle.Text = ("%s is capturing: %d%%"):format(factionName(capturer), math.floor(shown * 100))
+		subtitle.Text = ("%s%s is capturing: %d%%"):format(flagLabel, factionName(capturer), math.floor(shown * 100))
 	else
-		subtitle.Text = ("Held by %s"):format(factionName(owner))
+		subtitle.Text = ("%sHeld by %s"):format(flagLabel, factionName(owner))
 	end
 end
 

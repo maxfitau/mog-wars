@@ -34,6 +34,7 @@ clients can only ask; the server decides.
 | 22 | Launch switches and gradual reveal (built) | all |
 | 23 | Two islands: War Island and Training Island (built) | 15, 12 |
 | 24 | Bots, clearer signs and glowing zones (built) | 5, 7, 23 |
+| 25 | Six territories with flags, aura rewards and pop-ups (built) | 3, 24 |
 
 **Release plan (from the owner):** everything is built, but launch switches on only the war, ranks, boxes and units, the
 treadmill, the daily streak and the cosmetic shop. Seasons and the squad bonus are built and switched off; they come on as later
@@ -311,3 +312,15 @@ there, and nothing in the war can be reached from Training Island.
 **Test:** pure tests in `tests/BotRules.test.luau`. In Studio: see `docs/PLAYTEST.md`, section "Bots".
 **Done when:** a war is never emptier than 8 fighters, bots leave one at a time as players arrive, a new player can win a mog-off
 against a bot within a minute, and no bot ever appears as a player.
+
+## 25. Six territories with flags, aura rewards and pop-ups (built)
+
+**Build (code written, not yet playtested):** the nine generic zones are replaced by six territories with ten flags
+(`Territories.luau`: Gigachad Gate 3 flags Ultra; Rizz Ravine 2 and Locked-In Lighthouse 2, Diamond; NPC Village, Brainrot Bog and
+Cooked Canyon 1 each, Gold). One capture bar per flag; a territory is owned only when one faction holds all its flags; the HUD shows
+"Gigachad Gate: 2/3 flags". Completing a territory pays everyone who helped: Mog Points, a box of its tier and aura (+100, +300,
++1,000) with floating number pop-ups (`NumberFormat`, `PopupController`). Holders get an aura trickle each minute. Bots spread over
+flags and use ramp routes to raised flags. Simple placeholder scenery for each territory. The first-session arrow points at the
+nearest 1-flag territory. Studio-only `AssetCheck` hunts the "ContentId 203785492" error.
+**Test:** pure tests in `tests/Territories.test.luau` and `tests/NumberFormat.test.luau`; see `docs/PLAYTEST.md`, "Territories".
+**Done when:** holding 2 of 3 flags pays nothing, holding all 3 pays once, and every shown number matches what the server granted.

@@ -46,12 +46,12 @@ paid also gets the zone's box.
 | # | Rank | Cost | Total |
 |---|---|---|---|
 | 1 | NPC | 0 | 0 |
-| 2 | Rookie | 320 | 320 |
-| 3 | Sigma | 720 | 1,040 |
-| 4 | Chadlite | 1,350 | 2,390 |
-| 5 | Chad | 2,350 | 4,740 |
-| 6 | Gigachad | 8,800 | 13,540 |
-| 7 | Mog God | 21,000 | 34,540 |
+| 2 | Rookie | 500 | 500 |
+| 3 | Sigma | 1,150 | 1,650 |
+| 4 | Chadlite | 2,150 | 3,800 |
+| 5 | Chad | 3,750 | 7,550 |
+| 6 | Gigachad | 14,000 | 21,550 |
+| 7 | Mog God | 34,000 | 55,550 |
 
 The ladder is gentle up to Chad (so the first week is fun and fast) then steep (so Gigachad and Mog God take
 weeks and mean something). Ranks measure aura earned by winning, never looks. Rank does not change aura power.
@@ -90,12 +90,12 @@ the current config:
 
 | Player | Wars/day | Days/week | Days to Chad | Days to Mog God |
 |---|---|---|---|---|
-| Light | 2 | 4 | 18 | 130 |
+| Light | 2 | 4 | 16 | 118 |
 | **Casual** | **3** | **6** | **6** | **45** |
-| Regular | 5 | 7 | 4 | 23 |
+| Regular | 5 | 7 | 4 | 22 |
 | Hardcore | 12 | 7 | 2 | 12 |
 
-Target met: a casual player reaches Chad in about a week (day 6) and Mog God in about six and a half weeks (day 45). Barracks being off at launch is already included: the rank costs were refitted down a little to compensate,
+Target met: a casual player reaches Chad in about a week (day 6) and Mog God in about six weeks (day 41). Barracks being off at launch is already included: the rank costs were refitted down a little to compensate,
 inside the one to two month goal. A light player takes about four months, a deliberate choice: they still
 progress every session, and no tier is gated by money.
 
@@ -156,3 +156,13 @@ win against a bot gives 40 percent of the usual contribution, and taking a zone 
 percent of the pool (so a lone player cannot farm bots for full rewards). The boxes for a capture are unchanged but still limited
 by the daily cap of 12. The pacing simulation assumes captures against real players or mixed factions, so a player who only
 fights bots earns less than the table says.
+
+## Territories and aura rewards (built)
+
+Six territories with ten flags (`src/shared/Territories.luau`). A faction owns a territory only when it holds ALL its flags. A capture
+(completing a territory) pays everyone who helped: Mog Points from a pool of 100 x tier value (Gold 1, Diamond 2, Ultra 3), a box of
+the territory's tier, and aura: Gold +100, Diamond +300, Ultra +1,000. Aura is paid in the same points as the treadmill (10 aura is one
+second on a treadmill) straight into the aura level, and is not limited by the daily treadmill time. While a faction holds a territory
+its members get an aura trickle every minute (Gold 10, Diamond 20, Ultra 50). With six territories (three of them Gold) the average
+capture pays more than the old nine zones, so the rank costs were raised (table above) to keep casual pacing at Chad on day 6 and Mog
+God on day 41. Aura rewards are not in the pacing simulation; they speed up reaching the top aura level.

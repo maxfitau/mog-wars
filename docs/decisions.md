@@ -107,3 +107,9 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 101 | The first-session hint shows only on War Island | It pointed at zones from Training Island |
 | 102 | Bots are switched on by Features.bots (on at launch) | One flag turns them off if they cause problems |
 | 103 | `Players.MaxPlayers` is now set to 16 by Rojo sync (`$properties` on the Players service in `default.project.json`), applied automatically on every Connect | No Claude session has Studio GUI access to click Game Settings; Rojo sync sets the real property the same as a human would, so the manual step in decision 99 no longer has to be remembered each time |
+| 103 | Six territories / ten flags replace the nine zones; all names, positions, flag counts and rewards are in src/shared/Territories.luau; the screenshots did not arrive so the layout is my guess (gate in the centre, Ravine east, Lighthouse west, three outer territories north, south-west and south-east) | The owner's spec; positions are easy to move in one file |
+| 104 | A territory is owned only when one faction holds ALL its flags; rewards, boxes and war score count territories, not flags | The owner's rule |
+| 105 | "+100/+300/+1,000 aura" is paid as aura points into the aura level (10 aura = one treadmill second), to every paid contributor, not limited by the daily treadmill time; trickle is 10/20/50 a minute | "Aura" was not defined: this reuses the existing aura level; please confirm |
+| 106 | One portal at the top edge replaces the four portals by the bases | As in the owner's map description |
+| 107 | Number pop-ups: only the formatter, colour tiers and size scaling are built now (no CRITs or combos yet) | Needed for the rewards; the rest of slice 19 stays planned |
+| 108 | Rank costs raised again (500, 1,150, 2,150, 3,750, 14,000, 34,000) | Territory captures pay more; casual still reaches Chad on day 6 and Mog God on day 41 |

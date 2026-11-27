@@ -75,10 +75,12 @@ def load():
     cfg["boxRules"] = [(int(m.group(1)), m.group(2)) for m in re.finditer(
         r'\{\s*minValue\s*=\s*(\d+)\s*,\s*tier\s*=\s*"([^"]+)"\s*\}', boxes)]
     cfg["boxDailyCap"] = number(boxes, "dailyCap")
-    layout = (CONFIG.parent / "MapLayout.luau").read_text(encoding="utf-8")
-    cfg["zoneValues"] = [int(v) for v in re.findall(r"value\s*=\s*(\d+)", block(strip_comments(layout), "zones"))]
+    territories = strip_comments((CONFIG.parent / "Territories.luau").read_text(encoding="utf-8"))
+    tier_values = {m.group(1): int(m.group(2)) for m in re.finditer(r"(\w+)\s*=\s*\{\s*label\s*=\s*\"[^\"]*\"\s*,\s*value\s*=\s*(\d+)", block(territories, "tiers"))}
+    listing = territories[territories.index("Territories.list"):]
+    cfg["zoneValues"] = [tier_values[m.group(1)] for m in re.finditer(r'\btier\s*=\s*"(\w+)"', listing)]  # one capture per TERRITORY
     if not cfg["zoneValues"]:
-        sys.exit("MapLayout.luau has no zones")
+        sys.exit("Territories.luau has no territories")
     features = (CONFIG.parent / "Features.luau").read_text(encoding="utf-8")
     match = re.search(r"\bbarracks\s*=\s*(true|false)", strip_comments(features))
     cfg["barracksOn"] = bool(match and match.group(1) == "true")

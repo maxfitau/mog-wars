@@ -22,6 +22,16 @@ A live territory war on a meme map: train your aura, drop into the war, capture 
 6. Spend Mog Points to rank up: NPC → Rookie → Sigma → Chadlite → Chad → Gigachad → Mog God.
 7. Between wars, train in the Training Arena to raise aura power (see the Training Arena section).
 
+## Territories
+Six territories, ten capture flags, all on War Island. Names, positions, flag counts and rewards live in one settings file (src/shared/Territories.luau).
+- Centre: Gigachad Gate. Ultra. 3 flags (left tower, right tower, the gate). Stone fortress with purple banners.
+- Inner ring: Rizz Ravine (Diamond, 2 flags, one on each cliff, rope bridge between) and Locked-In Lighthouse (Diamond, 2 flags, one at the base and one at the top).
+- Outer ring: NPC Village (blocky cube houses, grey blocky villagers, original style), Brainrot Bog (bubbling green swamp, dead tree) and Cooked Canyon (lava river, smoke, red rock walls). Gold, 1 flag each.
+- Faction spawns in the 4 corners. The portal to Training Island is at the top edge.
+- Each flag is captured by standing near it. A faction owns a territory only when it holds ALL its flags. The HUD shows e.g. "Gigachad Gate: 2/3 flags".
+- On capture, everyone who helped gets rewards by contribution: Gold +100 aura, Diamond +300 aura, Ultra +1,000 aura, plus Mog Points and a box of that territory's tier.
+- A faction that holds a territory gets a small aura trickle every minute (more for harder territories).
+
 ## Islands
 One place, two islands (no separate places).
 - War Island: everyone spawns here, straight into the war. It has the territories, the capture zones, the faction bases and a portal by each base.

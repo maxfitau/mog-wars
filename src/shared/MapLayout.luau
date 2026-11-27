@@ -1,12 +1,12 @@
 --!strict
--- The placeholder map as plain data: one baseplate, one home base per faction (index = faction id) and the
--- capture zones. Positions are in studs on the ground plane; z points south. A real map built in Studio
--- replaces this: tag its zones "Zone", give each a "Value" attribute, and mark each faction's SpawnLocation
--- with a "HomeBase" attribute holding the faction id. tools/pacing.py reads the zone values from here.
--- Two islands share one place: War Island (the baseplate, bases, zones) and Training Island (see below).
+-- The placeholder map as plain data: one baseplate, one home base per faction (index = faction id) in the
+-- corners, the portal to Training Island and Training Island itself. The territories and their flags live in
+-- src/shared/Territories.luau. Positions are in studs on the ground plane; z points south. A real map built in Studio
+-- replaces this: tag each flag's part "Zone" with the Territory, FlagIndex, FlagCount and Value attributes (see
+-- Territories.luau), and mark each faction's SpawnLocation with a "HomeBase" attribute holding the faction id.
+-- Two islands share one place: War Island (the baseplate, bases, territories) and Training Island (see below).
 
 export type Base = { x: number, z: number }
-export type ZoneSpec = { name: string, x: number, z: number, size: number, value: number }
 export type Treadmill = { x: number, z: number, width: number, length: number, push: number }
 export type Portal = { x: number, z: number, size: number }
 export type Area = { x: number, z: number, width: number, length: number }
@@ -30,12 +30,9 @@ local MapLayout = {
 		{ x = 130, z = 130 }, -- faction 3, south east
 		{ x = -130, z = 130 }, -- faction 4, south west
 	} :: { Base },
-	-- Portals on War Island, one beside each home base. Walking into one sends you to Training Island.
+	-- The portal on War Island, at the top (north) edge. Walking into it sends you to Training Island.
 	warPortals = {
-		{ x = -130, z = -103, size = 14 },
-		{ x = 130, z = -103, size = 14 },
-		{ x = 130, z = 103, size = 14 },
-		{ x = -130, z = 103, size = 14 },
+		{ x = 0, z = -148, size = 14 },
 	} :: { Portal },
 	-- Training Island: a second platform in the same place, far from War Island. All positions inside it are
 	-- LOCAL to its centre (x east, z south). Everything for training and the shop is grouped here; the two
@@ -58,17 +55,6 @@ local MapLayout = {
 			arenaPlots = { x = 0, z = -90, width = 240, length = 60 },
 		},
 	} :: TrainingIsland,
-	zones = {
-		{ name = "Zone_Centre", x = 0, z = 0, size = 36, value = 2 },
-		{ name = "Zone_North", x = 0, z = -60, size = 28, value = 1 },
-		{ name = "Zone_East", x = 60, z = 0, size = 28, value = 1 },
-		{ name = "Zone_South", x = 0, z = 60, size = 28, value = 1 },
-		{ name = "Zone_West", x = -60, z = 0, size = 28, value = 1 },
-		{ name = "Zone_NorthWest", x = -95, z = -95, size = 28, value = 1 },
-		{ name = "Zone_NorthEast", x = 95, z = -95, size = 28, value = 1 },
-		{ name = "Zone_SouthEast", x = 95, z = 95, size = 28, value = 1 },
-		{ name = "Zone_SouthWest", x = -95, z = 95, size = 28, value = 1 },
-	} :: { ZoneSpec },
 }
 
 return MapLayout

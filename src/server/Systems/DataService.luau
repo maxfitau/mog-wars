@@ -345,6 +345,29 @@ function DataService.addTrainingStride(player: Player): (boolean, string, boolea
 	return true, "", gained > 0
 end
 
+-- Add aura points (10 aura = one second on a treadmill). Used for territory rewards and the aura trickle: it
+-- goes straight into the player's aura level and is NOT limited by the daily treadmill time. Returns the aura
+-- actually added (0 if the player is already at the top aura level or data is not loaded).
+function DataService.addAura(player: Player, aura: number): number
+	local data = DataService.get(player)
+	if not data or aura ~= aura or aura <= 0 or aura == math.huge then
+		return 0
+	end
+	local settings = Config.training
+	if data.trainingLevel >= settings.maxLevel then
+		return 0
+	end
+	local strides = math.floor(aura / settings.auraPerStride)
+	if strides < 1 then
+		return 0
+	end
+	local level, progress = TrainingRules.addStrides(data.trainingLevel, data.trainingProgress, strides, settings)
+	data.trainingLevel = level
+	data.trainingProgress = progress
+	syncTraining(player, data)
+	return strides * settings.auraPerStride
+end
+
 -- Wait (up to `seconds`) for a player's data to finish loading. Returns the data or nil.
 function DataService.waitFor(player: Player, seconds: number): PlayerData.Data?
 	local deadline = os.clock() + seconds

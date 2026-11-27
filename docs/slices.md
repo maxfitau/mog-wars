@@ -27,8 +27,9 @@ clients can only ask; the server decides.
 
 ## 1. Capture one territory by standing in it
 
-**Build:** a placeholder map (flat baseplate, one zone part tagged `Zone`, one spawn). A server system that, each
-tick, finds which players stand in the zone and runs the capture-bar math from `src/shared/CaptureBar.luau`.
+**Build (code written, not yet playtested):** `src/server/Systems/PlaceholderMap.luau` makes a baseplate, a spawn and
+one zone tagged `Zone`; `CaptureSystem.luau` finds who stands in each zone (`ZoneGeometry`) and runs
+`CaptureBar`. No remotes exist, so clients cannot touch zone state.
 The zone part changes colour when captured. No factions yet: a single "player team".
 **Test:** pure tests for the capture bar (`tests/CaptureBar.test.luau`). In Studio: join, stand in the zone and
 watch it fill and capture; step out and watch progress fall back; leave and rejoin and confirm it resets cleanly.

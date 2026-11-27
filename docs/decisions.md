@@ -20,3 +20,5 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 14 | Full rewards for 8 wars a day, half after; barracks capped at 8 hours | Healthy play for young players, no grind pressure |
 | 15 | Rank ladder 250 to 16,000 (casual: Chad day 6, Mog God day 44) | Meets the owner's pacing targets per `tools/pacing.py` |
 | 16 | Box odds sum to 100 and are shown; no pity or luck boosts | Matches Roblox paid-random rules even though boxes are never sold |
+| 17 | Slice 1 uses a single placeholder team and aura power 1 per player; the map is built by code | No Studio editing is needed to test; factions and rank scaling arrive in slices 2 and 8 |
+| 18 | Zone state is exposed as part attributes (`OwnerFaction`, `Progress`) and there are no remotes | Clients can read but never write; a HUD can read attributes later |

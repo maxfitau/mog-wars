@@ -186,3 +186,5 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 178 | The Aura Meteor and Supply Drops are free only, never sold; the meteor flag uses its own small capture loop (most players on it wins the second) instead of CaptureSystem | Keeps events self-contained so more can be added to the `EventSystem` registry |
 | 179 | Debug commands (`/mog ...`) exist only when `RunService:IsStudio()` | A live server never has them |
 | 180 | No minimap exists, so the meteor and drops use world markers (billboards, a beam and a ring) and the event banner | A minimap is a separate slice |
+| 181 | PopupSystem creates the `Remotes` folder before the WorldFx and RewardPopup remotes | WorldFx was landing outside the folder when PopupSystem loaded first, so AbilityController waited forever |
+| 182 | The war loop guards each step with pcall and always advances the phase | An error in a side system (startWar, finishWar) used to kill the loop and freeze the clock at 0:00 |

@@ -35,16 +35,17 @@ function PopupSystem.fx(kind: string, position: Vector3, extra: any?)
 end
 
 function PopupSystem.init()
-	local created = Instance.new("RemoteEvent")
-	created.Name = "WorldFx"
-	created.Parent = ReplicatedStorage:FindFirstChild("Remotes") or ReplicatedStorage
-	fxRemote = created
+	-- the Remotes folder first, so WorldFx and RewardPopup are both inside it before any client waits for them
 	local folder = ReplicatedStorage:FindFirstChild("Remotes")
 	if not folder then
 		folder = Instance.new("Folder")
 		folder.Name = "Remotes"
 		folder.Parent = ReplicatedStorage
 	end
+	local created = Instance.new("RemoteEvent")
+	created.Name = "WorldFx"
+	created.Parent = folder
+	fxRemote = created
 	local popup = Instance.new("RemoteEvent")
 	popup.Name = "RewardPopup"
 	popup.Parent = folder

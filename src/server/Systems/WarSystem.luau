@@ -194,24 +194,41 @@ function WarSystem.start()
 	task.spawn(function()
 		while true do
 			task.wait(0.5)
-			if phase == "War" then
-				publishScores()
-				local overtime = Features.overtime and endsAt - Workspace:GetServerTimeNow() <= Pace.overtime.seconds -- the last 60 seconds: all aura x2
-				if Workspace:GetAttribute("Overtime") ~= overtime then
-					Workspace:SetAttribute("Overtime", overtime)
-					if overtime then
-						for _, player in Players:GetPlayers() do
-							PopupSystem.send(player, "announce", 1, "1 MINUTE LEFT - DOUBLE AURA!")
+			-- every step is guarded: one error in a side system must never freeze the war clock at 0:00
+			local ok, err = pcall(function()
+				if phase == "War" then
+					publishScores()
+					local overtime = Features.overtime and endsAt - Workspace:GetServerTimeNow() <= Pace.overtime.seconds -- the last 60 seconds: all aura x2
+					if Workspace:GetAttribute("Overtime") ~= overtime then
+						Workspace:SetAttribute("Overtime", overtime)
+						if overtime then
+							for _, player in Players:GetPlayers() do
+								PopupSystem.send(player, "announce", 1, "1 MINUTE LEFT - DOUBLE AURA!")
+							end
 						end
 					end
 				end
+			end)
+			if not ok then
+				warn("[mog-wars] war tick failed: " .. tostring(err))
 			end
 			if Workspace:GetServerTimeNow() >= endsAt then
-				if phase == "War" then
-					finishWar()
+				local wasWar = phase == "War"
+				local stepOk, stepErr = pcall(function()
+					if wasWar then
+						finishWar()
+					else
+						startWar()
+					end
+				end)
+				if not stepOk then
+					warn(("[mog-wars] %s failed: %s"):format(if wasWar then "finishWar" else "startWar", tostring(stepErr)))
+				end
+				-- always move on, even if the step above errored part way
+				if wasWar then
 					setPhase("Intermission")
-				else
-					startWar()
+				elseif phase ~= "War" then
+					setPhase("War")
 				end
 			end
 		end

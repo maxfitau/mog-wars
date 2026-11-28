@@ -10,6 +10,7 @@ local TweenService = game:GetService("TweenService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("EconomyConfig"))
 local NumberFormat = require(Shared:WaitForChild("NumberFormat"))
+local HudSlots = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("HudSlots"))
 local Levels = require(Shared:WaitForChild("Levels"))
 local UiTheme = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("UiTheme"))
 
@@ -46,6 +47,8 @@ function AuraHud.init()
 	stroke.Thickness = 3
 	stroke.Parent = panel
 	local scale = Instance.new("UIScale")
+	local baseScale = HudSlots.leftScale()
+	scale.Scale = baseScale
 	scale.Parent = panel
 
 	local rankLabel = Instance.new("TextLabel")
@@ -199,8 +202,8 @@ function AuraHud.init()
 			lastDecile = -1
 		end
 		if last >= 0 and aura > last then
-			scale.Scale = 1.1 -- a little bounce whenever your aura goes up
-			TweenService:Create(scale, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
+			scale.Scale = baseScale * 1.1 -- a little bounce whenever your aura goes up
+			TweenService:Create(scale, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = baseScale }):Play()
 		end
 		last = aura
 	end
@@ -211,8 +214,8 @@ function AuraHud.init()
 		end
 		local _, tier = NumberFormat.suffix(shownAura)
 		if tier > lastTier and lastTier >= 0 then
-			scale.Scale = 1.25 -- NEW TIER: the counter pops and flashes the new suffix
-			TweenService:Create(scale, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = 1 }):Play()
+			scale.Scale = baseScale * 1.25 -- NEW TIER: the counter pops and flashes the new suffix
+			TweenService:Create(scale, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Scale = baseScale }):Play()
 			tierFlash.Text = "NEW TIER: " .. string.upper((NumberFormat.suffix(shownAura))) .. "!"
 			tierFlash.TextTransparency = 0
 			TweenService:Create(tierFlash, TweenInfo.new(1.6), { TextTransparency = 1 }):Play()

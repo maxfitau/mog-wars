@@ -301,7 +301,7 @@ function WarHud.start()
 		local camera = Workspace.CurrentCamera
 		if camera then
 			-- never overlap Roblox's top-left buttons: shrink on narrow screens
-			rootScale.Scale = math.clamp((camera.ViewportSize.X - 380) / WIDTH, 0.55, 1)
+			rootScale.Scale = math.clamp((camera.ViewportSize.X - 430) / WIDTH, 0.55, 1)
 		end
 		updateTimer()
 		clockSince += dt

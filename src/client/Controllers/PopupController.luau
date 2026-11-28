@@ -15,13 +15,14 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("EconomyConfig"))
 local NumberFormat = require(Shared:WaitForChild("NumberFormat"))
 local Weapons = require(Shared:WaitForChild("Weapons"))
+local HudSlots = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("HudSlots"))
 local UiTheme = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("UiTheme"))
 
 local PopupController = {}
 
-local MAX_ON_SCREEN = 6
+local MAX_ON_SCREEN = 3 -- at most three aura pop-ups at once
 local MAX_COINS = 8
-local LIFETIME_SECONDS = 1.4
+local LIFETIME_SECONDS = 0.9 -- and they fade fast
 
 local TIER_COLORS = {
 	white = Color3.fromRGB(255, 255, 255),
@@ -31,8 +32,6 @@ local TIER_COLORS = {
 
 local gui: ScreenGui
 local active: { TextLabel } = {}
-local banner: TextLabel
-local bannerToken = 0
 local comboLabel: TextLabel
 local comboToken = 0
 local punchUntil = 0
@@ -61,8 +60,10 @@ local function show(text: string, amount: number, color: Color3?)
 	end
 	local label = Instance.new("TextLabel")
 	label.AnchorPoint = Vector2.new(0.5, 0.5)
-	label.Size = UDim2.new(0, 300, 0, math.floor(36 * NumberFormat.sizeScale(amount)))
-	label.Position = UDim2.new(0.5, math.random(-40, 40), 0.64, #active * 26) -- below the crosshair, stacked downward
+	label.AnchorPoint = Vector2.new(0, 0)
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.Size = UDim2.new(0, 210, 0, math.floor(22 * math.min(1.3, NumberFormat.sizeScale(amount))))
+	label.Position = UDim2.new(0, 20 + math.random(0, 30), 0, 214 + #active * 24) -- the left column, never the middle of the screen
 	label.BackgroundTransparency = 1
 	label.Font = UiTheme.font
 	label.TextScaled = true
@@ -74,7 +75,7 @@ local function show(text: string, amount: number, color: Color3?)
 	table.insert(active, label)
 
 	local tween = TweenService:Create(label, TweenInfo.new(LIFETIME_SECONDS, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-		Position = label.Position - UDim2.new(0, 0, 0, 60),
+		Position = label.Position - UDim2.new(0, 0, 0, 30),
 		TextTransparency = 1,
 		TextStrokeTransparency = 1,
 	})
@@ -127,7 +128,7 @@ local function softNote(text: string, color: Color3)
 	noteCount += 1
 	local note = Instance.new("TextLabel")
 	note.Size = UDim2.new(0, 190, 0, 22)
-	note.Position = UDim2.new(0, 22, 0, 176)
+	note.Position = UDim2.new(0, 22, 0, 268)
 	note.BackgroundTransparency = 1
 	note.Font = UiTheme.font
 	note.TextScaled = true
@@ -171,23 +172,9 @@ local function edgeGlow(multiplier: number)
 	end)
 end
 
--- A big banner at the top of the screen (one at a time).
-local function showBanner(text: string, color: Color3, seconds: number)
-	bannerToken += 1
-	local token = bannerToken
-	banner.Text = text
-	banner.TextColor3 = color
-	banner.TextTransparency = 0
-	banner.TextStrokeTransparency = 0
-	banner.Visible = true
-	banner.Size = UDim2.new(0, 560, 0, 90)
-	TweenService:Create(banner, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Size = UDim2.new(0, 460, 0, 66) }):Play()
-	task.delay(seconds, function()
-		if bannerToken == token then
-			local fade = TweenService:Create(banner, TweenInfo.new(0.3), { TextTransparency = 1, TextStrokeTransparency = 1 })
-			fade:Play()
-		end
-	end)
+-- A big banner: it goes into the shared line slot (HudSlots), replacing the mission bar text for 3 seconds, one at a time.
+local function showBanner(text: string, color: Color3, _seconds: number)
+	HudSlots.line(text, color, math.clamp(_seconds, 1.2, 3))
 end
 
 -- The combo counter, right of the crosshair: x2, x3, x4 ... it bounces and the pitch rises.
@@ -201,8 +188,8 @@ local function showCombo(multiplier: number)
 	comboLabel.Text = ("COMBO x%d"):format(multiplier)
 	comboLabel.Visible = true
 	comboLabel.TextTransparency = 0
-	comboLabel.Size = UDim2.new(0, 260, 0, 60)
-	TweenService:Create(comboLabel, TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Size = UDim2.new(0, 200, 0, 44) }):Play()
+	comboLabel.Size = UDim2.new(0, 130, 0, 34)
+	TweenService:Create(comboLabel, TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Size = UDim2.new(0, 100, 0, 28) }):Play()
 	playSound(Weapons.combat.sounds.combo, 1 + 0.12 * (multiplier - 1))
 	task.delay(Weapons.combat.comboWindowSeconds, function()
 		if comboToken == token then
@@ -275,22 +262,10 @@ function PopupController.init()
 		table.insert(edgeFrames, frame)
 	end
 
-	banner = Instance.new("TextLabel")
-	banner.AnchorPoint = Vector2.new(0.5, 0)
-	banner.Position = UDim2.new(0.5, 0, 0.17, 0)
-	banner.Size = UDim2.new(0, 460, 0, 66)
-	banner.BackgroundTransparency = 1
-	banner.Font = UiTheme.font
-	banner.TextScaled = true
-	banner.TextStrokeColor3 = UiTheme.outline
-	banner.Visible = false
-	banner.Text = ""
-	banner.Parent = gui
-
 	comboLabel = Instance.new("TextLabel")
-	comboLabel.AnchorPoint = Vector2.new(0, 0.5)
-	comboLabel.Position = UDim2.new(0.5, 90, 0.46, 0) -- right of the crosshair, not on it
-	comboLabel.Size = UDim2.new(0, 200, 0, 44)
+	comboLabel.AnchorPoint = Vector2.new(0, 0)
+	comboLabel.Position = UDim2.new(0, 146, 0, 172) -- small, right beside the quest pill under the aura box
+	comboLabel.Size = UDim2.new(0, 100, 0, 28)
 	comboLabel.BackgroundTransparency = 1
 	comboLabel.Font = UiTheme.font
 	comboLabel.TextScaled = true
@@ -339,18 +314,6 @@ function PopupController.init()
 			-- MEGA MOG! (x5, gold) or ULTRA MOG! (x10, rainbow): a banner, a flash and a big number
 			local ultra = detail == "ultra"
 			showBanner(if ultra then "ULTRA MOG!" else "MEGA MOG!", if ultra then Color3.new(1, 1, 1) else Color3.fromRGB(255, 205, 60), 1.3)
-			if ultra then
-				local gradient = Instance.new("UIGradient")
-				gradient.Color = ColorSequence.new({
-					ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 80, 80)), ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 220, 60)),
-					ColorSequenceKeypoint.new(0.5, Color3.fromRGB(80, 230, 120)), ColorSequenceKeypoint.new(0.75, Color3.fromRGB(80, 160, 255)),
-					ColorSequenceKeypoint.new(1, Color3.fromRGB(200, 100, 255)),
-				})
-				gradient.Parent = banner
-				task.delay(1.5, function()
-					gradient:Destroy()
-				end)
-			end
 			flash.BackgroundColor3 = if ultra then Color3.fromRGB(255, 255, 255) else Color3.fromRGB(255, 225, 120)
 			flash.BackgroundTransparency = 0.7
 			TweenService:Create(flash, TweenInfo.new(0.4), { BackgroundTransparency = 1 }):Play()

@@ -1,3 +1,12 @@
+# HUD declutter, AFK, pacing: what you are looking for (read this first)
+Needs playtest (written without Studio). See `docs/HUD_LAYOUT.md` for the slot map.
+1. Top centre: tiles + timer only. Directly below: ONE line (mission bar, or a banner for 3 s replacing it). Meteor warnings, RANK UP, MEGA MOG all share that line, never stacked.
+2. Entering a territory shows a small card for 1.5 s just below the mission bar, only on a real new entry. Unlock and achievement cards wait their turn.
+3. Left: aura box, a small "Quests 0/3" pill (tap to open), the combo counter beside it, aura pop-ups (max 3) underneath. Right: a smaller minimap. The middle of the screen stays clear. No "MOST AURA" banner; the leader wears the tag in the world.
+4. AFK after 30 s idle: tag over the head, no passive ticks, cannot hold a flag; back at your island after 3 minutes.
+5. Pacing (active): Rookie about 1 min, Sigma 10 min, Chadlite 30 min, Chad 1 hr, Gigachad 3 hr, Mog God I about 72 hr. An idle player stops at Rookie X after about an hour. `python3 tools/pacing_sim.py` prints the model; `luau tests/Pacing.test.luau` checks it.
+
+---
 # Visual pass, Brainrot Bog, Cooked Canyon, spawn islands: what you are looking for (read this first)
 Needs playtest (written without Studio).
 1. **Bog:** moss patches over the mud, boardwalks toward the brain from the north-west and south-east with green lanterns, reeds and frogs by the ponds, glowing green, magenta and cyan mushrooms, hanging moss on the dead trees, green glows with fireflies. The brain is no longer shiny plastic.

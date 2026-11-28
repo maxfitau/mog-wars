@@ -9,6 +9,7 @@ local TweenService = game:GetService("TweenService")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Pace = require(Shared:WaitForChild("Pace"))
+local HudSlots = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("HudSlots"))
 local UiTheme = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("UiTheme"))
 
 local UnlockCard = {}
@@ -191,9 +192,12 @@ local function showNext()
 		return
 	end
 	showing = true
-	show(id, function()
-		showing = false
-		showNext()
+	HudSlots.card(function(done)
+		show(id, function()
+			showing = false
+			done()
+			showNext()
+		end)
 	end)
 end
 

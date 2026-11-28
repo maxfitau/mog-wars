@@ -12,6 +12,8 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Territories = require(Shared:WaitForChild("Territories"))
 local FactionRules = require(Shared:WaitForChild("FactionRules"))
 
+local HudSlots = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("HudSlots"))
+
 local TerritoryBanner = {}
 
 local player = Players.LocalPlayer
@@ -56,7 +58,7 @@ function TerritoryBanner.init()
 
 	local card = Instance.new("Frame")
 	card.AnchorPoint = Vector2.new(0.5, 0)
-	card.Size = UDim2.fromOffset(440, 54)
+	card.Size = UDim2.fromOffset(330, 40)
 	card.Position = UDim2.new(0.5, 0, 0, -80)
 	card.BackgroundColor3 = Color3.fromRGB(18, 22, 58)
 	card.BackgroundTransparency = 0.12
@@ -83,7 +85,7 @@ function TerritoryBanner.init()
 
 	local current: string? = nil
 	local seen: { [string]: boolean } = {}
-	local shownAt = 0
+	local lastShown: { [string]: number } = {}
 	local function show(territory: any)
 		local first = not seen[territory.id]
 		seen[territory.id] = true
@@ -92,16 +94,17 @@ function TerritoryBanner.init()
 		stroke.Color = colour
 		label.TextColor3 = colour:Lerp(Color3.new(1, 1, 1), 0.45)
 		label.Text = "⚔ ENTERING " .. string.upper(territory.name)
-		scale.Scale = if first then 1 else 0.7
-		card.Visible = true
-		shownAt = os.clock()
-		local mine = shownAt
-		card.Position = UDim2.new(0.5, 0, 0, -80)
-		TweenService:Create(card, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Position = UDim2.new(0.5, 0, 0, 205) }):Play()
-		task.delay(2, function()
-			if shownAt == mine then
-				TweenService:Create(card, TweenInfo.new(0.3), { Position = UDim2.new(0.5, 0, 0, -80) }):Play()
-			end
+		scale.Scale = if first then 1 else 0.8
+		-- one pop-up card at a time (HudSlots): small, in the upper third just below the mission bar, for 1.5 seconds
+		HudSlots.card(function(done)
+			card.Visible = true
+			card.Position = UDim2.new(0.5, 0, 0, -80)
+			TweenService:Create(card, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Position = UDim2.new(0.5, 0, 0, 172) }):Play()
+			task.delay(1.5, function()
+				TweenService:Create(card, TweenInfo.new(0.25), { Position = UDim2.new(0.5, 0, 0, -80) }):Play()
+				task.wait(0.3)
+				done()
+			end)
 		end)
 	end
 
@@ -120,7 +123,9 @@ function TerritoryBanner.init()
 		local id = if territory then territory.id else nil
 		if id ~= current then
 			current = id
-			if territory then
+			-- only a real new entry: not again for the same place within 20 seconds (walking a border)
+			if territory and (lastShown[territory.id] == nil or os.clock() - lastShown[territory.id] > 20) then
+				lastShown[territory.id] = os.clock()
 				show(territory)
 			end
 		end

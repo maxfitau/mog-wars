@@ -315,9 +315,7 @@ function StealSystem.start()
 			if best ~= leader then
 				setBounty(best)
 				if best then
-					for _, player in Players:GetPlayers() do
-						PopupSystem.send(player, "announce", 1, ("%s has the most aura! BOUNTY!"):format(best.DisplayName))
-					end
+					-- (no HUD banner: the leader's crown, beam and MOST AURA tag over their head in the world are the only signal)
 				end
 			end
 			if leader then

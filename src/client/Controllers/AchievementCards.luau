@@ -8,6 +8,8 @@ local TweenService = game:GetService("TweenService")
 
 local UiTheme = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("UiTheme"))
 
+local HudSlots = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("HudSlots"))
+
 local AchievementCards = {}
 
 local gui: ScreenGui
@@ -23,9 +25,10 @@ local function showNext()
 		return
 	end
 	showing = true
+	HudSlots.card(function(done)
 	local card = Instance.new("Frame")
-	card.AnchorPoint = Vector2.new(1, 0)
-	card.Position = UDim2.new(1.6, 0, 0, 120)
+	card.AnchorPoint = Vector2.new(0.5, 0)
+	card.Position = UDim2.new(0.5, 0, 0, -120)
 	card.Size = UDim2.new(0, 300, 0, 86)
 	card.BackgroundColor3 = UiTheme.panel
 	card.Parent = gui
@@ -52,15 +55,17 @@ local function showNext()
 	label("ACHIEVEMENT!", 6, 18, Color3.fromRGB(255, 205, 60))
 	label(item[1], 26, 30, Color3.new(1, 1, 1))
 	label(if item[3] ~= "" then ("%s  -  Title: %s"):format(item[2], item[3]) else item[2], 58, 20, Color3.fromRGB(190, 235, 255))
-	TweenService:Create(card, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Position = UDim2.new(1, -16, 0, 120) }):Play()
-	task.delay(3.4, function()
-		local out = TweenService:Create(card, TweenInfo.new(0.35), { Position = UDim2.new(1.6, 0, 0, 120) })
+	TweenService:Create(card, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Position = UDim2.new(0.5, 0, 0, 172) }):Play()
+	task.delay(2.6, function()
+		local out = TweenService:Create(card, TweenInfo.new(0.35), { Position = UDim2.new(0.5, 0, 0, -120) })
 		out.Completed:Connect(function()
 			card:Destroy()
 			showing = false
+			done()
 			showNext()
 		end)
 		out:Play()
+	end)
 	end)
 end
 

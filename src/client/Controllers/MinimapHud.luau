@@ -330,16 +330,16 @@ function MinimapHud.init()
 	small.Name = "Corner"
 	small.AnchorPoint = Vector2.new(1, 0)
 	small.Position = UDim2.new(1, -12, 0, 64)
-	small.Size = UDim2.fromOffset(170, 196)
+	small.Size = UDim2.fromOffset(128, 154)
 	small.BackgroundTransparency = 1
 	small.Parent = gui
 	local smallBarHolder = Instance.new("Frame")
-	smallBarHolder.Size = UDim2.fromOffset(170, 22)
+	smallBarHolder.Size = UDim2.fromOffset(128, 22)
 	smallBarHolder.Position = UDim2.fromOffset(0, 12)
 	smallBarHolder.BackgroundTransparency = 1
 	smallBarHolder.Parent = small
-	local updateSmallBar = makeBar(smallBarHolder, 170)
-	local smallView = makeView(small, 170, false)
+	local updateSmallBar = makeBar(smallBarHolder, 128)
+	local smallView = makeView(small, 128, false)
 	smallView.frame.Position = UDim2.fromOffset(0, 26)
 
 	local big = Instance.new("Frame") -- the expanded map

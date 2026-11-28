@@ -10,6 +10,7 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local Workspace = game:GetService("Workspace")
 
+local HudSlots = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("HudSlots"))
 local Pace = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Pace"))
 
 local EventController = {}
@@ -24,32 +25,6 @@ function EventController.init()
 	gui.IgnoreGuiInset = true
 	gui.DisplayOrder = 20
 	gui.Parent = player:WaitForChild("PlayerGui")
-
-	local bannerFrame = Instance.new("Frame")
-	bannerFrame.AnchorPoint = Vector2.new(0.5, 0)
-	bannerFrame.Position = UDim2.new(0.5, 0, 0, 120)
-	bannerFrame.Size = UDim2.fromOffset(420, 44)
-	bannerFrame.BackgroundColor3 = Color3.fromRGB(60, 20, 100)
-	bannerFrame.BackgroundTransparency = 0.1
-	bannerFrame.Visible = false
-	bannerFrame.Parent = gui
-	local corner = Instance.new("UICorner")
-	corner.CornerRadius = UDim.new(0, 12)
-	corner.Parent = bannerFrame
-	local stroke = Instance.new("UIStroke")
-	stroke.Color = Color3.fromRGB(215, 140, 255)
-	stroke.Thickness = 2
-	stroke.Parent = bannerFrame
-	local label = Instance.new("TextLabel")
-	label.Size = UDim2.fromScale(1, 1)
-	label.BackgroundTransparency = 1
-	label.Font = Enum.Font.GothamBlack
-	label.TextScaled = true
-	label.TextColor3 = Color3.new(1, 1, 1)
-	label.Parent = bannerFrame
-	local padding = Instance.new("UIPadding")
-	padding.PaddingTop, padding.PaddingBottom = UDim.new(0, 6), UDim.new(0, 6)
-	padding.Parent = label
 
 	local flash = Instance.new("Frame")
 	flash.Size = UDim2.fromScale(1, 1)
@@ -75,24 +50,20 @@ function EventController.init()
 	end
 
 	RunService.RenderStepped:Connect(function()
-		local name = Workspace:GetAttribute("EventName")
-		if type(name) == "string" and name ~= "" then
-			local endsAt = Workspace:GetAttribute("EventEndsAt")
-			local text = Workspace:GetAttribute("EventText")
-			local remaining = if type(endsAt) == "number" then math.max(0, math.ceil(endsAt - Workspace:GetServerTimeNow())) else 0
-			bannerFrame.Visible = true
-			if Workspace:GetAttribute("EventPhase") == "incoming" then
-				label.Text = ("AURA METEOR INCOMING - %ds"):format(remaining)
-			else
-				label.Text = if type(text) == "string" then string.upper(text) else ""
-			end
-		else
-			bannerFrame.Visible = false
-		end
 		local camera = Workspace.CurrentCamera
 		if camera and os.clock() < shakeUntil then
 			local strength = shakeStrength * (shakeUntil - os.clock())
 			camera.CFrame = camera.CFrame * CFrame.new((math.random() - 0.5) * strength, (math.random() - 0.5) * strength, 0)
+		end
+	end)
+
+	-- event banners use the shared line slot: they REPLACE the mission text for 3 seconds, then the mission returns
+	Workspace:GetAttributeChangedSignal("EventPhase"):Connect(function()
+		local phase = Workspace:GetAttribute("EventPhase")
+		if phase == "incoming" then
+			HudSlots.line("AURA METEOR INCOMING - 15s", Color3.fromRGB(215, 140, 255), 3)
+		elseif phase == "active" then
+			HudSlots.line("METEOR FLAG x5 - HOLD IT 20s!", Color3.fromRGB(240, 190, 255), 3)
 		end
 	end)
 

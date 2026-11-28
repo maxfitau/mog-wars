@@ -221,3 +221,6 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 213 | Event and drop rewards were cut (meteor 150 s, drop 25 s, gold drop 150 s, treasure 60 s of income) | At 600 s of income the meteor alone would have been a quarter of an active player's income |
 | 214 | AFK: 30 s without a key, tap or walking = AFK (no passive aura, cannot hold flags, an AFK tag over the head); 3 minutes = respawned at the team island | The client only sends a rate-limited "I am playing" ping; the server also sees walking |
 | 215 | Debug commands work only in Studio and only for `Pace.debug.allowedUserIds` (or the place owner of a place saved under a user); the Output prints your user id if you are not allowed | Never in live servers, and never for anyone else |
+| 216 | The HUD has two shared slots (`HudSlots`): a LINE slot (the mission bar, replaced for 3 s by any big banner) and a CARD slot (one pop-up card at a time) | The clutter came from banners, event bars, entering cards and unlock cards all stacking in the same space |
+| 217 | The left column (aura box, quest pill, pop-ups) scales down on narrow screens and the top-centre block and mission bar shrink so they never meet | Phones were overlapping the tiles |
+| 218 | The "MOST AURA" bounty only shows above the leader's head | A HUD banner was repeating what the crown already says |

@@ -16,6 +16,8 @@ local ZoneGeometry = require(Shared:WaitForChild("ZoneGeometry"))
 local UiTheme = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("UiTheme"))
 
 local MissionHud = {}
+local HudSlots = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("HudSlots"))
+local overriding = false
 
 local player = Players.LocalPlayer
 local NAVY = Color3.fromRGB(18, 22, 58)
@@ -95,6 +97,13 @@ local function update()
 		end
 	else
 		top, name = "HOLD", "everything!"
+	end
+	local camera = workspace.CurrentCamera
+	if camera then -- never reach into the aura box on the left or the minimap on the right: shrink on narrow screens
+		panel.Size = UDim2.new(0, math.clamp(camera.ViewportSize.X - 640, 200, 360), 0, 46)
+	end
+	if overriding then
+		return -- a banner is using the line slot right now
 	end
 	topLabel.Text = top
 	nameLabel.Text = name
@@ -224,6 +233,21 @@ function MissionHud.init()
 end
 
 function MissionHud.start()
+	-- the line slot: a banner replaces the mission text for a few seconds (HudSlots.line), then the mission returns
+	HudSlots.setLineHandler({
+		show = function(text: string, colour: Color3)
+			overriding = true
+			panel.Visible = true
+			topLabel.Text = ""
+			nameLabel.Text = string.upper(text)
+			nameLabel.TextColor3 = colour
+			chipLabel.Text = ""
+			hideDots()
+		end,
+		hide = function()
+			overriding = false
+		end,
+	})
 	local clock = 0
 	RunService.Heartbeat:Connect(function(dt)
 		clock += dt

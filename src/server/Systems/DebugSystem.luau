@@ -6,6 +6,8 @@
 --   /mog reset         reset your test data to a brand new player
 --   /mog meteor        start the Aura Meteor now    /mog drop     drop a crate    /mog gold     drop a GOLD crate
 --   /mog aura 1e9      add that much aura (level scaling applies)
+--   /mog weapon <id>   give a weapon (a duplicate adds a star)   /mog weapons   one of every weapon   /mog chest   roll a chest weapon
+--   /mog event [min]   start the weekly event now (default 10 minutes)   /mog eventstop   end it   /mog unequip   plain Shove
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -16,6 +18,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Pace = require(Shared:WaitForChild("Pace"))
 local Levels = require(Shared:WaitForChild("Levels"))
 local Features = require(Shared:WaitForChild("Features"))
+local WeaponCatalog = require(Shared:WaitForChild("WeaponCatalog"))
 local DataService = require(script.Parent:WaitForChild("DataService"))
 local PopupSystem = require(script.Parent:WaitForChild("PopupSystem"))
 
@@ -54,6 +57,34 @@ local function handle(player: Player, message: string)
 	elseif command == "mogstar" then
 		DataService.debugSetLevel(player, 6 * Pace.levels.perRank + math.max(1, math.floor(argument or 5)))
 		note(player, "debug: Mog God star")
+	elseif command == "weapon" and words[3] then
+		local isNew, stars = DataService.grantWeapon(player, words[3], "debug")
+		note(player, if stars > 0 then ("debug: %s %d stars%s"):format(words[3], stars, if isNew then " (new)" else "") else "debug: no such weapon id")
+	elseif command == "weapons" then
+		for _, weapon in WeaponCatalog.weapons do
+			DataService.grantWeapon(player, weapon.id, "debug")
+		end
+		note(player, "debug: one of every weapon")
+	elseif command == "chest" then
+		local id = DataService.rollWeapon(player, "chest")
+		note(player, "debug: chest gave " .. tostring(id))
+	elseif command == "unequip" then
+		DataService.equipWeapon(player, "")
+	elseif command == "event" or command == "eventstop" then
+		local ok, WeeklyEventSystem = pcall(function()
+			return require(script.Parent:WaitForChild("WeeklyEventSystem", 2))
+		end)
+		if ok then
+			if command == "event" then
+				(WeeklyEventSystem :: any).forceStart(argument or 10)
+				note(player, "debug: weekly event started")
+			else
+				(WeeklyEventSystem :: any).forceStop()
+				note(player, "debug: weekly event stopped")
+			end
+		else
+			note(player, "debug: the weekly event system is not loaded")
+		end
 	elseif command == "reset" then
 		DataService.debugReset(player)
 		note(player, "debug: your test data was reset")

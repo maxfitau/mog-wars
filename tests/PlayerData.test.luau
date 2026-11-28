@@ -155,6 +155,18 @@ local auraBad = PlayerData.template()
 auraBad.aura = -3
 check("negative aura is invalid", not PlayerData.isValid(auraBad))
 
+local v13: any = PlayerData.template()
+v13.version = 13
+v13.collection = nil
+v13.equippedWeapon = nil
+v13.questState = nil
+v13.leagueClaimedWeek = nil
+v13.pass = nil
+check("migrate upgrades version 13 and adds the weapon collection, quests, league and pass", PlayerData.migrate(v13) and PlayerData.isValid(v13) and next(v13.collection) == nil and v13.equippedWeapon == "" and v13.version == PlayerData.CURRENT_VERSION)
+local badCollection: any = PlayerData.template()
+badCollection.collection = { jawline_hammer = 9 }
+check("more than five stars is invalid", not PlayerData.isValid(badCollection))
+
 if failures > 0 then
 	error(failures .. " test(s) failed")
 end

@@ -1,12 +1,15 @@
 --!strict
 -- The three mini-quests of the war, on a small panel under the aura box: "Shove 5 Moglings 0/5". Finishing one ticks it with a
 -- little bounce and the server gives an aura burst and a fresh quest. Display only: it reads the Quest1..3 attributes.
+-- Under the list are "Daily" and "Weekly" buttons that open the Quest Board (QuestBoard.luau, also the J key); the board and
+-- this list never show together.
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 
 local HudSlots = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("HudSlots"))
 local UiTheme = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("UiTheme"))
+local QuestBoard = require(script.Parent:WaitForChild("QuestBoard"))
 
 local QuestPanel = {}
 
@@ -25,7 +28,7 @@ function QuestPanel.init()
 	local panel = Instance.new("Frame")
 	panel.Position = UDim2.new(0, 16, 0, 206) -- under the quest pill, top left, away from the middle of the screen
 	panel.Visible = false -- collapsed by default: tap the pill
-	panel.Size = UDim2.new(0, 270, 0, 90)
+	panel.Size = UDim2.new(0, 270, 0, 122)
 	panel.BackgroundColor3 = UiTheme.panel
 	panel.BackgroundTransparency = 0.25
 	panel.Parent = gui
@@ -48,7 +51,32 @@ function QuestPanel.init()
 	UiTheme.round(pill, UDim.new(1, 0))
 	pill.Activated:Connect(function()
 		panel.Visible = not panel.Visible
+		if panel.Visible then
+			QuestBoard.close()
+		end
 	end)
+	QuestBoard.onOpen = function()
+		panel.Visible = false
+	end
+	QuestBoard.onWar = function()
+		panel.Visible = true
+	end
+	for slot, info in { { "Daily", "daily" }, { "Weekly", "weekly" } } do
+		local button = Instance.new("TextButton")
+		button.Position = UDim2.new(0, 8 + (slot - 1) * 128, 0, 92)
+		button.Size = UDim2.new(0, 122, 0, 24)
+		button.BackgroundColor3 = Color3.fromRGB(80, 70, 125)
+		button.Font = UiTheme.font
+		button.TextScaled = true
+		button.TextColor3 = Color3.new(1, 1, 1)
+		button.Text = info[1] .. " quests"
+		button.Visible = QuestBoard.ready
+		button.Parent = panel
+		UiTheme.round(button, UDim.new(1, 0))
+		button.Activated:Connect(function()
+			QuestBoard.open(info[2])
+		end)
+	end
 	UiTheme.round(panel, UDim.new(0, 14))
 	local stroke = Instance.new("UIStroke")
 	stroke.Color = Color3.new(1, 1, 1)

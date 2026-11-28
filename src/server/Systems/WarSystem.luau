@@ -131,8 +131,10 @@ local function finishWar()
 			if kind == "aura" then
 				amount = DataService.addAura(player, math.random(Pace.chest.aura.min, Pace.chest.aura.max))
 			end
+			-- a free weapon on top of the reward (never sold); the chest card reveals it
+			local weaponId, _, weaponStars = DataService.rollWeapon(player, "chest")
 			if chestRemote then
-				chestRemote:FireClient(player, kind, name, amount)
+				chestRemote:FireClient(player, kind, name, amount, weaponId or "", weaponStars)
 			end
 		end
 	end)

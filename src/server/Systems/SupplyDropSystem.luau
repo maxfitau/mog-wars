@@ -113,6 +113,9 @@ local function reward(player: Player, gold: boolean)
 		end
 		roll = "aura" -- owns them all: a big aura burst instead
 	end
+	if gold then -- a gold crate also holds a free weapon (the client shows the reveal card)
+		DataService.rollWeapon(player, "gold_drop")
+	end
 	if roll == "main" then
 		local seconds = if gold then Pace.drops.goldMainCharacterSeconds else Pace.drops.mainCharacterSeconds
 		giveMainCharacter(player, seconds)

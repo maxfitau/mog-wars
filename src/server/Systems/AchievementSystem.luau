@@ -23,10 +23,13 @@ local RAISE = { -- event kind -> counter raised to at least the event's value
 }
 
 local function check(player: Player, counter: string, value: number)
-	for _, achievement in Achievements do
+	for index, achievement in Achievements do
 		if achievement.counter == counter and value >= achievement.goal and DataService.unlockAchievement(player, achievement.id) then
 			if achievement.title then
 				DataService.setTitle(player, achievement.title)
+			end
+			if index % 5 == 0 then
+				DataService.rollWeapon(player, "achievement") -- every 5th achievement also gives a free weapon
 			end
 			if remote then
 				remote:FireClient(player, achievement.name, achievement.desc, achievement.title or "")

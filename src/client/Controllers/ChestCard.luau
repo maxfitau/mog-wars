@@ -9,13 +9,31 @@ local TweenService = game:GetService("TweenService")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local NumberFormat = require(Shared:WaitForChild("NumberFormat"))
 local Pace = require(Shared:WaitForChild("Pace"))
+local WeaponCatalog = require(Shared:WaitForChild("WeaponCatalog"))
 local UiTheme = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("UiTheme"))
+local SoundController = require(script.Parent:WaitForChild("SoundController"))
 
 local ChestCard = {}
 
 local gui: ScreenGui
 
-local function scene(kind: string, name: string, amount: number)
+-- The drop odds of the chest as one short readable line per two rarities, from WeaponCatalog.odds.chest.
+local function oddsText(): string
+	local odds = WeaponCatalog.odds.chest
+	local parts: { string } = {}
+	for _, rarity in WeaponCatalog.rarities do
+		local chance = odds[rarity.id] or 0
+		if chance > 0 then
+			table.insert(parts, ("%s %s%%"):format(rarity.label, tostring(chance)))
+		end
+	end
+	local half = math.ceil(#parts / 2)
+	local first = table.concat(parts, "  ", 1, half)
+	local second = table.concat(parts, "  ", half + 1, #parts)
+	return ("Weapon odds\n%s\n%s"):format(first, second)
+end
+
+local function scene(kind: string, name: string, amount: number, weaponId: string, stars: number)
 	local chest = Instance.new("Frame")
 	chest.AnchorPoint = Vector2.new(0.5, 0.5)
 	chest.Position = UDim2.new(0.5, 0, -0.2, 0)
@@ -40,6 +58,19 @@ local function scene(kind: string, name: string, amount: number)
 	padding.PaddingTop = UDim.new(0.3, 0)
 	padding.PaddingBottom = UDim.new(0.3, 0)
 	padding.Parent = lid
+	local oddsLabel = Instance.new("TextLabel") -- small, readable drop odds under the chest
+	oddsLabel.AnchorPoint = Vector2.new(0.5, 0)
+	oddsLabel.Position = UDim2.new(0.5, 0, 0.45, 105)
+	oddsLabel.Size = UDim2.new(0, 330, 0, 54)
+	oddsLabel.BackgroundColor3 = UiTheme.panel
+	oddsLabel.BackgroundTransparency = 0.3
+	oddsLabel.Font = UiTheme.font
+	oddsLabel.TextSize = 14
+	oddsLabel.TextColor3 = Color3.new(1, 1, 1)
+	oddsLabel.Text = oddsText()
+	oddsLabel.Visible = false
+	oddsLabel.Parent = gui
+	UiTheme.round(oddsLabel, UDim.new(0, 10))
 	-- drop in
 	TweenService:Create(chest, TweenInfo.new(0.7, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), { Position = UDim2.new(0.5, 0, 0.45, 0) }):Play()
 	task.wait(0.9)
@@ -52,6 +83,25 @@ local function scene(kind: string, name: string, amount: number)
 	end
 	chest.Rotation = 0
 	-- pop open
+	oddsLabel.Visible = true
+	local weapon = WeaponCatalog.byId[weaponId]
+	if weapon then
+		local rarity = WeaponCatalog.rarityById[weapon.rarity]
+		local colour = if rarity then Color3.fromRGB(rarity.rgb[1], rarity.rgb[2], rarity.rgb[3]) else Color3.new(1, 1, 1)
+		local weaponLabel = Instance.new("TextLabel")
+		weaponLabel.BackgroundTransparency = 1
+		weaponLabel.Position = UDim2.new(0, 0, 0.72, 0)
+		weaponLabel.Size = UDim2.new(1, 0, 0.24, 0)
+		weaponLabel.Font = UiTheme.font
+		weaponLabel.TextScaled = true
+		weaponLabel.TextColor3 = colour
+		weaponLabel.TextStrokeColor3 = UiTheme.outline
+		weaponLabel.TextStrokeTransparency = 0
+		weaponLabel.Text = ("%s! %s"):format(weapon.name, if stars <= 1 then "NEW!" else ("%d stars"):format(stars))
+		weaponLabel.Parent = chest
+		local rank = if rarity then rarity.rank else 1
+		SoundController.play(if rank >= 2 then "chest_rare" else "chest_open")
+	end
 	TweenService:Create(chest, TweenInfo.new(0.25, Enum.EasingStyle.Back), { Size = UDim2.new(0, 330, 0, 190) }):Play()
 	lid.Text = if kind == "aura" then ("+%s AURA!"):format(NumberFormat.format(amount)) elseif kind == "title" then ('NEW TITLE: "%s"'):format(name) else ("FREE: %s"):format(name)
 	lid.TextColor3 = Color3.new(1, 1, 1)
@@ -71,6 +121,7 @@ local function scene(kind: string, name: string, amount: number)
 	end
 	task.wait(Pace.chest.seconds - 1.8)
 	chest:Destroy()
+	oddsLabel:Destroy()
 end
 
 function ChestCard.init()
@@ -83,9 +134,11 @@ end
 
 function ChestCard.start()
 	local remote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("WarChest") :: RemoteEvent
-	remote.OnClientEvent:Connect(function(kind: any, name: any, amount: any)
+	remote.OnClientEvent:Connect(function(kind: any, name: any, amount: any, weaponId: any, stars: any)
 		if type(kind) == "string" and type(name) == "string" and type(amount) == "number" then
-			task.spawn(scene, kind, name, amount)
+			local id = if type(weaponId) == "string" then weaponId else ""
+			local count = if type(stars) == "number" then math.clamp(math.floor(stars), 0, 5) else 0
+			task.spawn(scene, kind, name, amount, id, count)
 		end
 	end)
 end

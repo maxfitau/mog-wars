@@ -20,6 +20,9 @@ local Features = {
 	blockyMoglings = true, -- Moglings get a simple blocky body built from parts (no avatar download)
 	stashes = true, -- the 12 hidden Aura Stashes
 	stealing = true, -- knock-offs drop aura orbs; a bounty on the aura leader
+	events = true, -- one server event per war (Aura Meteor), free rewards only
+	supplyDrops = true, -- balloon crates with free rewards, never sold
+	debugCommands = true, -- "/mog ..." chat commands, ONLY in Studio (the server refuses them anywhere else)
 	rifts = true, -- portals that throw you into the sky to glide down
 
 	-- OFF: built, but hidden to keep the game simple for little kids

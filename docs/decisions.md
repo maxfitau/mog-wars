@@ -176,3 +176,13 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 168 | Ziplines are driven by the server (it takes network ownership of the rider while they ride) and work both ways; touching a platform or pressing its prompt starts a ride | The client-driven version was unreliable |
 | 169 | Cooldown covers wipe away instead of a true circular ring | Roblox UI has no radial progress without images |
 | 170 | Not built yet: airship taxis, tank mode, music and sound effects, slow-motion and hit-stop, phone haptics | Time; sounds need licensed ids; Roblox has no phone vibration API |
+| 171 | Aura is shown with 3 significant digits: 999, 1.23K, 12.3K, 123K, 1.23M ... B, T, then letter pairs aa, ab ... (35.8ab) | One formatter (`NumberFormat`) is used everywhere so big numbers read the same on every screen |
+| 172 | Every rank has 10 levels (Rookie I-X ... Mog God I-X), then endless Mog God stars; level comes from total aura (`Levels.luau`) | Rank-ups (every 10 levels) keep the cinematic and the ability unlock; level-ups get a small "LEVEL UP! xN AURA" banner |
+| 173 | Income growth per level is 1.74, not the 2.5 asked for (`Pace.levels.growth`) | 2.5 per level compounds to about 1e20 a second at Mog God I; 1.74 gives trillions a second there and the letter suffixes in the star levels; set it to 2.5 if you want more |
+| 174 | Every aura reward is scaled inside `DataService.addAura` by the level multiplier, so each reward is "N seconds of current income"; stolen orbs already come from the war tally so they skip scaling | One place to scale means no reward can be forgotten |
+| 175 | Steal and bounty thresholds scale with the victim's level | Otherwise everyone is stealable and everyone leads the bounty after the first level |
+| 176 | Saved aura is clamped to 1e300; leaderboards must use `Levels.sortKey(aura)` (a whole number that sorts like aura) | DataStores and ordered stores hold doubles / integers under 9.2e18 |
+| 177 | Aura and levels never change ability strength, speed or capture speed (only income and looks) | Design rule 2: no pay-to-win and no snowballing power |
+| 178 | The Aura Meteor and Supply Drops are free only, never sold; the meteor flag uses its own small capture loop (most players on it wins the second) instead of CaptureSystem | Keeps events self-contained so more can be added to the `EventSystem` registry |
+| 179 | Debug commands (`/mog ...`) exist only when `RunService:IsStudio()` | A live server never has them |
+| 180 | No minimap exists, so the meteor and drops use world markers (billboards, a beam and a ring) and the event banner | A minimap is a separate slice |

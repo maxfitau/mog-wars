@@ -469,6 +469,20 @@ function DataService.addAura(player: Player, aura: number, alreadyScaled: boolea
 	return shown
 end
 
+-- STUDIO DEBUG ONLY (called by DebugSystem, which refuses to run outside Studio): jump a player to a level.
+function DataService.debugSetLevel(player: Player, level: number)
+	local data = DataService.get(player)
+	if not data then
+		return
+	end
+	level = math.clamp(math.floor(level), 0, Pace.levels.maxLevel)
+	data.aura = Levels.cumulative(level)
+	data.rank = Levels.rankOfLevel(level)
+	player:SetAttribute("Aura", data.aura)
+	player:SetAttribute("Level", level)
+	player:SetAttribute("Rank", data.rank)
+end
+
 -- Something to call when a gain is a crit ("mega" or "ultra"); set by ComboSystem.
 DataService.onCrit = nil :: ((Player, string, number) -> ())?
 

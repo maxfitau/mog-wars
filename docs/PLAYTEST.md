@@ -1,3 +1,15 @@
+# Big numbers, Aura Meteor, Supply Drops: what you are looking for (read this first)
+In Studio press Play; the Output says "Studio debug commands on". Type these in the chat:
+`/mog level 25`, `/mog gigachad`, `/mog mogod`, `/mog mogstar 5`, `/mog aura 1e9`, `/mog meteor`, `/mog drop`, `/mog gold`. They do nothing in a live game.
+1. **Formatter.** At Gigachad and Mog God the aura counter reads like 1.23K / 4.56M / 7.80T / 1.10aa / 35.8ab, always 3 digits, and rolls up smoothly. Crossing a suffix flashes "NEW TIER: B!" under the counter.
+2. **Levels.** Rank shows "ROOKIE III", "MOG GOD X", "MOG GOD ★5". Every level-up shows "LEVEL UP! x1.74 AURA"; each 10th level is the big RANK UP banner. A fresh player levels about every minute at first.
+3. **Income scaling.** `/mog mogod` then stand on a flag: the +X ticks are trillions per second. Stash, quest, crit and chest rewards are big too (they are seconds of income).
+4. **Fairness.** Your Shove, Dash and capture speed feel the same at level 0 and at Mog God ★5.
+5. **Aura Meteor** (`/mog meteor`, or half way through each war): purple sky, a banner "AURA METEOR INCOMING - 15s", a marker with a purple ring on the landing island, a meteor streak, a boom with screen shake and a white flash, a ring of aura orbs, then a "METEOR FLAG x5" for you and the Moglings to fight over. The team holding it 20 seconds in total gets a big aura burst and "METEOR CLAIMED BY RED!". Then it crumbles. There is no minimap in the game yet, so the marker and banner are the guides.
+6. **Supply Drops** (`/mog drop`, `/mog gold`, or every ~45s in a war): a crate on a balloon with coloured smoke (gold smoke for gold). Hold E (hold the button on a phone) for 1.5s; get shoved and it cancels. Confetti, then aura / Main Character Mode / Protein Shake / a free trail or title.
+**Needs playtest:** everything here (this was written without Studio). No sound ids are set in `Pace.sounds`, so alarm, boom and pop are silent until you add ids. Tune: `Pace.levels`, `Pace.meteor`, `Pace.drops`.
+
+---
 # Abilities, stealing, dopamine, rifts, ziplines: what you are looking for (read this first)
 Studio must have **Mog War 3** open. Cheat ranks with the server console (set the player's Aura attribute) to reach each ability quickly.
 1. **Top HUD.** Four chunky team tiles (colour gradient, white border, shadow, round letter badge, "3/7", a row of pips, a crown over the leader, a pulse when that team captures); a round timer in the middle with "WAR 1" small and a ring that drains, pulsing red in the last minute; under it a dark navy pill with a yellow border, a yellow flag circle, "CAPTURE" and the territory name, and a white "115m ➜" chip; it turns red with "DEFEND ...!" when your territory is attacked. Nothing overlaps Roblox's top-left buttons.

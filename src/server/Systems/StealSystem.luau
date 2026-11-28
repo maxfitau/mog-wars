@@ -18,7 +18,7 @@ local Stats = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("Sta
 
 local StealSystem = {}
 
-type Orb = { part: Part, value: number, owner: Player?, born: number }
+type Orb = { part: Part, value: number, owner: Player?, born: number, base: boolean? }
 
 local lastHit: { [Player]: { attacker: Player?, time: number } } = {}
 local lastSteal: { [Player]: number } = {}
@@ -40,6 +40,32 @@ local function rootOf(player: Player): BasePart?
 end
 
 -- Remember who last shoved/froze/hit a player (so a fall within a few seconds counts as a knock-off).
+-- Scatter `count` free orbs around a point (used by events). `each` is in level-0 aura; DataService scales it for whoever
+-- picks it up, so it is worth the same number of seconds of income at every level.
+function StealSystem.dropFreeOrbs(position: Vector3, count: number, each: number, lifetime: number?)
+	for index = 1, count do
+		local angle = index / count * math.pi * 2 + math.random() * 0.4
+		local radius = 8 + math.random() * 26
+		local orb = Instance.new("Part")
+		orb.Name = "AuraOrb"
+		orb.Shape = Enum.PartType.Ball
+		orb.Size = Vector3.new(2.6, 2.6, 2.6)
+		orb.Material = Enum.Material.Neon
+		orb.Color = if index % 2 == 0 then Color3.fromRGB(190, 90, 255) else Color3.fromRGB(255, 205, 70)
+		orb.Anchored = true
+		orb.CanCollide = false
+		orb.CanQuery = false
+		orb.CanTouch = false
+		orb.Position = position + Vector3.new(math.cos(angle) * radius, 4 + (index % 3), math.sin(angle) * radius)
+		orb.Parent = Workspace
+		local light = Instance.new("PointLight")
+		light.Color = orb.Color
+		light.Range = 10
+		light.Parent = orb
+		table.insert(orbs, { part = orb, value = each, owner = nil, born = now() - Pace.steal.orbSeconds + (lifetime or Pace.meteor.orbSeconds), base = true })
+	end
+end
+
 function StealSystem.noteHit(victim: Player, attacker: Player?)
 	lastHit[victim] = { attacker = attacker, time = now() }
 end
@@ -206,6 +232,7 @@ function StealSystem.start()
 			task.wait(0.12)
 			local t = now()
 			local paid: { [Player]: number } = {}
+			local paidBase: { [Player]: number } = {}
 			for index = #orbs, 1, -1 do
 				local orb = orbs[index]
 				if t - orb.born > Pace.steal.orbSeconds or not orb.part.Parent then
@@ -226,7 +253,11 @@ function StealSystem.start()
 					end
 					if bestPlayer and bestRoot then
 						if bestDistance < Pace.steal.pickupRange then
-							paid[bestPlayer] = (paid[bestPlayer] or 0) + orb.value
+							if orb.base then
+								paidBase[bestPlayer] = (paidBase[bestPlayer] or 0) + orb.value
+							else
+								paid[bestPlayer] = (paid[bestPlayer] or 0) + orb.value
+							end
 							Events.fire(bestPlayer, "orb", 1)
 							orb.part:Destroy()
 							table.remove(orbs, index)
@@ -237,6 +268,13 @@ function StealSystem.start()
 					else
 						orb.part.Position += Vector3.new(0, math.sin(t * 3 + index) * 0.04, 0)
 					end
+				end
+			end
+			for player, value in paidBase do -- event orbs: worth "seconds of income" for whoever collects them (DataService scales)
+				local shown = DataService.addAura(player, value)
+				if shown > 0 then
+					Stats.add(player, "aura", shown)
+					PopupSystem.send(player, "aura", shown, "")
 				end
 			end
 			for player, value in paid do

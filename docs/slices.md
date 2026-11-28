@@ -359,3 +359,8 @@ Unlock cards (Shove at NPC, Dash at Rookie, Mog Stare at Sigma), a mission bar w
 Four new rank abilities (Slam, Flip, Shield, Total Mog) with only the two newest shown; aura stealing and the bounty; crits, combos, mini-quests, achievements, the rank-bar teaser, the war chest; the top HUD restyle; server-driven two-way ziplines; rifts with gliding; Gate back and Rizz Ravine finishing.
 **Test:** `tests/Pace.test.luau`, `tests/RankRules.test.luau`, `tests/PlayerData.test.luau`; see `docs/PLAYTEST.md`.
 **Done when:** every ability works and stays server-checked, stealing never changes saved aura, and something rewarding happens every few seconds.
+
+## Slice 33: Big numbers, levels, Aura Meteor, Supply Drops
+Idle-game number formatting, 10 levels per rank with endless stars and a per-level income multiplier, level-up banners and a NEW TIER flash; a once-per-war Aura Meteor event; balloon supply drops (1 in 8 gold); Studio-only `/mog` debug commands.
+**Test:** `tests/NumberFormat.test.luau`, `tests/Levels.test.luau`, `tests/Pace.test.luau`; see `docs/PLAYTEST.md`.
+**Done when:** numbers read correctly up to the aa/ab suffixes, a level-up happens every minute or two early, the meteor lands once a war and a team can claim it, and crates open with a 1.5 s hold.

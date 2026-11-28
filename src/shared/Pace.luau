@@ -107,6 +107,40 @@ Pace.levels = {
 	maxAura = 1e300, -- saved aura is clamped here (a double holds up to about 1.8e308)
 }
 
+-- SERVER EVENTS: one per war, rotating through `rotation` (add more kinds in EventSystem). Free rewards only, never sold.
+Pace.events = {
+	rotation = { "meteor" },
+	startFraction = 0.5, -- the warning starts this far through the war
+}
+Pace.meteor = {
+	warningSeconds = 15,
+	holdSeconds = 20, -- one team must hold the flag this long IN TOTAL (not in a row)
+	activeSeconds = 70, -- the meteor crumbles if nobody has held it that long
+	flagRadius = 15,
+	flagValue = 5, -- worth 5x a normal flag to Moglings
+	rewardSeconds = 600, -- every member of the winning team gets this many seconds of income
+	orbCount = 14,
+	orbSeconds = 20, -- each scattered orb is worth this many seconds of income
+}
+-- SUPPLY DROPS: free crates, never sold. Rewards are in seconds of income so they stay exciting at every level.
+Pace.drops = {
+	everySeconds = 45,
+	goldOneIn = 8,
+	holdSeconds = 1.5,
+	fallSeconds = 14,
+	lifetimeSeconds = 70,
+	auraSeconds = 90, -- the big aura burst, in seconds of income
+	goldAuraSeconds = 600,
+	mainCharacterSeconds = 15,
+	goldMainCharacterSeconds = 30,
+	shakeSeconds = 10,
+	-- weights: aura, main character mode, protein shake, rare cosmetic (a trail or title from the free "box" list)
+	weights = { aura = 40, main = 25, shake = 25, cosmetic = 10 },
+	goldWeights = { aura = 40, main = 20, shake = 10, cosmetic = 30 },
+}
+-- Sound ids (rbxassetid://...). Empty = silent. Add your own licensed or Roblox-made ids here.
+Pace.sounds = { alarm = "", boom = "", pop = "", gold = "" }
+
 Pace.capture = {
 	secondsPerFlag = { gold = 4, diamond = 6, ultra = 8 }, -- one player alone, per flag
 	extraPlayerBonus = 0.25, -- each extra teammate on the flag adds this much speed

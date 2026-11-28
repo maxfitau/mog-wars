@@ -69,6 +69,12 @@ local function random(): number
 	return rng:NextNumber()
 end
 
+local extraZones: (() -> { ZoneView })? = nil
+-- Extra flags that only exist for a while (the meteor flag). Moglings rush them like any other flag.
+function BotService.setExtraZones(source: (() -> { ZoneView })?)
+	extraZones = source
+end
+
 function BotService.setZoneSource(source: () -> { ZoneView })
 	zoneSource = source
 end
@@ -398,7 +404,12 @@ end
 local function think()
 	local now = Workspace:GetServerTimeNow()
 	local warOn = Workspace:GetAttribute("WarPhase") == "War"
-	local views = if zoneSource then zoneSource() else {}
+	local views = if zoneSource then table.clone(zoneSource()) else {}
+	if extraZones then
+		for _, extra in extraZones() do
+			table.insert(views, extra)
+		end
+	end
 	local flat: { BotRules.ZoneView } = {}
 	for _, view in views do
 		table.insert(flat, { x = view.x, z = view.z, owner = view.owner, value = view.value })

@@ -1,3 +1,13 @@
+# Flags, lighting, team mascots: what you are looking for (read this first)
+Needs playtest (written without Studio). Screenshot each spawn island and a few flags from far away.
+1. **Flags** from another island: a tall pole with a big waving cloth in the owner's colour (white while neutral), a tall light beam (it pulses while contested), a pie of coloured spokes on the ground that fills as a team captures, and a flag icon with the capture percent that shows through walls within about 150 studs. When a flag changes owner the cloth whips, the colour changes and confetti bursts.
+2. **Lighting:** a lower sun with longer shadows, violet-blue shade (cool fill), only neon and beams bloom, soft sun rays. Walking into the Bog (green), Canyon (orange), Rizz Ravine (pink sparkle), Lighthouse (cool sea) and Chud Chambers (dim, torchlit) blends the mood over 2 seconds. On a phone emulator the sun rays are off.
+3. **Mascots:** each spawn island has a giant statue beside the spawn pad (red lion with a huge square jaw, blue owl meditating with its beak pressed shut, yellow-scarf wolf in sunglasses, purple glowing phoenix) on a plinth with two team banners, and a small mascot NPC that bobs, waves when you walk within about 30 studs, and hops, spins and throws confetti for 5 seconds when its team captures a territory.
+4. **Team tiles** at the top show 🦁 🦉 🐺 🔥 instead of letters.
+**Check first:** the statue and NPC positions (they might overlap a launch pad or a lift on a spawn island), whether the owl and wolf read well from the spawn pad, and how heavy the extra flag parts feel on a phone.
+**Tune:** `STRIPS`, `SPOKES` and the beam size in `FlagVisuals.luau`; moods in `MoodController.luau`; `Lib/IslandTerrain.luau` for the base lighting; positions in `MascotSystem.luau`.
+
+---
 # Visual pass, Locked-In Lighthouse (fourth island): what you are looking for (read this first)
 Needs playtest (written without Studio). View from the pier, the door path and the gallery.
 1. A sandy shore with rock patches, pebbles, dune grass and a few windswept trees (no bare grey rock round the tower).

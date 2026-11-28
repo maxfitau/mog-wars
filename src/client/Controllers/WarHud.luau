@@ -36,6 +36,9 @@ local circleScale: UIScale
 local rootScale: UIScale
 local totalTerritories = 7
 
+-- Mascot icons for the team tiles (emoji): lion, owl, wolf, phoenix.
+local MASCOTS = { "🦁", "🦉", "🐺", "🔥" }
+
 local function clock(seconds: number): string
 	seconds = math.max(0, math.ceil(seconds))
 	return ("%d:%02d"):format(seconds // 60, seconds % 60)
@@ -80,7 +83,7 @@ local function makeTile(parent: Frame, id: number, x: number): Tile
 	badge.Font = UiTheme.font
 	badge.TextScaled = true
 	badge.TextColor3 = color:Lerp(Color3.new(0, 0, 0), 0.2)
-	badge.Text = string.sub(faction.name, 1, 1)
+	badge.Text = MASCOTS[faction.id] or string.sub(faction.name, 1, 1) -- the team mascot instead of a letter
 	badge.Parent = frame
 	UiTheme.round(badge, UDim.new(1, 0))
 

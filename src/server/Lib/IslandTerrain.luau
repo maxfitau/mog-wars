@@ -34,11 +34,13 @@ function IslandTerrain.lighting()
 	if not decorationOff or terrain.Decoration then
 		warn("[mog-wars] Terrain.Decoration could not be turned off from a script. In Studio select Workspace > Terrain and untick Decoration (once, then save the place).")
 	end
-	Lighting.ClockTime = 16.5
+	Lighting.ClockTime = 17 -- a lower sun: longer, softer shadows
 	Lighting.GeographicLatitude = 25
-	Lighting.Brightness = 3
-	Lighting.Ambient = Color3.fromRGB(150, 132, 104)
-	Lighting.OutdoorAmbient = Color3.fromRGB(172, 152, 118)
+	Lighting.Brightness = 2.7
+	Lighting.ExposureCompensation = 0.1
+	-- warm sun, COOL sky fill: the shadows lean violet-blue so things have depth
+	Lighting.Ambient = Color3.fromRGB(128, 122, 150)
+	Lighting.OutdoorAmbient = Color3.fromRGB(138, 140, 178)
 	Lighting.ColorShift_Top = Color3.fromRGB(255, 222, 160)
 	Lighting.EnvironmentDiffuseScale = 1
 	Lighting.EnvironmentSpecularScale = 1
@@ -59,9 +61,9 @@ function IslandTerrain.lighting()
 	atmosphere.Haze = 1.4
 	atmosphere.Parent = Lighting
 	local bloom = Instance.new("BloomEffect")
-	bloom.Intensity = 0.4
-	bloom.Size = 36
-	bloom.Threshold = 1.0
+	bloom.Intensity = 0.55
+	bloom.Size = 28
+	bloom.Threshold = 1.5 -- only beams and neon bloom
 	bloom.Parent = Lighting
 	local color = Instance.new("ColorCorrectionEffect")
 	color.TintColor = Color3.fromRGB(255, 243, 216) -- slightly warm
@@ -69,7 +71,7 @@ function IslandTerrain.lighting()
 	color.Contrast = 0.1
 	color.Parent = Lighting
 	local sun = Instance.new("SunRaysEffect")
-	sun.Intensity = 0.15
+	sun.Intensity = 0.14
 	sun.Spread = 0.8
 	sun.Parent = Lighting
 	if not Lighting:FindFirstChildOfClass("Sky") then

@@ -450,6 +450,9 @@ local function tick(dt: number)
 				if CaptureSystem.onTerritoryCaptured then
 					CaptureSystem.onTerritoryCaptured(territory.name, territory.owner)
 				end
+				for _, listener in CaptureSystem.captureListeners do
+					task.spawn(listener, territory.name, territory.owner) -- (the team mascots cheer from here)
+				end
 				warCaptures[territory.owner] = (warCaptures[territory.owner] or 0) + 1
 				payOut(territory, territory.owner, if ownerBefore ~= 0 then ownerBefore else previousOwner)
 			end
@@ -627,6 +630,7 @@ end
 
 -- Something to call when a territory changes hands (PresenceSystem uses it for the announcer banners).
 CaptureSystem.onTerritoryCaptured = nil :: ((string, number) -> ())?
+CaptureSystem.captureListeners = {} :: { (string, number) -> () }
 
 function CaptureSystem.init()
 	BotService.setZoneSource(CaptureSystem.zoneViews)

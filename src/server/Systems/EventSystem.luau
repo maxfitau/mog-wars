@@ -30,6 +30,10 @@ local lastWarRun = -1
 local flagPart: Part? = nil
 local flagOwner = 0
 
+-- Set by WeeklyEventSystem: called when a team claims a meteor, with the winning faction id and the real players of that
+-- team who stood on the flag. (The reward itself stays here; this is only so the weekly event can count who took part.)
+EventSystem.onClaim = nil :: ((number, { Player }) -> ())?
+
 local function fxAll(kind: string, a: any?, b: any?)
 	if remote then
 		remote:FireAllClients(kind, a, b)
@@ -154,7 +158,8 @@ local function countOn(position: Vector3): { [number]: number }
 	return counts
 end
 
-local function runMeteor()
+-- `storm` = a METEOR STORM meteor (the weekly event): it does not need a war to be running.
+local function runMeteor(storm: boolean)
 	local landing = pickLanding()
 	local warnEnds = Workspace:GetServerTimeNow() + Pace.meteor.warningSeconds
 	setState("meteor", "incoming", warnEnds, "AURA METEOR INCOMING")
@@ -251,12 +256,23 @@ local function runMeteor()
 	end)
 
 	local held: { [number]: number } = {}
+	local stood: { [Player]: boolean } = {} -- real players who stood on the flag
 	local startedAt = Workspace:GetServerTimeNow()
 	local winner = 0
 	setState("meteor", "active", startedAt + Pace.meteor.activeSeconds, "METEOR FLAG")
-	while Workspace:GetServerTimeNow() - startedAt < Pace.meteor.activeSeconds and winner == 0 and Workspace:GetAttribute("WarPhase") == "War" do
+	while Workspace:GetServerTimeNow() - startedAt < Pace.meteor.activeSeconds and winner == 0 and (storm or Workspace:GetAttribute("WarPhase") == "War") do
 		task.wait(0.5)
 		local counts = countOn(landing)
+		for _, player in Players:GetPlayers() do
+			local character = player.Character
+			local root = character and character:FindFirstChild("HumanoidRootPart")
+			if root and root:IsA("BasePart") then
+				local offset = root.Position - landing
+				if math.sqrt(offset.X ^ 2 + offset.Z ^ 2) <= Pace.meteor.flagRadius and math.abs(offset.Y) < 25 then
+					stood[player] = true
+				end
+			end
+		end
 		local best, bestCount, tie = 0, 0, false
 		for faction, count in counts do
 			if count > bestCount then
@@ -283,12 +299,23 @@ local function runMeteor()
 		local info = FactionRules.factions[winner]
 		banner(("METEOR CLAIMED BY %s!"):format(string.upper(info.name)))
 		fxAll("claim", landing, winner)
+		local claimers: { Player } = {}
 		for _, player in Players:GetPlayers() do
 			if player:GetAttribute("Faction") == winner then
+				if stood[player] then
+					table.insert(claimers, player)
+				end
 				local shown = DataService.addAura(player, Pace.meteor.rewardSeconds * Pace.levels.nominalIncome)
 				if shown > 0 then
 					PopupSystem.send(player, "aura", shown, "")
 				end
+			end
+		end
+		local onClaim = EventSystem.onClaim
+		if onClaim then
+			local ok, err = pcall(onClaim, winner, claimers)
+			if not ok then
+				warn("[mog-wars] meteor claim hook failed: " .. tostring(err))
 			end
 		end
 	else
@@ -304,19 +331,25 @@ local function runMeteor()
 end
 
 -- All events. Add new ones here; each runs on its own thread when its turn comes.
-local events: { [string]: () -> () } = {
+local events: { [string]: (boolean) -> () } = {
 	meteor = runMeteor,
 }
 
--- Start an event now (used by the rotation and by the Studio debug command). Returns false if one is already running.
-function EventSystem.trigger(id: string): boolean
+-- Is an event running right now?
+function EventSystem.isRunning(): boolean
+	return running
+end
+
+-- Start an event now (used by the rotation, the weekly METEOR STORM and the Studio debug command). Returns false if one is
+-- already running. `storm` = a storm meteor: it runs even when no war is on.
+function EventSystem.trigger(id: string, storm: boolean?): boolean
 	local run = events[id]
 	if not run or running then
 		return false
 	end
 	running = true
 	task.spawn(function()
-		local ok, err = pcall(run)
+		local ok, err = pcall(run, storm == true)
 		if not ok then
 			warn("[mog-wars] event " .. id .. " failed: " .. tostring(err))
 			clearState()
@@ -347,7 +380,8 @@ function EventSystem.start()
 	task.spawn(function()
 		while true do
 			task.wait(1)
-			if Workspace:GetAttribute("WarPhase") == "War" and not running then
+			-- (during the weekly METEOR STORM the storm sends the meteors, so the per-war one waits)
+			if Workspace:GetAttribute("WarPhase") == "War" and not running and Workspace:GetAttribute("WeeklyEventLive") ~= true then
 				local warNumber = Workspace:GetAttribute("WarNumber")
 				local endsAt = Workspace:GetAttribute("WarPhaseEndsAt")
 				if type(warNumber) == "number" and type(endsAt) == "number" and warNumber ~= lastWarRun then

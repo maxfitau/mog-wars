@@ -3,6 +3,8 @@
 -- Requests carry NO data: "ClaimDailyRequest" and "CollectBarracksRequest". Each is rate limited, then
 -- DataService does the check and the change as one step, or nothing. Double claims are impossible: the
 -- claim day is saved with the box in the same step. Results go back as "RewardsResult".
+-- DAY 7 of the streak also gives a GUARANTEED RARE weapon (DataService.rollWeapon with the "streak" source, whose odds are
+-- 100% Rare). It is free only, never sold. It is rolled only when claimDaily said ok, so it can never be given twice for a day.
 -- A timer refreshes the DailyReady, DailyDay and BarracksPending attributes the screen displays.
 
 local Players = game:GetService("Players")
@@ -10,6 +12,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
 local DataService = require(script.Parent:WaitForChild("DataService"))
+local Config = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("EconomyConfig"))
 
 local MIN_INTERVAL = 0.5 -- seconds between requests from one player
 local REFRESH_SECONDS = 10
@@ -48,7 +51,12 @@ function RewardsSystem.init()
 			return
 		end
 		local ok, reason, tier, day = DataService.claimDaily(player)
-		result:FireClient(player, ok, reason, "daily", tier, day)
+		local prize = ""
+		if ok and day == #Config.dailyStreak.auraRewards then
+			local weaponId = DataService.rollWeapon(player, "streak") -- a guaranteed Rare
+			prize = weaponId or ""
+		end
+		result:FireClient(player, ok, reason, "daily", tier, day, prize)
 	end)
 	collect.OnServerEvent:Connect(function(player: Player)
 		if throttled(player) then

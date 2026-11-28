@@ -231,6 +231,26 @@ local function flyTo(color: Color3, count: number, targetY: number)
 end
 
 -- A small screen punch: a quick white flash and a short camera jolt.
+-- A quick field-of-view kick (the "hit-stop" feel on a MEGA/ULTRA crit, a stretch on a rank up). It returns to what it was.
+local kicking = false
+local function fovKick(delta: number, seconds: number)
+	local camera = Workspace.CurrentCamera
+	if not camera or kicking then
+		return
+	end
+	kicking = true
+	local original = camera.FieldOfView
+	local out = TweenService:Create(camera, TweenInfo.new(seconds * 0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { FieldOfView = original + delta })
+	out:Play()
+	out.Completed:Connect(function()
+		local back = TweenService:Create(camera, TweenInfo.new(seconds * 0.65, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), { FieldOfView = original })
+		back:Play()
+		back.Completed:Connect(function()
+			kicking = false
+		end)
+	end)
+end
+
 local function punch()
 	flash.BackgroundTransparency = 0.82
 	TweenService:Create(flash, TweenInfo.new(0.25), { BackgroundTransparency = 1 }):Play()
@@ -319,6 +339,7 @@ function PopupController.init()
 			TweenService:Create(flash, TweenInfo.new(0.4), { BackgroundTransparency = 1 }):Play()
 			show(("+%s"):format(number), amount * 50, if ultra then Color3.fromRGB(255, 255, 255) else Color3.fromRGB(255, 205, 60))
 			flyTo(Color3.fromRGB(255, 215, 80), 4, 92)
+			fovKick(if ultra then -12 else -7, 0.35) -- zoom in: a hit-stop feel
 		elseif kind == "comboend" then
 			softNote(("Combo ended +%s"):format(number), Color3.fromRGB(255, 190, 60))
 		elseif kind == "stolen" then
@@ -338,6 +359,11 @@ function PopupController.init()
 			punch()
 		elseif kind == "rankup" then
 			showBanner(("RANK UP! %s"):format(if type(detail) == "string" then string.upper(detail) else ""), Color3.fromRGB(255, 215, 60), 2.4)
+			-- the rank-up moment: a golden flash and a wide camera stretch
+			flash.BackgroundColor3 = Color3.fromRGB(255, 225, 120)
+			flash.BackgroundTransparency = 0.5
+			TweenService:Create(flash, TweenInfo.new(0.9), { BackgroundTransparency = 1 }):Play()
+			fovKick(16, 1.2)
 			punch()
 		elseif kind == "rush" then
 			show("AURA RUSH!", 1000, Color3.fromRGB(120, 255, 170))

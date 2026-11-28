@@ -65,6 +65,48 @@ local function brain(k: any)
 	light.Parent = core
 end
 
+-- The brain is the hero: groove balls between the lobes, red veins running over it, glowing neurons with lights, slime puddles and
+-- drips round its foot. Everything is a few small parts on the outside; the inside is unchanged.
+local function brainDetail(k: any, folder: Folder, cx: number, cz: number, height: number)
+	local rng = Random.new(99)
+	local shell = BRAIN_RADIUS + 6
+	local function onShell(latDegrees: number, angle: number, radius: number): Vector3
+		local lat = math.rad(latDegrees)
+		return Vector3.new(math.cos(angle) * math.cos(lat) * radius, math.sin(lat) * radius, math.sin(angle) * math.cos(lat) * radius)
+	end
+	for _ = 1, 70 do -- the grooves (sulci): small dark squashed balls pressed into the lobes
+		local point = onShell(8 + rng:NextNumber() * 74, rng:NextNumber() * math.pi * 2, shell + 0.5)
+		local groove = k:ball("BrainGroove", point.X, point.Y - 1.4, point.Z, 3.4, 2.8, 3.4, Color3.fromRGB(205, 70, 120), Enum.Material.Fabric, { collide = false })
+		groove.CFrame = CFrame.lookAt(groove.Position, groove.Position + point)
+	end
+	for index = 1, 8 do -- veins: thin red tubes running up the meridians
+		local angle = index / 8 * math.pi * 2 + 0.2
+		local from, to = onShell(12, angle, shell + 1.2), onShell(78, angle + 0.25, shell + 1.2)
+		local vein = k:box("BrainVein", (from.X + to.X) / 2, (from.Y + to.Y) / 2 - 0.4, (from.Z + to.Z) / 2, 0.8, 0.8, (to - from).Magnitude, Color3.fromRGB(200, 40, 70), Enum.Material.Fabric, { collide = false })
+		local middle = vein.Position
+		vein.CFrame = CFrame.lookAt(middle, middle + (to - from))
+	end
+	for index = 1, 16 do -- neurons: glowing balls, a few with real lights
+		local point = onShell(15 + rng:NextNumber() * 65, rng:NextNumber() * math.pi * 2, shell + 2)
+		local colour = ({ Color3.fromRGB(110, 240, 255), Color3.fromRGB(255, 240, 120), Color3.fromRGB(190, 255, 130) })[index % 3 + 1]
+		local neuron = k:ball("Neuron", point.X, point.Y - 1, point.Z, 2, 2, 2, colour, Enum.Material.Neon, { collide = false })
+		if index % 4 == 0 then
+			local light = Instance.new("PointLight")
+			light.Color = colour
+			light.Range = 20
+			light.Parent = neuron
+		end
+	end
+	for index = 1, 10 do -- slime puddles and drips round the foot
+		local angle = index / 10 * math.pi * 2
+		local reach = 38 + (index % 3) * 4
+		k:cyl("SlimePuddle", math.cos(angle) * reach, 0.05, math.sin(angle) * reach, 5 + (index % 3) * 2, 0.2, Color3.fromRGB(120, 230, 90), Enum.Material.Glass, { collide = false, transparency = 0.25 })
+		if index % 2 == 0 then
+			k:cyl("SlimeDrip", math.cos(angle) * (BRAIN_RADIUS + 3), 8, math.sin(angle) * (BRAIN_RADIUS + 3), 1.2, 7, Color3.fromRGB(120, 230, 90), Enum.Material.Glass, { collide = false, transparency = 0.3 })
+		end
+	end
+end
+
 local function deadTree(k: any, x: number, z: number, lean: number)
 	k:box("DeadTrunk", x, 0, z, 2.5, 16, 2.5, WOOD, Enum.Material.Wood, { cover = true })
 	for index, tilt in { 35, -40, 20 } do
@@ -103,6 +145,7 @@ return function(folder: Folder, territory: any)
 	end
 
 	brain(k)
+	brainDetail(k, folder, cx, cz, territory.height)
 
 	-- dead trees and swamp cover (stumps and mossy boulders)
 	for index, spot in { { -78, -10 }, { 75, 10 }, { -30, 82 }, { 40, 88 }, { -85, 60 }, { 84, -50 }, { 8, -90 }, { -60, -78 } } do

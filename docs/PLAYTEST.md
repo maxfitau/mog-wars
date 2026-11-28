@@ -1,3 +1,10 @@
+# Bog hero brain, hit-stop and rank-up moment: what you are looking for (read this first)
+Needs playtest (written without Studio).
+1. Brainrot Bog's brain: dark grooves between the lobes, red veins, glowing cyan, yellow and green neurons (a few with lights), slime puddles and drips round the foot. The inside is unchanged.
+2. A MEGA or ULTRA crit zooms the camera in for a quarter of a second; a RANK UP flashes gold and stretches the view wide for a moment (then everything returns).
+**Still not built:** music, sound effects (no licensed ids), airship taxis, tank mode, real slow motion (Roblox cannot slow other players), phone haptics.
+
+---
 # HUD declutter, AFK, pacing: what you are looking for (read this first)
 Needs playtest (written without Studio). See `docs/HUD_LAYOUT.md` for the slot map.
 1. Top centre: tiles + timer only. Directly below: ONE line (mission bar, or a banner for 3 s replacing it). Meteor warnings, RANK UP, MEGA MOG all share that line, never stacked.

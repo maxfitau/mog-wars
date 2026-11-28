@@ -224,3 +224,5 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 216 | The HUD has two shared slots (`HudSlots`): a LINE slot (the mission bar, replaced for 3 s by any big banner) and a CARD slot (one pop-up card at a time) | The clutter came from banners, event bars, entering cards and unlock cards all stacking in the same space |
 | 217 | The left column (aura box, quest pill, pop-ups) scales down on narrow screens and the top-centre block and mission bar shrink so they never meet | Phones were overlapping the tiles |
 | 218 | The "MOST AURA" bounty only shows above the leader's head | A HUD banner was repeating what the crown already says |
+| 219 | Hit-stop is a short field-of-view zoom on MEGA/ULTRA crits and the rank-up moment is a gold flash plus a wide stretch | Real slow motion would slow every other player; a camera kick gives the same feel for the one player |
+| 220 | The Bog's brain got grooves, veins, neurons, puddles and drips (the hero detail) | It was the plainest hero landmark left |

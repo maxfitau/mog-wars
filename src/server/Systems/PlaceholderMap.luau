@@ -15,6 +15,7 @@ local FactionRules = require(Shared:WaitForChild("FactionRules"))
 local MapLayout = require(Shared:WaitForChild("MapLayout"))
 local Features = require(Shared:WaitForChild("Features"))
 local Territories = require(Shared:WaitForChild("Territories"))
+local TerritorySigns = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("TerritorySigns"))
 local IslandTerrain = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("IslandTerrain"))
 local Cover = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("Cover"))
 local SkyKit = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("SkyKit"))
@@ -174,6 +175,10 @@ function PlaceholderMap.start()
 				end
 			end
 		end
+	end
+	local signsOk, signsError = pcall(TerritorySigns.build) -- giant name letters and entrance arches
+	if not signsOk then
+		warn("[mog-wars] territory signs failed: " .. tostring(signsError))
 	end
 	SkyKit.decor() -- circling airships and floating mini rocks
 	if Features.launchPads or Features.ziplines then

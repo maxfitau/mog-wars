@@ -11,7 +11,7 @@ local TweenService = game:GetService("TweenService")
 local Workspace = game:GetService("Workspace")
 
 local HudSlots = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("HudSlots"))
-local Pace = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Pace"))
+local SoundController = require(script.Parent:WaitForChild("SoundController"))
 
 local EventController = {}
 
@@ -38,17 +38,6 @@ function EventController.init()
 	tint.Enabled = true
 	tint.Parent = Lighting
 
-	local function playSound(id: string)
-		if type(id) ~= "string" or id == "" then
-			return -- no sound set: stay silent (a nil or empty id would error)
-		end
-		local sound = Instance.new("Sound")
-		sound.SoundId = id
-		sound.Parent = gui
-		sound:Play()
-		game:GetService("Debris"):AddItem(sound, 6)
-	end
-
 	RunService.RenderStepped:Connect(function()
 		local camera = Workspace.CurrentCamera
 		if camera and os.clock() < shakeUntil then
@@ -71,7 +60,7 @@ function EventController.init()
 	remote.OnClientEvent:Connect(function(kind: any, position: any)
 		if kind == "warn" then
 			TweenService:Create(tint, TweenInfo.new(2), { TintColor = Color3.fromRGB(205, 150, 255), Saturation = 0.15 }):Play()
-			playSound(Pace.sounds.alarm)
+			SoundController.play("meteor_alarm")
 		elseif kind == "boom" then
 			local camera = Workspace.CurrentCamera
 			local distance = if camera and typeof(position) == "Vector3" then (camera.CFrame.Position - position).Magnitude else 0
@@ -79,9 +68,9 @@ function EventController.init()
 			shakeUntil = os.clock() + 1.2
 			flash.BackgroundTransparency = 0.15
 			TweenService:Create(flash, TweenInfo.new(0.9), { BackgroundTransparency = 1 }):Play()
-			playSound(Pace.sounds.boom)
+			SoundController.play("meteor_boom")
 		elseif kind == "claim" then
-			playSound(Pace.sounds.gold)
+			SoundController.play("meteor_claim")
 		elseif kind == "clear" then
 			TweenService:Create(tint, TweenInfo.new(2), { TintColor = Color3.new(1, 1, 1), Saturation = 0 }):Play()
 		end

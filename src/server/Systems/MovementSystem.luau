@@ -14,6 +14,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Sounds = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Sounds"))
 local Pace = require(Shared:WaitForChild("Pace"))
 local Features = require(Shared:WaitForChild("Features"))
 local Events = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("Events"))
@@ -174,17 +175,6 @@ local function playerFromHit(hit: BasePart): Player?
 	return if model then Players:GetPlayerFromCharacter(model) else nil
 end
 
-local function playSound(parent: Instance, id: string)
-	if id == "" then
-		return
-	end
-	local sound = Instance.new("Sound")
-	sound.SoundId = id
-	sound.Parent = parent
-	sound:Play()
-	game:GetService("Debris"):AddItem(sound, 3)
-end
-
 local function onCharacter(player: Player, character: Model)
 	local humanoid = character:WaitForChild("Humanoid", 5)
 	if humanoid and humanoid:IsA("Humanoid") then
@@ -223,7 +213,7 @@ local function bindPad(pad: Instance)
 		lastPad[player] = t
 		MovementSystem.boost(player, "pad", Pace.speed.pad.boost, Pace.speed.pad.seconds)
 		addTrail(player, Pace.speed.pad.seconds)
-		playSound(pad, Pace.sounds.whoosh)
+		Sounds.playAt(pad, "whoosh")
 	end)
 end
 
@@ -245,7 +235,7 @@ local function bindLaunchPad(pad: Instance)
 		launchDebounce[player] = t
 		MovementSystem.launch(player, vector)
 		Events.fire(player, "launch", 1)
-		playSound(pad, Pace.sounds.whoosh)
+		Sounds.playAt(pad, "whoosh")
 	end)
 end
 

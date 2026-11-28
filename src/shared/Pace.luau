@@ -150,8 +150,6 @@ Pace.drops = {
 	weights = { aura = 40, main = 25, shake = 25, cosmetic = 10 },
 	goldWeights = { aura = 40, main = 20, shake = 10, cosmetic = 30 },
 }
--- Sound ids (rbxassetid://...). Empty = silent. Add your own licensed or Roblox-made ids here.
-Pace.sounds = { alarm = "", boom = "", pop = "", gold = "" }
 
 -- CHUD CHAMBERS TRAP DUNGEON. Traps never hurt: they knock you back, fling you, or slime you back to the dungeon entrance.
 -- Every trap telegraphs (glow and sound) about `warnSeconds` before it fires. Rewards are in seconds of income.
@@ -163,7 +161,6 @@ Pace.traps = {
 	treasureSeconds = 60, -- the hidden treasure room, once per war per player
 	trappedSeconds = 2, -- the slime hold before you are sent back to the entrance
 	knock = 38, -- how hard a swing, a boulder or the cans throw you back
-	sounds = { warn = "", boom = "", chomp = "", zap = "", fart = "", slime = "" }, -- rbxassetid:// ids; empty = silent
 }
 
 -- DEBUG: the "/mog" chat commands. They only work in Roblox Studio (never in a live server) and only for the user ids listed here
@@ -271,6 +268,6 @@ Pace.results = {
 	mvpPerAssist = 1.5, -- ... and this per assist
 }
 
-Pace.sounds = { whoosh = "", pickup = "", dash = "", overtimeMusic = "", unlock = "", announcer = "" } -- empty until you have licensed ids
+-- (sound ids now live in Sounds.luau)
 
 return Pace

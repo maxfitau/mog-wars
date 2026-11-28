@@ -1,5 +1,5 @@
 --!strict
--- "⚔ ENTERING COOKED CANYON": a title card that slides in for 2 seconds whenever you cross into a territory, tinted with the
+-- "ENTERING COOKED CANYON": a title card that slides in for 2 seconds whenever you cross into a territory, tinted with the
 -- owner's team colour (white while nobody owns it). Smaller after the first time you enter that territory. Display only.
 
 local CollectionService = game:GetService("CollectionService")
@@ -93,7 +93,7 @@ function TerritoryBanner.init()
 		local colour = if owner ~= 0 and FactionRules.factions[owner] then Color3.fromRGB(table.unpack(FactionRules.factions[owner].rgb)) else Color3.new(1, 1, 1)
 		stroke.Color = colour
 		label.TextColor3 = colour:Lerp(Color3.new(1, 1, 1), 0.45)
-		label.Text = "⚔ ENTERING " .. string.upper(territory.name)
+		label.Text = "ENTERING " .. string.upper(territory.name)
 		scale.Scale = if first then 1 else 0.8
 		-- one pop-up card at a time (HudSlots): small, in the upper third just below the mission bar, for 1.5 seconds
 		HudSlots.card(function(done)

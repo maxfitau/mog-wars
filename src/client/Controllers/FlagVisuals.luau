@@ -29,7 +29,7 @@ type Flag = {
 	spokes: { Part },
 	icon: BillboardGui,
 	percent: TextLabel,
-	glyph: TextLabel,
+	glyph: Frame,
 	colour: Color3,
 	whipUntil: number,
 	lastOwner: number,
@@ -114,14 +114,27 @@ local function build(zone: BasePart)
 	icon.AlwaysOnTop = true
 	icon.MaxDistance = 150
 	icon.Parent = anchor
-	local glyph = Instance.new("TextLabel")
-	glyph.Size = UDim2.new(1, 0, 0.62, 0)
-	glyph.BackgroundTransparency = 1
-	glyph.Font = Enum.Font.GothamBlack
-	glyph.TextScaled = true
-	glyph.Text = "⚑"
-	glyph.TextStrokeTransparency = 0
-	glyph.Parent = icon
+	local mark = Instance.new("Frame") -- a drawn flag icon: a pole and a cloth (no text glyph that could draw as a blank square)
+	mark.Size = UDim2.new(1, 0, 0.62, 0)
+	mark.BackgroundTransparency = 1
+	mark.Parent = icon
+	local poleIcon = Instance.new("Frame")
+	poleIcon.AnchorPoint = Vector2.new(0.5, 0)
+	poleIcon.Position = UDim2.new(0.38, 0, 0.05, 0)
+	poleIcon.Size = UDim2.new(0, 4, 0.95, 0)
+	poleIcon.BackgroundColor3 = Color3.new(1, 1, 1)
+	poleIcon.BorderSizePixel = 0
+	poleIcon.Parent = mark
+	local glyph = Instance.new("Frame")
+	glyph.Position = UDim2.new(0.38, 2, 0.05, 0)
+	glyph.Size = UDim2.new(0.34, 0, 0.5, 0)
+	glyph.BackgroundColor3 = Color3.new(1, 1, 1)
+	glyph.BorderSizePixel = 0
+	glyph.Parent = mark
+	local glyphStroke = Instance.new("UIStroke")
+	glyphStroke.Color = Color3.fromRGB(20, 20, 30)
+	glyphStroke.Thickness = 2
+	glyphStroke.Parent = glyph
 	local percent = Instance.new("TextLabel")
 	percent.Position = UDim2.fromScale(0, 0.6)
 	percent.Size = UDim2.new(1, 0, 0.4, 0)
@@ -226,7 +239,7 @@ function FlagVisuals.start()
 				end
 			end
 			-- floating icon
-			flag.glyph.TextColor3 = flag.colour
+			flag.glyph.BackgroundColor3 = flag.colour
 			local shownCapturer = capturerId ~= 0 and ownerId ~= capturerId and fraction > 0.01
 			flag.percent.Text = if shownCapturer then ("%d%%"):format(math.floor(fraction * 100 + 0.5)) else ""
 			flag.percent.TextColor3 = if shownCapturer then colourOf(capturerId):Lerp(Color3.new(1, 1, 1), 0.3) else Color3.new(1, 1, 1)

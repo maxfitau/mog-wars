@@ -1,3 +1,11 @@
+# Minimap redo and audio pass: what you are looking for (read this first)
+Needs playtest (written without Studio).
+1. **Minimap:** top right, level with the mission bar's row, up to 260 px with a gold border: island blobs in the owner's colour (white = neutral) each with a ring in its tier colour (gold / blue / purple), team-coloured squares in the corners, white diamond flags, a white arrow for you turning with the camera, team dots, a pulsing dashed yellow ring on your mission territory, a meteor icon and crate icons. No blank squares anywhere. The map-control bar sits above it with a drawn crown. "M - tap to expand" under it, then MUSIC and SFX toggles.
+2. **Big map:** M or tap: centred, names under each island, CHUD CHAMBERS marked beside Gigachad Gate. You can still walk.
+3. **Audio:** every sound id is in `src/shared/Sounds.luau` and ALL are empty, so the game is silent and error free. Fill them in (Roblox's own audio library in the Creator Store), then check the Output after 6 seconds: "[mog-wars] sound audit: N ids set, M failed to load, K have no id yet: ...". Sounds that failed are printed as "sound FAILED to load". Music is calm on the islands and intense in the last minute; the capture tick rises in pitch; aura pings rise along a streak; the ambient loops are 3D per island.
+**Check:** the minimap does not touch the mission bar or the top-centre tiles on a phone-sized screen.
+
+---
 # Airship taxis: what you are looking for (read this first)
 Needs playtest (written without Studio).
 1. Each spawn island has a wooden dock (gold ring, sign "AIRSHIP: Gigachad Gate") beside the island, with a cream airship hovering over it: a wooden gondola, a fat balloon with a band in the team colour, a banner, a lantern and a spinning propeller.

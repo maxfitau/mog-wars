@@ -7,6 +7,9 @@
 
 local HudSlots = {}
 
+-- Set by SoundController: called whenever a banner starts showing (for the announcer sting).
+HudSlots.onLine = nil :: (() -> ())?
+
 type LineItem = { text: string, colour: Color3, seconds: number }
 type LineHandler = { show: (text: string, colour: Color3) -> (), hide: () -> () }
 
@@ -25,6 +28,9 @@ local function runLine()
 			local handler = lineHandler
 			if handler then
 				handler.show(item.text, item.colour)
+				if HudSlots.onLine then
+					HudSlots.onLine()
+				end
 				task.wait(item.seconds)
 				handler.hide()
 				task.wait(0.15)

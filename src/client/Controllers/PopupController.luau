@@ -15,6 +15,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("EconomyConfig"))
 local NumberFormat = require(Shared:WaitForChild("NumberFormat"))
 local Weapons = require(Shared:WaitForChild("Weapons"))
+local SoundController = require(script.Parent:WaitForChild("SoundController"))
 local HudSlots = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("HudSlots"))
 local UiTheme = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("UiTheme"))
 
@@ -37,19 +38,6 @@ local comboToken = 0
 local punchUntil = 0
 local coins = 0
 local flash: Frame
-
-local function playSound(id: string, pitch: number)
-	if id == "" then
-		return -- no licensed sound ids yet (Weapons.combat.sounds): pitch still rises when you add them
-	end
-	local sound = Instance.new("Sound")
-	sound.SoundId = id
-	sound.PlaybackSpeed = pitch
-	sound.Volume = 0.5
-	sound.Parent = gui
-	sound:Play()
-	game:GetService("Debris"):AddItem(sound, 3)
-end
 
 local function show(text: string, amount: number, color: Color3?)
 	while #active >= MAX_ON_SCREEN do
@@ -190,7 +178,6 @@ local function showCombo(multiplier: number)
 	comboLabel.TextTransparency = 0
 	comboLabel.Size = UDim2.new(0, 130, 0, 34)
 	TweenService:Create(comboLabel, TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Size = UDim2.new(0, 100, 0, 28) }):Play()
-	playSound(Weapons.combat.sounds.combo, 1 + 0.12 * (multiplier - 1))
 	task.delay(Weapons.combat.comboWindowSeconds, function()
 		if comboToken == token then
 			comboLabel.Visible = false
@@ -306,6 +293,9 @@ function PopupController.init()
 
 	local remote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("RewardPopup") :: RemoteEvent
 	remote.OnClientEvent:Connect(function(kind: any, amount: any, detail: any)
+		if type(kind) == "string" and type(amount) == "number" then
+			SoundController.onPopup(kind, amount)
+		end
 		if type(amount) ~= "number" or amount ~= amount or amount <= 0 then
 			return
 		end

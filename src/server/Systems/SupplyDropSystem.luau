@@ -13,6 +13,7 @@ local TweenService = game:GetService("TweenService")
 local Workspace = game:GetService("Workspace")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Sounds = require(Shared:WaitForChild("Sounds"))
 local Pace = require(Shared:WaitForChild("Pace"))
 local Territories = require(Shared:WaitForChild("Territories"))
 local CosmeticCatalog = require(Shared:WaitForChild("CosmeticCatalog"))
@@ -73,12 +74,7 @@ local function confetti(position: Vector3)
 	part.Parent = Workspace
 	emitter:Emit(70)
 	Debris:AddItem(part, 3)
-	if Pace.sounds.pop ~= "" then
-		local sound = Instance.new("Sound")
-		sound.SoundId = Pace.sounds.pop
-		sound.Parent = part
-		sound:Play()
-	end
+	Sounds.playAt(part, "drop_open")
 end
 
 local function giveMainCharacter(player: Player, seconds: number)
@@ -226,6 +222,7 @@ function SupplyDropSystem.drop(gold: boolean?, position: Vector3?): boolean
 
 	task.spawn(function()
 		fall.Completed:Wait()
+		Sounds.playAt(crate, if isGold then "drop_gold" else "drop_land")
 		-- the balloon floats away
 		TweenService:Create(balloon, TweenInfo.new(4), { Position = balloon.Position + Vector3.new(0, 80, 0), Transparency = 1 }):Play()
 		rope:Destroy()

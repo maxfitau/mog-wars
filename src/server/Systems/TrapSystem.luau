@@ -13,6 +13,7 @@ local Workspace = game:GetService("Workspace")
 local Debris = game:GetService("Debris")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
+local Sounds = require(Shared:WaitForChild("Sounds"))
 local Pace = require(Shared:WaitForChild("Pace"))
 local DataService = require(script.Parent:WaitForChild("DataService"))
 local PopupSystem = require(script.Parent:WaitForChild("PopupSystem"))
@@ -63,6 +64,7 @@ local function playSound(at: Vector3, id: string)
 	local sound = Instance.new("Sound")
 	sound.SoundId = id
 	sound.RollOffMaxDistance = 120
+	sound.SoundGroup = Sounds.group("SFX")
 	sound.Parent = part
 	sound:Play()
 	Debris:AddItem(part, 4)
@@ -127,7 +129,7 @@ function TrapSystem.trapped(actor: Actor, backTo: Vector3?)
 		glow.Parent = character
 		Debris:AddItem(glow, Pace.traps.trappedSeconds)
 	end
-	playSound(actor.root.Position, Pace.traps.sounds.slime)
+	playSound(actor.root.Position, Sounds.get("trap_slime"))
 	credit(actor)
 	task.delay(Pace.traps.trappedSeconds, function()
 		if actor.root.Parent and actor.humanoid.Health > 0 then
@@ -208,7 +210,7 @@ function TrapSystem.swingingChair(folder: Instance, pivot: Vector3, along: Vecto
 		for _, actor in actors() do
 			local offset = actor.root.Position - seatPosition
 			if offset.Magnitude < 5.5 and ready(actor) then
-				playSound(seatPosition, Pace.traps.sounds.boom)
+				playSound(seatPosition, Sounds.get("trap_boom"))
 				TrapSystem.knock(actor, along * (if velocitySign >= 0 then 1 else -1))
 			end
 		end
@@ -247,7 +249,7 @@ function TrapSystem.boulder(folder: Instance, plateAt: Vector3, from: Vector3, t
 					if math.sqrt(offset.X ^ 2 + offset.Z ^ 2) < 3.5 and math.abs(offset.Y) < 6 then
 						busy = true
 						plate.Color = Color3.fromRGB(255, 50, 50)
-						playSound(plateAt, Pace.traps.sounds.warn)
+						playSound(plateAt, Sounds.get("trap_warn"))
 						shake({ bag }, Pace.traps.warnSeconds)
 						local start = from + Vector3.new(0, 4.5, 0)
 						local finish = to + Vector3.new(0, 4.5, 0)
@@ -263,7 +265,7 @@ function TrapSystem.boulder(folder: Instance, plateAt: Vector3, from: Vector3, t
 							for _, victim in actors() do
 								local away = victim.root.Position - position
 								if away.Magnitude < 7.5 and ready(victim) then
-									playSound(position, Pace.traps.sounds.boom)
+									playSound(position, Sounds.get("trap_boom"))
 									local side = Vector3.new(away.X, 0, away.Z)
 									TrapSystem.knock(victim, if side.Magnitude > 1 then side else travel.Unit:Cross(Vector3.yAxis))
 								end
@@ -309,14 +311,14 @@ function TrapSystem.canAvalanche(folder: Instance, plateAt: Vector3, regionCentr
 					if math.sqrt(offset.X ^ 2 + offset.Z ^ 2) < 3.2 and math.abs(offset.Y) < 6 then
 						busy = true
 						plate.Color = Color3.fromRGB(255, 50, 50)
-						playSound(plateAt, Pace.traps.sounds.warn)
+						playSound(plateAt, Sounds.get("trap_warn"))
 						shake(cans, Pace.traps.warnSeconds)
 						for index, can in cans do
 							local landing = Vector3.new(homes[index].Position.X, regionCentre.Y + 1.5, homes[index].Position.Z)
 							TweenService:Create(can, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In), { Position = landing }):Play()
 						end
 						task.wait(0.5)
-						playSound(regionCentre, Pace.traps.sounds.boom)
+						playSound(regionCentre, Sounds.get("trap_boom"))
 						for _, victim in actors() do
 							local offsetV = victim.root.Position - regionCentre
 							if math.abs(offsetV.X) < regionSize.X / 2 + 1 and math.abs(offsetV.Z) < regionSize.Z / 2 + 1 and offsetV.Y > -4 and offsetV.Y < 14 and ready(victim, 2) then
@@ -375,7 +377,7 @@ function TrapSystem.pizzaFloor(folder: Instance, centre: Vector3, columns: numbe
 				part.Color = Color3.fromRGB(255, 110, 40)
 				part.Material = Enum.Material.Neon
 			end
-			playSound(centre, Pace.traps.sounds.warn)
+			playSound(centre, Sounds.get("trap_warn"))
 			local homes = {}
 			for index, part in cracked do
 				homes[index] = part.CFrame
@@ -437,7 +439,7 @@ function TrapSystem.laserGrid(folder: Instance, start: Vector3, finish: Vector3,
 				local along = offset:Dot(axis)
 				local across = offset:Dot(sideAxis)
 				if math.abs(along) < 1.1 and math.abs(across) < width / 2 + 0.5 and math.abs(offset.Y) < 1.2 and ready(actor, 3) then
-					playSound(position, Pace.traps.sounds.zap)
+					playSound(position, Sounds.get("trap_zap"))
 					TrapSystem.trapped(actor, backTo)
 					break
 				end
@@ -490,13 +492,13 @@ function TrapSystem.mimic(folder: Instance, position: Vector3, spitDir: Vector3)
 						for _, eye in eyes do
 							eye.Transparency = 0
 						end
-						playSound(position, Pace.traps.sounds.warn)
+						playSound(position, Sounds.get("trap_warn"))
 						shake({ body }, Pace.traps.warnSeconds)
 						for _, tooth in teeth do
 							tooth.Transparency = 0
 						end
 						door.CFrame *= CFrame.Angles(0, math.rad(70), 0) -- the door swings open: CHOMP
-						playSound(position, Pace.traps.sounds.chomp)
+						playSound(position, Sounds.get("trap_chomp"))
 						for _, victim in actors() do
 							local d = victim.root.Position - body.Position
 							if math.sqrt(d.X ^ 2 + d.Z ^ 2) < 7 and ready(victim, 3) then

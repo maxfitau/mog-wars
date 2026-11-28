@@ -1,10 +1,13 @@
 --!strict
--- THE MINIMAP. A small rounded map in the top-right corner (below the Roblox top bar; Roblox's own player list is hidden so they
--- do not overlap) showing the islands coloured by owner (white = neutral), flags, you (an arrow), teammates (dots), your
--- current mission flag (a pulsing ring), supply drops and the meteor. Tap it (phone) or press M (PC) to open a big map
--- with the territory names; tap or M again to close. You can keep moving while it is open. A "map control" bar on top shows
--- each team's share of the territories with a crown on the leader. Display only: it reads attributes and parts the server
--- already publishes.
+-- THE MINIMAP, drawn only with shapes (no text glyphs that could render as blank squares). Top-right under the mission bar's row, up to
+-- 260 px, rounded with a gold border:
+--   each territory is an island blob filled with the owner's colour (white = neutral) and a ring in its tier colour
+--   (gold / diamond blue / ultra purple); the four team spawn islands are team-coloured squares in the corners; flags are white
+--   diamonds; you are a white arrow pointing where you face; teammates are small dots; your mission territory has a pulsing dashed
+--   yellow ring; the meteor and supply drops are small drawn icons.
+-- A "map control" bar above it splits each team's share of the territories, with a drawn crown over the leader. Tap the map or press M
+-- to open a big centred map with the names under each island (and Chud Chambers marked under Gigachad Gate); you can keep moving.
+-- Two small toggles under it switch the music and the sound effects. Display only.
 
 local CollectionService = game:GetService("CollectionService")
 local Players = game:GetService("Players")
@@ -18,20 +21,25 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Territories = require(Shared:WaitForChild("Territories"))
 local FactionRules = require(Shared:WaitForChild("FactionRules"))
 local MapLayout = require(Shared:WaitForChild("MapLayout"))
+local SoundController = require(script.Parent:WaitForChild("SoundController"))
 
 local MinimapHud = {}
 
 local player = Players.LocalPlayer
-local HALF = MapLayout.baseplateSize / 2 + 40 -- world studs from the middle to the map's edge
+local HALF = MapLayout.baseplateSize / 2 + 40
 
-type View = { frame: Frame, size: number, big: boolean, dots: { Frame }, update: () -> () }
+local NAVY = Color3.fromRGB(34, 36, 66)
+local BORDER = Color3.fromRGB(255, 205, 60)
+local NEUTRAL = Color3.fromRGB(232, 232, 238)
+local TIER = { gold = Color3.fromRGB(255, 200, 60), diamond = Color3.fromRGB(90, 175, 255), ultra = Color3.fromRGB(185, 95, 255) }
+
+type View = { frame: Frame, update: () -> () }
 
 local function factionColour(id: number): Color3
 	local faction = FactionRules.factions[id]
-	return if faction then Color3.fromRGB(table.unpack(faction.rgb)) else Color3.new(1, 1, 1)
+	return if faction then FactionRules.color(faction) else NEUTRAL
 end
 
--- Territory owners from the flags the server publishes.
 local function owners(): { [string]: number }
 	local result: { [string]: number } = {}
 	for _, zone in CollectionService:GetTagged("Zone") do
@@ -44,63 +52,85 @@ local function owners(): { [string]: number }
 	return result
 end
 
-local function round(parent: Instance, radius: number)
+local function rounded(parent: Instance, radius: number)
 	local corner = Instance.new("UICorner")
 	corner.CornerRadius = UDim.new(0, radius)
 	corner.Parent = parent
+end
+
+local function box(parent: Instance, size: Vector2, colour: Color3, z: number?): Frame
+	local f = Instance.new("Frame")
+	f.AnchorPoint = Vector2.new(0.5, 0.5)
+	f.Size = UDim2.fromOffset(size.X, size.Y)
+	f.BackgroundColor3 = colour
+	f.BorderSizePixel = 0
+	f.ZIndex = z or 1
+	f.Parent = parent
+	return f
+end
+
+local function outline(frame: GuiObject, colour: Color3, thickness: number)
+	local stroke = Instance.new("UIStroke")
+	stroke.Color = colour
+	stroke.Thickness = thickness
+	stroke.Parent = frame
+	return stroke
 end
 
 local function makeView(parent: Instance, size: number, big: boolean): View
 	local frame = Instance.new("Frame")
 	frame.Name = if big then "BigMap" else "MiniMap"
 	frame.Size = UDim2.fromOffset(size, size)
-	frame.BackgroundColor3 = Color3.fromRGB(24, 34, 70)
-	frame.BackgroundTransparency = 0.08
+	frame.BackgroundColor3 = NAVY
+	frame.BorderSizePixel = 0
 	frame.ClipsDescendants = true
 	frame.Parent = parent
-	round(frame, if big then 22 else 16)
-	local stroke = Instance.new("UIStroke")
-	stroke.Color = Color3.fromRGB(255, 205, 60)
-	stroke.Thickness = 2.5
-	stroke.Parent = frame
+	rounded(frame, if big then 26 else 22)
+	outline(frame, BORDER, if big then 4 else 3)
 
 	local function toMap(x: number, z: number): UDim2
 		return UDim2.fromOffset((x + HALF) / (HALF * 2) * size, (z + HALF) / (HALF * 2) * size)
 	end
-	local function disc(name: string, x: number, z: number, radius: number, colour: Color3, transparency: number?): Frame
-		local pixels = math.max(4, radius / (HALF * 2) * size * 2)
-		local part = Instance.new("Frame")
-		part.Name = name
-		part.AnchorPoint = Vector2.new(0.5, 0.5)
-		part.Size = UDim2.fromOffset(pixels, pixels)
-		part.Position = toMap(x, z)
-		part.BackgroundColor3 = colour
-		part.BackgroundTransparency = transparency or 0
-		part.BorderSizePixel = 0
-		part.Parent = frame
-		round(part, 999)
-		return part
+	local function pixels(studs: number): number
+		return studs / (HALF * 2) * size
+	end
+	local function disc(x: number, z: number, radiusStuds: number, colour: Color3, z_: number): Frame
+		local d = math.max(5, pixels(radiusStuds) * 2)
+		local f = box(frame, Vector2.new(d, d), colour, z_)
+		f.Position = toMap(x, z)
+		rounded(f, 999)
+		return f
 	end
 
-	-- islands (they recolour with the owner) and the four team spawn islands
-	local islandFrames: { [string]: Frame } = {}
+	-- the four team spawn islands: team-coloured rounded squares in the corners
 	for index, base in MapLayout.bases do
-		local spawn = disc("Spawn" .. index, base.x, base.z, MapLayout.baseIslandRadius, factionColour(index), 0.25)
-		spawn.ZIndex = 1
+		local side = math.max(8, pixels(MapLayout.baseIslandRadius) * 2 * 0.9)
+		local square = box(frame, Vector2.new(side, side), factionColour(index), 1)
+		square.Position = toMap(base.x, base.z)
+		rounded(square, math.floor(side * 0.3))
+		square.BackgroundTransparency = 0.05
 	end
+
+	-- territories: an island blob (a main disc and two lobes) in the owner's colour, with a ring in the tier colour
+	local blobs: { [string]: { Frame } } = {}
+	local caveMarkers: { [string]: Frame } = {}
 	for _, territory in Territories.list do
 		if territory.radius > 0 then
-			local island = disc(territory.id, territory.x, territory.z, territory.radius, Color3.new(1, 1, 1), 0.15)
-			island.ZIndex = 2
-			islandFrames[territory.id] = island
+			local parts: { Frame } = {}
+			local lobeA = disc(territory.x + territory.radius * 0.55, territory.z - territory.radius * 0.3, territory.radius * 0.55, NEUTRAL, 2)
+			local lobeB = disc(territory.x - territory.radius * 0.5, territory.z + territory.radius * 0.38, territory.radius * 0.5, NEUTRAL, 2)
+			local main = disc(territory.x, territory.z, territory.radius * 0.85, NEUTRAL, 3)
+			outline(main, TIER[territory.tier] or BORDER, if big then 4 else 3)
+			parts = { main, lobeA, lobeB }
+			blobs[territory.id] = parts
 			if big then
 				local label = Instance.new("TextLabel")
-				label.AnchorPoint = Vector2.new(0.5, 0.5)
-				label.Position = toMap(territory.x, territory.z + territory.radius * 0.62)
-				label.Size = UDim2.fromOffset(150, 20)
+				label.AnchorPoint = Vector2.new(0.5, 0)
+				label.Position = toMap(territory.x, territory.z + territory.radius * 0.95)
+				label.Size = UDim2.fromOffset(150, 16)
 				label.BackgroundTransparency = 1
 				label.Font = Enum.Font.GothamBlack
-				label.TextSize = 14
+				label.TextSize = 13
 				label.TextColor3 = Color3.new(1, 1, 1)
 				label.TextStrokeTransparency = 0.2
 				label.Text = string.upper(territory.name)
@@ -108,18 +138,21 @@ local function makeView(parent: Instance, size: number, big: boolean): View
 				label.Parent = frame
 			end
 		else
-			local cave = disc(territory.id, territory.x - 38, territory.z + 38, 22, Color3.new(1, 1, 1), 0.1) -- the cave, drawn beside the Gate
-			cave.ZIndex = 3
-			islandFrames[territory.id] = cave
+			-- the cave under the Gate: a small dark arch beside it
+			local arch = box(frame, Vector2.new(math.max(9, pixels(34)), math.max(9, pixels(26))), NEUTRAL, 4)
+			arch.Position = toMap(territory.x + 20, territory.z + 52)
+			rounded(arch, 999)
+			outline(arch, TIER[territory.tier] or BORDER, 2)
+			caveMarkers[territory.id] = arch
 			if big then
 				local label = Instance.new("TextLabel")
-				label.AnchorPoint = Vector2.new(0.5, 0.5)
-				label.Position = toMap(territory.x - 38, territory.z + 70)
-				label.Size = UDim2.fromOffset(150, 20)
+				label.AnchorPoint = Vector2.new(0.5, 0)
+				label.Position = toMap(territory.x + 20, territory.z + 52 + 20)
+				label.Size = UDim2.fromOffset(150, 14)
 				label.BackgroundTransparency = 1
 				label.Font = Enum.Font.GothamBlack
-				label.TextSize = 12
-				label.TextColor3 = Color3.fromRGB(255, 220, 150)
+				label.TextSize = 11
+				label.TextColor3 = Color3.fromRGB(255, 225, 160)
 				label.TextStrokeTransparency = 0.2
 				label.Text = string.upper(territory.name)
 				label.ZIndex = 9
@@ -127,77 +160,108 @@ local function makeView(parent: Instance, size: number, big: boolean): View
 			end
 		end
 		for _, flag in territory.flags do
-			local dotSize = if big then 9 else 6
-			local dot = Instance.new("Frame")
-			dot.AnchorPoint = Vector2.new(0.5, 0.5)
-			dot.Size = UDim2.fromOffset(dotSize, dotSize)
+			local dot = box(frame, Vector2.new(if big then 9 else 6, if big then 9 else 6), Color3.new(1, 1, 1), 6)
 			dot.Position = toMap(flag.x, flag.z)
-			dot.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-			dot.BorderSizePixel = 0
 			dot.Rotation = 45
-			dot.ZIndex = 6
-			dot.Parent = frame
-			local flagStroke = Instance.new("UIStroke")
-			flagStroke.Color = Color3.fromRGB(20, 20, 30)
-			flagStroke.Thickness = 1.5
-			flagStroke.Parent = dot
+			outline(dot, Color3.fromRGB(25, 25, 40), 1.5)
 		end
 	end
 
-	-- the mission ring, the meteor, you and your team
+	-- the mission ring: twelve yellow dashes round the territory, turning and pulsing
 	local ring = Instance.new("Frame")
 	ring.AnchorPoint = Vector2.new(0.5, 0.5)
-	ring.Size = UDim2.fromOffset(if big then 26 else 18, if big then 26 else 18)
 	ring.BackgroundTransparency = 1
-	ring.Visible = false
+	ring.Size = UDim2.fromOffset(if big then 54 else 38, if big then 54 else 38)
 	ring.ZIndex = 8
+	ring.Visible = false
 	ring.Parent = frame
-	round(ring, 999)
-	local ringStroke = Instance.new("UIStroke")
-	ringStroke.Color = Color3.fromRGB(255, 215, 60)
-	ringStroke.Thickness = 3
-	ringStroke.Parent = ring
-	local function icon(text: string, colour: Color3): TextLabel
-		local label = Instance.new("TextLabel")
-		label.AnchorPoint = Vector2.new(0.5, 0.5)
-		label.Size = UDim2.fromOffset(22, 22)
-		label.BackgroundTransparency = 1
-		label.Font = Enum.Font.GothamBlack
-		label.TextSize = if big then 22 else 16
-		label.Text = text
-		label.TextColor3 = colour
-		label.TextStrokeTransparency = 0
-		label.ZIndex = 10
-		label.Visible = false
-		label.Parent = frame
-		return label
+	for index = 1, 12 do
+		local angle = (index - 0.5) / 12 * math.pi * 2
+		local dash = Instance.new("Frame")
+		dash.AnchorPoint = Vector2.new(0.5, 0.5)
+		dash.Size = UDim2.fromOffset(if big then 7 else 5, 3)
+		dash.Position = UDim2.fromScale(0.5 + 0.5 * math.cos(angle), 0.5 + 0.5 * math.sin(angle))
+		dash.Rotation = math.deg(angle) + 90
+		dash.BackgroundColor3 = Color3.fromRGB(255, 220, 70)
+		dash.BorderSizePixel = 0
+		dash.ZIndex = 8
+		dash.Parent = ring
 	end
-	local meteorIcon = icon("☄", Color3.fromRGB(215, 140, 255))
-	local arrow = icon("▲", Color3.new(1, 1, 1))
+
+	-- the meteor: a purple ball with an orange tail
+	local meteor = Instance.new("Frame")
+	meteor.AnchorPoint = Vector2.new(0.5, 0.5)
+	meteor.Size = UDim2.fromOffset(18, 18)
+	meteor.BackgroundTransparency = 1
+	meteor.ZIndex = 10
+	meteor.Visible = false
+	meteor.Parent = frame
+	local tail = box(meteor, Vector2.new(12, 4), Color3.fromRGB(255, 150, 60), 10)
+	tail.Position = UDim2.fromScale(0.25, 0.7)
+	tail.Rotation = 35
+	local ball = box(meteor, Vector2.new(10, 10), Color3.fromRGB(190, 100, 255), 11)
+	ball.Position = UDim2.fromScale(0.65, 0.35)
+	rounded(ball, 999)
+	outline(ball, Color3.new(1, 1, 1), 1.5)
+
+	-- you: a white arrow (a round body and a pointed tip) that turns with the camera
+	local arrow = Instance.new("Frame")
+	arrow.AnchorPoint = Vector2.new(0.5, 0.5)
+	arrow.Size = UDim2.fromOffset(if big then 22 else 16, if big then 22 else 16)
+	arrow.BackgroundTransparency = 1
 	arrow.ZIndex = 12
-	local crateIcons: { TextLabel } = {}
+	arrow.Visible = false
+	arrow.Parent = frame
+	local tip = box(arrow, Vector2.new(9, 9), Color3.new(1, 1, 1), 12)
+	tip.Position = UDim2.fromScale(0.5, 0.2)
+	tip.Rotation = 45
+	outline(tip, Color3.fromRGB(25, 25, 40), 1.2)
+	local body = box(arrow, Vector2.new(10, 10), Color3.new(1, 1, 1), 13)
+	body.Position = UDim2.fromScale(0.5, 0.62)
+	rounded(body, 999)
+	outline(body, Color3.fromRGB(25, 25, 40), 1.2)
+
+	-- supply drops: a small crate (square with a cross), gold for a gold drop
+	local crates: { { holder: Frame, square: Frame } } = {}
 	for index = 1, 4 do
-		crateIcons[index] = icon("▣", Color3.fromRGB(90, 220, 230))
+		local holder = Instance.new("Frame")
+		holder.AnchorPoint = Vector2.new(0.5, 0.5)
+		holder.Size = UDim2.fromOffset(12, 12)
+		holder.BackgroundTransparency = 1
+		holder.ZIndex = 10
+		holder.Visible = false
+		holder.Parent = frame
+		local square = box(holder, Vector2.new(10, 10), Color3.fromRGB(90, 220, 230), 10)
+		square.Position = UDim2.fromScale(0.5, 0.5)
+		outline(square, Color3.fromRGB(25, 25, 40), 1.2)
+		local crossH = box(square, Vector2.new(10, 2), Color3.fromRGB(25, 25, 40), 11)
+		crossH.Position = UDim2.fromScale(0.5, 0.5)
+		local crossV = box(square, Vector2.new(2, 10), Color3.fromRGB(25, 25, 40), 11)
+		crossV.Position = UDim2.fromScale(0.5, 0.5)
+		crates[index] = { holder = holder, square = square }
 	end
 	local mates: { Frame } = {}
 	for index = 1, 15 do
-		local mate = Instance.new("Frame")
-		mate.AnchorPoint = Vector2.new(0.5, 0.5)
-		mate.Size = UDim2.fromOffset(if big then 8 else 5, if big then 8 else 5)
-		mate.BorderSizePixel = 0
-		mate.ZIndex = 7
+		local mate = box(frame, Vector2.new(if big then 8 else 5, if big then 8 else 5), NEUTRAL, 7)
 		mate.Visible = false
-		mate.Parent = frame
-		round(mate, 999)
+		rounded(mate, 999)
+		outline(mate, Color3.new(1, 1, 1), 1)
 		mates[index] = mate
 	end
 
-	local view: View = { frame = frame, size = size, big = big, dots = {}, update = function() end }
+	local view: View = { frame = frame, update = function() end }
 	view.update = function()
 		local ownerOf = owners()
-		for id, island in islandFrames do
+		for id, parts in blobs do
 			local owner = ownerOf[id] or 0
-			island.BackgroundColor3 = if owner ~= 0 then factionColour(owner) else Color3.new(1, 1, 1)
+			local colour = if owner ~= 0 then factionColour(owner) else NEUTRAL
+			for _, piece in parts do
+				piece.BackgroundColor3 = colour
+			end
+		end
+		for id, marker in caveMarkers do
+			local owner = ownerOf[id] or 0
+			marker.BackgroundColor3 = if owner ~= 0 then factionColour(owner) else NEUTRAL
 		end
 		local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 		if root and root:IsA("BasePart") then
@@ -214,28 +278,30 @@ local function makeView(parent: Instance, size: number, big: boolean): View
 		ring.Visible = typeof(mission) == "Vector3"
 		if typeof(mission) == "Vector3" then
 			ring.Position = toMap(mission.X, mission.Z)
-			ring.Size = UDim2.fromOffset((if big then 26 else 18) + 4 * math.sin(os.clock() * 6), (if big then 26 else 18) + 4 * math.sin(os.clock() * 6))
+			local base = if big then 54 else 38
+			local pulse = base + 6 * math.sin(os.clock() * 6)
+			ring.Size = UDim2.fromOffset(pulse, pulse)
+			ring.Rotation = os.clock() * 30 % 360
 		end
 		local eventPos = Workspace:GetAttribute("EventPos")
-		meteorIcon.Visible = typeof(eventPos) == "Vector3" and Workspace:GetAttribute("EventName") == "meteor"
+		meteor.Visible = typeof(eventPos) == "Vector3" and Workspace:GetAttribute("EventName") == "meteor"
 		if typeof(eventPos) == "Vector3" then
-			meteorIcon.Position = toMap(eventPos.X, eventPos.Z)
+			meteor.Position = toMap(eventPos.X, eventPos.Z)
 		end
 		local used = 0
 		for _, child in Workspace:GetChildren() do
-			if child:IsA("Model") and (child.Name == "SupplyCrate" or child.Name == "GoldSupplyCrate") and used < #crateIcons then
+			if child:IsA("Model") and (child.Name == "SupplyCrate" or child.Name == "GoldSupplyCrate") and used < #crates then
 				local crate = child:FindFirstChild("Crate")
 				if crate and crate:IsA("BasePart") then
 					used += 1
-					local label = crateIcons[used]
-					label.Visible = true
-					label.Position = toMap(crate.Position.X, crate.Position.Z)
-					label.TextColor3 = if child.Name == "GoldSupplyCrate" then Color3.fromRGB(255, 205, 50) else Color3.fromRGB(90, 220, 230)
+					crates[used].holder.Visible = true
+					crates[used].holder.Position = toMap(crate.Position.X, crate.Position.Z)
+					crates[used].square.BackgroundColor3 = if child.Name == "GoldSupplyCrate" then Color3.fromRGB(255, 205, 50) else Color3.fromRGB(90, 220, 230)
 				end
 			end
 		end
-		for index = used + 1, #crateIcons do
-			crateIcons[index].Visible = false
+		for index = used + 1, #crates do
+			crates[index].holder.Visible = false
 		end
 		local myFaction = player:GetAttribute("Faction")
 		local shown = 0
@@ -255,16 +321,17 @@ local function makeView(parent: Instance, size: number, big: boolean): View
 	return view
 end
 
--- The "map control" bar: each team's share of the territories as a coloured split bar, with a crown over the leader.
+-- The map-control bar: each team's share of the territories, with a drawn crown over the leader.
 local function makeBar(parent: Instance, width: number): () -> ()
 	local holder = Instance.new("Frame")
 	holder.Name = "MapControl"
-	holder.Size = UDim2.fromOffset(width, 16)
-	holder.BackgroundColor3 = Color3.fromRGB(235, 235, 240)
+	holder.Size = UDim2.fromOffset(width, 14)
+	holder.Position = UDim2.fromOffset(0, 8)
+	holder.BackgroundColor3 = NEUTRAL
 	holder.BorderSizePixel = 0
 	holder.ClipsDescendants = true
 	holder.Parent = parent
-	round(holder, 8)
+	rounded(holder, 7)
 	local segments: { Frame } = {}
 	for faction = 1, FactionRules.count() do
 		local segment = Instance.new("Frame")
@@ -274,17 +341,21 @@ local function makeBar(parent: Instance, width: number): () -> ()
 		segment.Parent = holder
 		segments[faction] = segment
 	end
-	local crown = Instance.new("TextLabel")
-	crown.Size = UDim2.fromOffset(20, 16)
+	local crown = Instance.new("Frame") -- a drawn crown: a gold band and three points
+	crown.Size = UDim2.fromOffset(16, 10)
 	crown.AnchorPoint = Vector2.new(0.5, 1)
 	crown.BackgroundTransparency = 1
-	crown.Text = "♛"
-	crown.TextSize = 16
-	crown.TextColor3 = Color3.fromRGB(255, 215, 60)
-	crown.Font = Enum.Font.GothamBlack
-	crown.TextStrokeTransparency = 0
 	crown.Visible = false
+	crown.ZIndex = 5
 	crown.Parent = parent
+	local gold = Color3.fromRGB(255, 205, 60)
+	local band = box(crown, Vector2.new(14, 4), gold, 5)
+	band.Position = UDim2.fromScale(0.5, 0.85)
+	for index = -1, 1 do
+		local point = box(crown, Vector2.new(5, 5), gold, 5)
+		point.Position = UDim2.fromScale(0.5 + index * 0.3, 0.25)
+		point.Rotation = 45
+	end
 	return function()
 		local counts: { [number]: number } = {}
 		local total = 0
@@ -299,7 +370,7 @@ local function makeBar(parent: Instance, width: number): () -> ()
 		for faction = 1, FactionRules.count() do
 			local share = if total > 0 then (counts[faction] or 0) / total else 0
 			segments[faction].Position = UDim2.fromOffset(x, 0)
-			segments[faction].Size = UDim2.fromOffset(share * width, 16)
+			segments[faction].Size = UDim2.fromOffset(share * width, 14)
 			x += share * width
 			if (counts[faction] or 0) > bestCount then
 				best, bestCount = faction, counts[faction] or 0
@@ -311,70 +382,85 @@ local function makeBar(parent: Instance, width: number): () -> ()
 			for faction = 1, best - 1 do
 				before += (counts[faction] or 0) / math.max(total, 1) * width
 			end
-			crown.Position = UDim2.new(0, before + (counts[best] or 0) / math.max(total, 1) * width / 2, 0, -2)
+			crown.Position = UDim2.new(0, 8 + math.max(0, before + (counts[best] or 0) / math.max(total, 1) * width / 2 - 8), 0, 8)
 		end
 	end
+end
+
+-- a small on/off toggle (drawn: a pill with a coloured light), for music and sound effects
+local function toggle(parent: Instance, text: string, position: UDim2, get: () -> boolean, set: (boolean) -> ())
+	local button = Instance.new("TextButton")
+	button.Size = UDim2.fromOffset(60, 18)
+	button.Position = position
+	button.BackgroundColor3 = NAVY
+	button.Font = Enum.Font.GothamBlack
+	button.TextSize = 10
+	button.TextColor3 = Color3.new(1, 1, 1)
+	button.Text = "      " .. text
+	button.Parent = parent
+	rounded(button, 9)
+	outline(button, BORDER, 1.5)
+	local light = box(button, Vector2.new(8, 8), Color3.fromRGB(110, 230, 120), 2)
+	light.Position = UDim2.new(0, 11, 0.5, 0)
+	rounded(light, 999)
+	button.Activated:Connect(function()
+		set(not get())
+		light.BackgroundColor3 = if get() then Color3.fromRGB(110, 230, 120) else Color3.fromRGB(230, 90, 90)
+	end)
 end
 
 function MinimapHud.init()
 	pcall(function()
 		StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, false) -- the minimap lives where the player list would be
 	end)
+	local camera = Workspace.CurrentCamera
+	local viewport = if camera then camera.ViewportSize else Vector2.new(1280, 720)
+	local S = math.clamp(math.min(260, viewport.X * 0.31, viewport.Y - 230), 130, 260)
 	local gui = Instance.new("ScreenGui")
 	gui.Name = "MinimapHud"
 	gui.ResetOnSpawn = false
 	gui.DisplayOrder = 8
 	gui.Parent = player:WaitForChild("PlayerGui")
 
-	local small = Instance.new("Frame") -- the corner widget: bar on top, map below
+	local small = Instance.new("Frame")
 	small.Name = "Corner"
 	small.AnchorPoint = Vector2.new(1, 0)
-	small.Position = UDim2.new(1, -12, 0, 64)
-	small.Size = UDim2.fromOffset(128, 154)
+	small.Position = UDim2.new(1, -12, 0, 112) -- below the top-centre block and level with the mission bar's row, never under it
+	small.Size = UDim2.fromOffset(S, S + 70)
 	small.BackgroundTransparency = 1
 	small.Parent = gui
-	local smallBarHolder = Instance.new("Frame")
-	smallBarHolder.Size = UDim2.fromOffset(128, 22)
-	smallBarHolder.Position = UDim2.fromOffset(0, 12)
-	smallBarHolder.BackgroundTransparency = 1
-	smallBarHolder.Parent = small
-	local updateSmallBar = makeBar(smallBarHolder, 128)
-	local smallView = makeView(small, 128, false)
+	local updateSmallBar = makeBar(small, S)
+	local smallView = makeView(small, S, false)
 	smallView.frame.Position = UDim2.fromOffset(0, 26)
+	local hint = Instance.new("TextLabel")
+	hint.Position = UDim2.fromOffset(0, 28 + S)
+	hint.Size = UDim2.fromOffset(S, 14)
+	hint.BackgroundTransparency = 1
+	hint.Font = Enum.Font.GothamBold
+	hint.TextSize = 11
+	hint.TextColor3 = Color3.new(1, 1, 1)
+	hint.TextStrokeTransparency = 0.4
+	hint.Text = "M - tap to expand"
+	hint.Parent = small
+	toggle(small, "MUSIC", UDim2.fromOffset(0, 44 + S), SoundController.isMusicOn, SoundController.setMusic)
+	toggle(small, "SFX", UDim2.fromOffset(66, 44 + S), SoundController.isSfxOn, SoundController.setSfx)
 
-	local big = Instance.new("Frame") -- the expanded map
+	local bigSize = math.clamp(math.min(540, viewport.X - 40, viewport.Y - 120), 260, 540)
+	local big = Instance.new("Frame")
 	big.Name = "Expanded"
 	big.AnchorPoint = Vector2.new(0.5, 0.5)
-	big.Position = UDim2.fromScale(0.5, 0.52)
-	big.Size = UDim2.fromOffset(560, 600)
+	big.Position = UDim2.fromScale(0.5, 0.54)
+	big.Size = UDim2.fromOffset(bigSize, bigSize + 40)
 	big.BackgroundTransparency = 1
 	big.Visible = false
 	big.Parent = gui
-	local bigBarHolder = Instance.new("Frame")
-	bigBarHolder.Size = UDim2.fromOffset(560, 28)
-	bigBarHolder.Position = UDim2.fromOffset(0, 22)
-	bigBarHolder.BackgroundTransparency = 1
-	bigBarHolder.Parent = big
-	local updateBigBar = makeBar(bigBarHolder, 560)
-	local bigTitle = Instance.new("TextLabel")
-	bigTitle.Size = UDim2.fromOffset(560, 20)
-	bigTitle.BackgroundTransparency = 1
-	bigTitle.Text = "MAP CONTROL  -  press M or tap to close"
-	bigTitle.Font = Enum.Font.GothamBlack
-	bigTitle.TextSize = 13
-	bigTitle.TextColor3 = Color3.new(1, 1, 1)
-	bigTitle.TextStrokeTransparency = 0.3
-	bigTitle.Position = UDim2.fromOffset(0, 54)
-	bigTitle.Parent = big
-	local bigView = makeView(big, 540, true)
-	bigView.frame.Position = UDim2.fromOffset(10, 56)
-	bigView.frame.Position = UDim2.fromOffset(10, 78)
-	big.Size = UDim2.fromOffset(560, 640)
+	local updateBigBar = makeBar(big, bigSize)
+	local bigView = makeView(big, bigSize, true)
+	bigView.frame.Position = UDim2.fromOffset(0, 30)
 
-	local function toggle()
+	local function flip()
 		big.Visible = not big.Visible
 	end
-	-- tap the little map (phone) or press M (PC); neither blocks movement
 	for _, view in { smallView, bigView } do
 		local tap = Instance.new("TextButton")
 		tap.Size = UDim2.fromScale(1, 1)
@@ -382,11 +468,11 @@ function MinimapHud.init()
 		tap.Text = ""
 		tap.ZIndex = 20
 		tap.Parent = view.frame
-		tap.Activated:Connect(toggle)
+		tap.Activated:Connect(flip)
 	end
 	UserInputService.InputBegan:Connect(function(input, processed)
 		if not processed and input.KeyCode == Enum.KeyCode.M then
-			toggle()
+			flip()
 		end
 	end)
 

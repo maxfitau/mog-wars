@@ -35,6 +35,13 @@ function PopupSystem.fx(kind: string, position: Vector3, extra: any?)
 end
 
 function PopupSystem.init()
+	for _, name in { "Music", "SFX", "Ambient" } do -- the volume groups the client's toggles control
+		if not game:GetService("SoundService"):FindFirstChild(name) then
+			local group = Instance.new("SoundGroup")
+			group.Name = name
+			group.Parent = game:GetService("SoundService")
+		end
+	end
 	-- the Remotes folder first, so WorldFx and RewardPopup are both inside it before any client waits for them
 	local folder = ReplicatedStorage:FindFirstChild("Remotes")
 	if not folder then

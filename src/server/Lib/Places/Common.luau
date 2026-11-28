@@ -47,6 +47,7 @@ function Common.ambience(folder: Instance, position: Vector3, soundId: string, v
 	sound.Looped = true
 	sound.Volume = volume or 0.4
 	sound.RollOffMaxDistance = 140
+	sound.SoundGroup = game:GetService("SoundService"):FindFirstChild("Ambient") :: SoundGroup?
 	sound.Parent = holder
 	sound:Play()
 end

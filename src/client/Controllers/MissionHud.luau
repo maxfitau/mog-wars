@@ -107,7 +107,7 @@ local function update()
 	end
 	topLabel.Text = top
 	nameLabel.Text = name
-	chipLabel.Text = if target then ("%dm ➜"):format(math.floor(distance)) else "✔"
+	chipLabel.Text = if target then ("%dm >"):format(math.floor(distance)) else "OK"
 	-- navy and yellow normally; red when one of your territories is being attacked
 	panel.BackgroundColor3 = if defending then Color3.fromRGB(190, 35, 50) else NAVY
 	panelStroke.Color = if defending then Color3.new(1, 1, 1) else Color3.fromRGB(255, 205, 60)

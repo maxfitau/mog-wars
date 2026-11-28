@@ -1,15 +1,17 @@
 --!strict
--- Ambient sound ids for each territory. Empty on purpose: paste licensed asset ids here ("rbxassetid://123") and each
--- place plays its own looping sound. The moments' stings are listed too. Nothing else needs to change.
+-- Ambient sound ids for each territory now come from Sounds.luau (the one place for every sound id). This file only forwards them,
+-- so the places keep reading Ambience.<territory id>.
+
+local Sounds = require(script.Parent:WaitForChild("Sounds"))
 
 local Ambience = {
-	npc_village = "", -- murmuring villagers, a quiet breeze
-	brainrot_bog = "", -- bubbling swamp, croaks, a low hum
-	cooked_canyon = "", -- crackling lava, sizzling
-	rizz_ravine = "", -- wind through the ravine, soft chimes
-	locked_in_lighthouse = "", -- waves and gulls
-	gigachad_gate = "", -- a low heroic drone
-	chud_chambers = "", -- dripping water, a low rumble, distant gamer noises
+	npc_village = Sounds.ambientFor("npc_village"),
+	brainrot_bog = Sounds.ambientFor("brainrot_bog"),
+	cooked_canyon = Sounds.ambientFor("cooked_canyon"),
+	rizz_ravine = Sounds.ambientFor("rizz_ravine"),
+	locked_in_lighthouse = Sounds.ambientFor("locked_in_lighthouse"),
+	gigachad_gate = Sounds.ambientFor("gigachad_gate"),
+	chud_chambers = Sounds.ambientFor("chud_chambers"),
 	moments = { rizz_heart = "", geyser = "", gate_flex = "", brain_pulse = "", stare = "", lamp = "" },
 }
 

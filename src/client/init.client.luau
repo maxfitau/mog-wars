@@ -7,7 +7,7 @@ local Features = require(game:GetService("ReplicatedStorage"):WaitForChild("Shar
 -- Only the screens for switched-on features are loaded (see src/shared/Features.luau). The HUD is three things:
 -- aura and rank (top left), the war timer and team scores with the capture bar (top centre), and the shove button
 -- (bottom right). The shop and the daily reward are the only other screens.
-local order = { "AuraHud", "WarHud", "CaptureHud", "ShoveController", "PopupController", "ResultsHud", "TutorialHint", "SignFader" }
+local order = { "SoundController", "AuraHud", "WarHud", "CaptureHud", "ShoveController", "PopupController", "ResultsHud", "TutorialHint", "SignFader" }
 local function add(name: string, on: boolean)
 	if on then
 		table.insert(order, name)

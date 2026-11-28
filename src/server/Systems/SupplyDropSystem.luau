@@ -17,6 +17,7 @@ local Sounds = require(Shared:WaitForChild("Sounds"))
 local Pace = require(Shared:WaitForChild("Pace"))
 local Territories = require(Shared:WaitForChild("Territories"))
 local CosmeticCatalog = require(Shared:WaitForChild("CosmeticCatalog"))
+local Events = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("Events"))
 local DataService = require(script.Parent:WaitForChild("DataService"))
 local PopupSystem = require(script.Parent:WaitForChild("PopupSystem"))
 local MovementSystem = require(script.Parent:WaitForChild("MovementSystem"))
@@ -273,6 +274,7 @@ function SupplyDropSystem.drop(gold: boolean?, position: Vector3?): boolean
 			watch:Disconnect()
 			confetti(crate.Position + Vector3.new(0, 3, 0))
 			reward(player, isGold)
+			Events.fire(player, "supply", 1) -- the daily quests count opened drops
 			model:Destroy()
 			active -= 1
 		end)

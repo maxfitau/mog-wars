@@ -169,7 +169,7 @@ Pace.traps = {
 -- DEBUG: the "/mog" chat commands. They only work in Roblox Studio (never in a live server) and only for the user ids listed here
 -- (the place owner's id is added automatically for a place saved under a user). Put YOUR Roblox user id in this list.
 Pace.debug = {
-	allowedUserIds = {} :: { number },
+	allowedUserIds = { 5387903118 } :: { number },
 }
 
 Pace.capture = {

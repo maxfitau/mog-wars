@@ -106,7 +106,7 @@ local function finishWar()
 	end
 	-- the WAR CHEST: after the results, a free chest drops and pops open with a random free reward. Never sold.
 	task.delay(Pace.results.seconds, function()
-		for _, player in Players:GetPlayers() do
+		local function chestFor(player: Player)
 			local weights = Pace.chest.weights
 			local roll = math.random() * (weights.aura + weights.cosmetic + weights.title)
 			local kind, name, amount = "aura", "Aura burst!", 0
@@ -135,6 +135,15 @@ local function finishWar()
 			local weaponId, _, weaponStars = DataService.rollWeapon(player, "chest")
 			if chestRemote then
 				chestRemote:FireClient(player, kind, name, amount, weaponId or "", weaponStars)
+			end
+		end
+		for _, player in Players:GetPlayers() do
+			-- only players who are really in the war (placed on a team, not AFK); one player's error never stops the others
+			if player:GetAttribute("Faction") ~= nil and player:GetAttribute("AFK") ~= true then
+				local ok, err = pcall(chestFor, player)
+				if not ok then
+					warn("[mog-wars] war chest failed for a player: " .. tostring(err))
+				end
 			end
 		end
 	end)

@@ -508,13 +508,17 @@ function BotService.knockback(bot: Bot, dx: number, dz: number, studs: number)
 end
 
 -- Freeze a bot for a moment.
+local stunnedUntil: { [any]: number } = setmetatable({}, { __mode = "k" }) :: any
+
 function BotService.stun(bot: Bot, seconds: number)
 	if not BotService.isAlive(bot) then
 		return
 	end
 	bot.humanoid.WalkSpeed = 0
-	task.delay(seconds, function()
-		if bot.humanoid.Parent then
+	local untilTime = math.max(stunnedUntil[bot] or 0, os.clock() + seconds) -- a short stun never ends a longer one early
+	stunnedUntil[bot] = untilTime
+	task.delay(untilTime - os.clock(), function()
+		if bot.humanoid.Parent and os.clock() >= (stunnedUntil[bot] or 0) - 0.05 then
 			bot.humanoid.WalkSpeed = Config.bots.walkSpeed
 		end
 	end)

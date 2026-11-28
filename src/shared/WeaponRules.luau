@@ -59,10 +59,10 @@ end
 -- A client charge time in seconds: nil when it is not a finite number from 0 up to 10. Otherwise clamped to the weapon's charge
 -- (plus a little slack for latency).
 function WeaponRules.cleanCharge(charge: number, maxCharge: number): number?
-	if not finite(charge) or charge < 0 or charge > 10 then
+	if not finite(charge) or charge < 0 then
 		return nil
 	end
-	return math.min(charge, maxCharge + 0.25)
+	return math.min(charge, maxCharge + 0.25) -- holding too long still throws the full punch
 end
 
 -- ---------- geometry ----------

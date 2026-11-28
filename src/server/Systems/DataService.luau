@@ -801,7 +801,7 @@ function DataService.init()
 			return -- validate every payload: a string of a sane length
 		end
 		local now = os.clock()
-		if now - (lastEquip[player] or 0) < 0.3 then
+		if now - (lastEquip[player] or 0) < 1.5 then -- swapping weapons is slow, so it cannot be used to double up with Shove
 			return -- rate limit
 		end
 		lastEquip[player] = now
@@ -812,6 +812,7 @@ function DataService.init()
 		task.spawn(load, player)
 	end)
 	Players.PlayerRemoving:Connect(function(player)
+		lastEquip[player] = nil
 		local profile = profiles[player]
 		if profile then
 			profiles[player] = nil

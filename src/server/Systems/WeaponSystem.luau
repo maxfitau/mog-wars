@@ -226,7 +226,7 @@ effects.hammer = function(ctx)
 	local origin = att.root.Position
 	local reach = WeaponRules.hammerReach(p, ctx.stars)
 	local targets = enemiesOf(att)
-	local index = WeaponRules.pickNearest(origin.X, origin.Z, if ctx.aimed then ctx.ax else nil, if ctx.aimed then ctx.az else nil, WeaponRules.HAMMER_ANGLE, reach, pointsOf(targets))
+	local index = WeaponRules.pickNearest(origin.X, origin.Z, ctx.ax, ctx.az, WeaponRules.HAMMER_ANGLE, reach, pointsOf(targets))
 	sendFx("hammer", ctx.weapon, ctx.stars, origin, Vector3.new(ctx.ax, 0, ctx.az) * reach, 0, att.root.Parent)
 	if not index then
 		return false
@@ -551,6 +551,8 @@ local function onRequest(player: Player, aim: any, charge: any)
 	if WeaponSystem.use(att, weapon, stars, ax, az, cleanCharge) then
 		lastUse[player] = t
 		player:SetAttribute("WeaponReadyAt", t + weapon.cooldown)
+	else
+		lastUse[player] = t - weapon.cooldown + 0.7 -- a miss costs a short 0.7 s wait, so nobody can spam effects at everyone
 	end
 end
 

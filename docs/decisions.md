@@ -243,3 +243,5 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 235 | Weapon pill and Season Pass button sit below the minimap at a y computed from the minimap size; the event pill is at the right edge y 64-104 | The agents assumed an older minimap size; the integrator moved them so nothing overlaps |
 | 236 | Meteor claims and opened supply drops fire `Events.fire(player, "meteor" / "supply")` so the daily and weekly quests can count them; the "collect weapons" weekly quest was left out | No event existed for it |
 | 237 | The Mirror Shield is press-to-activate for 2.5 s (not a true hold) | Simpler and reliable on touch |
+| 238 | Review fixes: a weapon miss costs 0.7 s (no effect spam), weapon swaps are rate limited to 1.5 s, a long charge still punches, the hammer is always aimed, bot stuns never cut a longer stun short, the War Chest only pays players who are on a team and not AFK and one error never stops the rest | Findings of the weapons code review |
+| 239 | Known and left alone: the OLD combat system (off) also uses a remote called EquipWeapon and an attribute called Weapon; rename one side before turning combat back on | Combat is switched off |

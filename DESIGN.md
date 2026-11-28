@@ -1,4 +1,4 @@
-# Mog Wars — Design Brief (v0.2, the simple game)
+# Mog Wars — Design Brief (v0.3, the simple game plus progression)
 
 ## One sentence
 **Run to a flag, stand on it to win it for your team, and your aura goes up. Get the most aura to go from NPC to Mog God.**
@@ -89,3 +89,18 @@ One map per server, 6 territories, 4 auto-balanced teams, 6-minute wars that res
 
 ## Money (cosmetic only)
 Aura colours, trails, titles, and later extra cosmetics. Never power.
+
+## Where we are up to (project paused)
+**State of the code:** everything is committed and pushed to `main`. The whole game was written in a cloud session with no Studio and no Luau runtime, so **nothing has been run or playtested**: only `python3 tools/luaucheck.py` (a syntax check) was ever run. The first job when work resumes is a Studio playtest using `docs/MAC_MCP_PROMPT.md` and the checklists at the top of `docs/PLAYTEST.md`, then fixing what breaks. Also run every `tests/*.test.luau` with `luau` (none were run), and `python3 tools/pacing_sim.py`.
+
+**Built (unplayed):** the simple capture-the-flag war on 7 floating-island territories and 4 teams; big numbers and 10 levels per rank; pacing, AFK and a debug command set (Studio only, your user id); bubble lifts; the Chud Chambers trap dungeon; the Aura Meteor and supply drops; name signs, entering cards and the minimap; detail passes on every island; waving flags, mood lighting and team mascots; airship taxis; the sound system; the 9-weapon collection with index, chest and odds; daily and weekly quests and the streak; the weekly Meteor Storm event, season theme and team league; reactions; the Season Pass (built, OFF).
+
+**Known gaps and risks:**
+- All sound ids in `src/shared/Sounds.luau` are empty (the game is silent); fill them from Roblox's own audio library and read the Studio sound audit.
+- No Creator Store kits, generated meshes or MaterialVariants/PBR; no mobile frame-rate test; StreamingEnabled is off.
+- The HUD layout (right column, phone sizes) was checked by arithmetic only.
+- League winner is decided per server at the week rollover, and the league chest and weekly reward have no participation threshold (alt-account risk); the gauntlet charge is client-reported. See `docs/decisions.md` 239 and 242.
+- The old combat system (off) clashes with the new weapons on the `EquipWeapon` remote and `Weapon` attribute names.
+- Creator Hub tasks for the owner: set Maximum Players to 8, create the Meteor Storm Saturday event card, enable Studio access to API services if you want saving tested.
+- Not built: tank mode, music, real hit-stop (a camera zoom stands in), Rebirth (Update 2).
+

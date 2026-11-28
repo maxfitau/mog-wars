@@ -1,3 +1,14 @@
+# Visual pass, Gigachad Gate (first island): what you are looking for (read this first)
+Needs playtest (written without Studio). Compare with your reference images from three angles (front gateway, a tower, the back courtyard).
+1. The face has cheekbones, brow ridges, lips, a chin, sideburns and an amber gleam behind the sunglasses; the jaws have brick lines.
+2. A cobble path runs from the gateway to the mouth tunnel, with a cross path to both towers; lantern posts line it (every other one glows with a real light).
+3. Flower beds (stone-edged, mixed colours), bushes, barrels, crate stacks and pebbles in both courtyards; flowers and tufts round the island rim.
+4. Towers: corner buttresses with gold caps, glowing window slits, brick lines.
+5. Fireflies over the gardens and drifting leaves by the towers.
+6. Nothing blocks the gateway, the mouth tunnel, the tower doors or the lifts; Moglings still reach the tower flags.
+**Not done yet:** MaterialVariants (needs Studio), Creator Store kits, generated hero meshes, real PBR. See ART.md.
+
+---
 # Name signs, ENTERING cards, minimap: what you are looking for (read this first)
 Needs playtest (written without Studio).
 1. **Letters:** each island has its name in big blocky letters on a rock plinth at its far rim, facing the middle of the map, in its own style: Gate stone, Rizz glowing pink, Canyon dark rock with lava seams, Lighthouse red and white stripes, NPC Village coloured wood blocks, Bog slimy green. Chud Chambers has snack-bag letters high on the hall's south wall. Check they read left to right (not mirrored) from the middle of the map.

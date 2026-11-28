@@ -201,3 +201,6 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 193 | The ENTERING card reads the flags' TerritoryOwner for its colour and is smaller after the first visit; the cave is checked before the Gate | Chud Chambers sits inside the Gate's footprint |
 | 194 | The minimap hides Roblox's own player list (top right) so the two never overlap; M or a tap opens the big map | The only way to guarantee no overlap on every screen |
 | 195 | The minimap draws the cave as a small circle beside the Gate and the supply drops, meteor and mission flag as icons | The cave shares the Gate's x and z |
+| 196 | ART.md is the style guide; shared detail helpers live in `Lib/Detail.luau` and every island pass uses them | One look across islands, and fewer hand-placed parts |
+| 197 | StreamingEnabled stays off for now | The server zones, the minimap and the mission bar read parts from the whole map; streaming needs a Studio test first |
+| 198 | Gigachad Gate got the first detail pass in code (face carving, brick courses, buttresses, window slits, cobble paths, flower beds, bushes, barrels, crates, lantern posts, fireflies, leaves, rim flowers); no Creator Store assets yet | The cloud session cannot reach the Creator Store; inserts go through Studio MCP and get logged in ART.md |

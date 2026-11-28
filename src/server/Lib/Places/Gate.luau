@@ -9,6 +9,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Ambience = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Ambience"))
 local Cover = require(script.Parent.Parent:WaitForChild("Cover"))
 local Common = require(script.Parent:WaitForChild("Common"))
+local Detail = require(script.Parent.Parent:WaitForChild("Detail"))
 local Kit = require(script.Parent.Parent:WaitForChild("Kit"))
 local TerrainKit = require(script.Parent.Parent:WaitForChild("TerrainKit"))
 local SkyKit = require(script.Parent.Parent:WaitForChild("SkyKit"))
@@ -66,14 +67,14 @@ return function(folder: Folder, territory: any)
 	k:room("Throne", 0, 26, 0, 90, 34, 60, 3, STONE, Enum.Material.Slate, { W = { w = 8, h = 9 }, E = { w = 8, h = 9 } }, nil, false)
 	k:box("HeadRoof", 0, 60, 0, 94, 6, 64, STONE, Enum.Material.Slate)
 	-- sunglasses, brow, nose and teeth on the south face
-	k:box("Glasses", 0, 42, 31.2, 74, 9, 2, BLACK, Enum.Material.SmoothPlastic, { collide = false })
-	k:box("GlassesBridge", 0, 45, 31.8, 8, 2, 2, BLACK, Enum.Material.SmoothPlastic, { collide = false })
+	k:box("Glasses", 0, 42, 31.2, 74, 9, 2, BLACK, Enum.Material.Glass, { collide = false })
+	k:box("GlassesBridge", 0, 45, 31.8, 8, 2, 2, BLACK, Enum.Material.Glass, { collide = false })
 	k:box("Glint", -22, 46, 32.4, 10, 2, 0.4, Color3.new(1, 1, 1), Enum.Material.Neon, { collide = false })
 	k:box("Glint", 22, 46, 32.4, 10, 2, 0.4, Color3.new(1, 1, 1), Enum.Material.Neon, { collide = false })
 	k:box("Brow", 0, 52, 31.5, 80, 4, 3, DARK, Enum.Material.Slate, { collide = false })
 	k:box("Nose", 0, 28, 31.5, 9, 14, 5, STONE, Enum.Material.Slate, { collide = false })
 	for index = -4, 4 do
-		k:box("Tooth", index * 2.6, 19, 29.5, 2.2, 6, 2, Color3.new(1, 1, 1), Enum.Material.SmoothPlastic, { collide = false })
+		k:box("Tooth", index * 2.6, 19, 29.5, 2.2, 6, 2, Color3.new(1, 1, 1), Enum.Material.Marble, { collide = false })
 	end
 	k:box("GoldTrim", 0, 25.2, 31.2, 90, 1.2, 1, GOLD, Enum.Material.Neon, { collide = false })
 	-- inside the throne room: a gold throne and four pillars to fight around
@@ -145,6 +146,90 @@ return function(folder: Folder, territory: any)
 	end
 	k:box("BackTrim", 0, 61, -31.8, 92, 1.4, 1.4, GOLD, Enum.Material.Neon, { collide = false })
 	k:box("BackCrest", 0, 66, -26, 16, 8, 4, GOLD, Enum.Material.Metal, { collide = false })
+
+	-- ===== DETAIL PASS (see ART.md): face carving, stonework, paths, gardens, props, light and particles =====
+	local rng = Random.new(1337)
+	local world = function(x: number, z: number): Vector3
+		return Vector3.new(cx + x, height, cz + z)
+	end
+	-- the face: cheekbones, lips, brow ridges, a chin, and a glowing amber gleam behind the sunglasses
+	for _, side in { -1, 1 } do
+		k:ball("Cheek", side * 30, 30, 30.6, 16, 9, 6, STONE, Enum.Material.Slate, { collide = false })
+		k:box("BrowRidge", side * 20, 55, 31.2, 28, 2.4, 3.2, Color3.fromRGB(120, 118, 134), Enum.Material.Slate, { collide = false, rotY = 0 })
+		k:ball("EyeGleam", side * 22, 43, 31.9, 16, 5, 1, Color3.fromRGB(255, 190, 90), Enum.Material.Neon, { collide = false, transparency = 0.7 })
+		k:ball("Sideburn", side * 44, 28, 29, 4, 22, 4, DARK, Enum.Material.Slate, { collide = false })
+	end
+	k:ball("Chin", 0, 11, 31, 30, 9, 6, STONE, Enum.Material.Slate, { collide = false })
+	k:box("Lip", 0, 22.2, 30.6, 40, 1.6, 2, Color3.fromRGB(176, 120, 120), Enum.Material.Marble, { collide = false })
+	-- brick courses (thin dark mortar lines) across the jaws, the head roof edge and the tower walls: no flat grey slabs
+	for row = 1, 11 do
+		for _, side in { -1, 1 } do
+			k:box("Mortar", side * 28.5, row * 2.2, 30.1, 33, 0.18, 0.2, Color3.fromRGB(88, 84, 96), Enum.Material.Slate, { collide = false })
+		end
+	end
+	for _, side in { -1, 1 } do
+		for row = 1, 15 do
+			k:box("TowerMortar", side * 75, row * 4, 11.1, 22, 0.2, 0.2, Color3.fromRGB(80, 78, 92), Enum.Material.Slate, { collide = false })
+		end
+		-- corner buttresses and glowing window slits on each tower
+		for _, cornerX in { -11, 11 } do
+			k:cyl("Buttress", side * 75 + cornerX, 0, 11, 3.6, 54, Color3.fromRGB(130, 130, 146), Enum.Material.Cobblestone)
+			k:ball("ButtressCap", side * 75 + cornerX, 52.5, 11, 4.8, 3.2, 4.8, GOLD, Enum.Material.Metal, { collide = false })
+		end
+		for level = 0, 2 do
+			k:box("WindowSlit", side * 75, 20 + level * 12, 11.2, 1.2, 5, 0.6, Color3.fromRGB(255, 190, 90), Enum.Material.Neon, { collide = false })
+			k:box("WindowFrame", side * 75, 19.4 + level * 12, 11.1, 2.6, 6.2, 0.4, DARK, Enum.Material.Slate, { collide = false })
+		end
+		-- a purple pointed roof cap on the tower's flag deck, with a gold finial
+		k:cyl("TowerRoofRing", side * 75, 66, 0, 6, 2.6, GOLD, Enum.Material.Metal, { collide = false })
+		-- gold pillar tops get lanterns
+		k:ball("PillarLantern", side * 22, 22, 52, 3, 3.6, 3, Color3.fromRGB(255, 190, 90), Enum.Material.Neon, { collide = false })
+	end
+
+	-- paths: the gateway to the mouth tunnel, and a cross path to both towers' doors
+	Detail.cobblePath(folder, world(0, 78), world(0, 31), 14, rng)
+	Detail.cobblePath(folder, world(-70, 41), world(70, 41), 7, rng)
+	Detail.cobblePath(folder, world(-86, 18), world(-86, 60), 6, rng)
+	Detail.cobblePath(folder, world(86, 18), world(86, 60), 6, rng)
+	-- lantern posts down the main path and by the towers
+	for index = 0, 5 do
+		for _, side in { -1, 1 } do
+			Detail.lanternPost(folder, world(side * 9, 38 + index * 8), index % 2 == 0)
+		end
+	end
+	-- gardens: flower beds along the front walls and either side of the path, clipped bushes in the corners
+	for _, side in { -1, 1 } do
+		Detail.flowerBed(folder, world(side * 38, 47), Vector3.xAxis, 18, 5, rng)
+		Detail.flowerBed(folder, world(side * 14, 76), Vector3.zAxis, 10, 4, rng)
+		Detail.flowerBed(folder, world(side * 96, 40), Vector3.zAxis, 16, 5, rng)
+		for index = 1, 5 do
+			Detail.bush(folder, world(side * (50 + index * 9), 56 + (index % 2) * 3), 1.1, rng)
+			Detail.bush(folder, world(side * (100 + (index % 2) * 4), 5 + index * 9), 1.2, rng)
+		end
+		-- the back courtyard too
+		Detail.flowerBed(folder, world(side * 40, -58), Vector3.xAxis, 20, 5, rng)
+		for index = 1, 4 do
+			Detail.bush(folder, world(side * (30 + index * 14), -70), 1.2, rng)
+		end
+	end
+	-- props: barrels and crate stacks against the walls and the towers' feet, rubble and pebbles
+	for _, side in { -1, 1 } do
+		for index = 0, 3 do
+			Detail.barrel(folder, world(side * (56 + index * 4), 49), rng)
+		end
+		Detail.crateStack(folder, world(side * 62, 46), rng)
+		Detail.crateStack(folder, world(side * 100, 62), rng)
+		Detail.rocks(folder, world(side * 30, 62), rng, 5)
+		Detail.rocks(folder, world(side * 90, -20), rng, 6)
+	end
+	-- flowers and tufts all round the island's rim so no ground is bare
+	Detail.tuftRing(folder, Vector3.new(cx, height, cz), 110, 124, 70, rng)
+	-- light and life: fireflies over the gardens, leaves drifting by the towers
+	Detail.fireflies(folder, world(0, 60) + Vector3.new(0, 5, 0), Vector3.new(60, 8, 30))
+	Detail.fireflies(folder, world(0, -58) + Vector3.new(0, 5, 0), Vector3.new(80, 8, 14))
+	for _, side in { -1, 1 } do
+		Detail.leaves(folder, world(side * 80, 30) + Vector3.new(0, 18, 0), Color3.fromRGB(200, 170, 70))
+	end
 	Common.sparkles(folder, "GateSparkles", k:at(0, 8, 34), GOLD, 10, 60)
 	Common.ambience(folder, k:at(0, 10, 0), Ambience.gigachad_gate, 0.35)
 end

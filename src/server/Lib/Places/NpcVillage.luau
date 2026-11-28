@@ -45,25 +45,11 @@ local function statue(k: any)
 	dots.Text = "..."
 	dots.Parent = gui
 
-	-- wooden scaffolding up the front: six flights of stairs zig-zagging between landings, 14 up each
+	-- the scaffolding is gone: one big BUBBLE LIFT at the foot of the statue floats you up to the head plate (84 up)
 	local row = -4
-	local function flight(fromX: number, toX: number, base: number)
-		k:stairs("ScaffoldStair", fromX, base, row, toX, row, 14, 5, WOOD, Enum.Material.WoodPlanks, true)
-	end
-	local landings = { { 20, 14 }, { -20, 28 }, { 20, 42 }, { -20, 56 }, { 20, 70 } }
-	flight(-16, 16, 0)
-	flight(16, -16, 14)
-	flight(-16, 16, 28)
-	flight(16, -16, 42)
-	flight(-16, 16, 56)
-	flight(16, -4, 70) -- the last flight ends level with the head plate
-	for _, landing in landings do
-		k:box("ScaffoldLanding", landing[1], landing[2] - 0.8, row, 10, 0.8, 8, WOOD, Enum.Material.WoodPlanks)
-		for _, dx in { -4, 4 } do
-			for _, dz in { -3, 3 } do
-				k:box("ScaffoldPost", landing[1] + dx, 0, row + dz, 1, landing[2] - 0.8, 1, WOOD, Enum.Material.Wood)
-			end
-		end
+	k:lift("StatueLift", { { -16, 0, row }, { -16, 86, row }, { -4, 86, row } })
+	for _, dx in { -1, 1 } do -- two little banner posts so the lift is easy to spot
+		k:box("LiftPost", -16 + dx * 4, 0, row, 1, 6, 1, WOOD, Enum.Material.Wood)
 	end
 end
 
@@ -175,7 +161,7 @@ return function(folder: Folder, territory: any)
 	k:box("WellRim", wellX, 0, wellZ + 3.5, 11, 3, 3, DARK, Enum.Material.Cobblestone)
 	k:box("WellRim", wellX - 3.5, 0, wellZ, 3, 3, 4, DARK, Enum.Material.Cobblestone)
 	k:box("WellRim", wellX + 3.5, 0, wellZ, 3, 3, 4, DARK, Enum.Material.Cobblestone)
-	k:truss("WellLadder", wellX + 1.2, -16, wellZ, 17)
+	k:truss("WellLadder", wellX + 1.2, -16, wellZ, 17, wellX + 1.2, wellZ + 7.5, 5)
 	Common.stash(folder, k:at(wellX + 4, -16, wellZ + 3), territory.id)
 	local glow = Instance.new("PointLight")
 	glow.Range = 20

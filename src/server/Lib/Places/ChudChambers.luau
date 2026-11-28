@@ -51,11 +51,12 @@ return function(folder: Folder, territory: any)
 		k:box("HatchFrame", -26, 70, 42 + side * 6.6, 14, 0.8, 1.2, WOOD, Enum.Material.WoodPlanks, { collide = false })
 		k:box("HatchFrame", -26 + side * 6.6, 70, 42, 1.2, 0.8, 14, WOOD, Enum.Material.WoodPlanks, { collide = false })
 	end
+	k:lift("ChudChute", { { -26, 71, 42 }, { -26, 1, 42 } }, true) -- the DROP CHUTE: a gentle bubble ride down the shaft
 	local door = k:box("HatchDoor", -26, 72, 35, 11, 0.6, 6, WOOD, Enum.Material.WoodPlanks, { collide = false })
 	tilt(door, math.rad(-72), 0, 0)
 	-- entrance 2: a rope ladder from the island's edge down to a walkway, and the walkway to the north tunnel
 	k:box("LadderWalk", 28, -1, -114, 6, 1, 40, Color3.fromRGB(150, 105, 62), Enum.Material.WoodPlanks)
-	k:truss("RopeLadder", 28, 0, -132, 72)
+	k:truss("RopeLadder", 28, 0, -132, 72, 28, -126, 1)
 	k:box("LadderTopPlank", 28, 69, -128, 6, 1, 8, Color3.fromRGB(150, 105, 62), Enum.Material.WoodPlanks)
 	for _, side in { -1, 1 } do
 		k:box("LadderRope", 28 + side * 1.6, 0, -132, 0.3, 72, 0.3, Color3.fromRGB(235, 220, 190), Enum.Material.Fabric, { collide = false })

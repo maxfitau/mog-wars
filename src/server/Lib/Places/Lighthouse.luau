@@ -119,7 +119,7 @@ return function(folder: Folder, territory: any)
 		k:box("Crate", spot[1], 0, spot[2], 4.5, 4.5, 4.5, Color3.fromRGB(190, 140, 80), Enum.Material.WoodPlanks, { cover = true, rotY = index })
 	end
 	k:box("CellarRim", -30, 0, 10, 6, 1.5, 6, STONE, Enum.Material.Cobblestone, { collide = false }) -- the hatch frame
-	k:truss("CellarLadder", -29, -16, 10, 17)
+	k:truss("CellarLadder", -29, -16, 10, 17, -29, 16, 2)
 	Common.stash(folder, k:at(-34, -16, 14), territory.id)
 	Common.ambience(folder, k:at(0, 6, 0), Ambience.locked_in_lighthouse, 0.4)
 end

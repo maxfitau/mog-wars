@@ -188,3 +188,6 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 180 | No minimap exists, so the meteor and drops use world markers (billboards, a beam and a ring) and the event banner | A minimap is a separate slice |
 | 181 | PopupSystem creates the `Remotes` folder before the WorldFx and RewardPopup remotes | WorldFx was landing outside the folder when PopupSystem loaded first, so AbilityController waited forever |
 | 182 | The war loop guards each step with pcall and always advances the phase | An error in a side system (startWar, finishWar) used to kill the loop and freeze the clock at 0:00 |
+| 183 | Stairs, spirals and ladders are decoration; every one comes with a bubble lift (`Kit:lift`, `LiftSystem`) and the invisible walking ramps are gone | Stairs kept failing; a server-driven float is reliable on PC and phone |
+| 184 | A lift carries you along a path at 26 studs/s with the server owning your physics (like ziplines); Moglings ride too; you cannot re-enter the same lift for 1.5 s | No client trust, and chained flights (Gate towers) still work |
+| 185 | Lifts only go up from the bottom of old stairs; the Chud Chambers hatch got a down chute | A chute at every stair top would catch people who only want to stay up |

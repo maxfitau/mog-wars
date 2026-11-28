@@ -1,3 +1,12 @@
+# Bubble lifts: what you are looking for (read this first)
+Needs playtest (written without Studio). Every old staircase, spiral and ladder is now decoration with a glowing bubble lift beside it: a flat glowing pad on the floor and a faint tube of rising bubbles.
+1. Walk onto each pad: you float smoothly along the tube, then walk off at the top. Try: Gigachad Gate tower flights (four chained lifts), NPC statue (one big lift to the head), the NPC house stairs, the Lighthouse spiral, Chud Chambers spiral and rope ladder, the well and the Lighthouse cellar ladders.
+2. Chud Chambers courtyard hatch: step onto the hatch hole, a green chute lowers you gently into the cave.
+3. Moglings should ride a lift when their route walks over the pad. If one stands below a high flag forever, tell me which flag (their routes were built for ramps).
+4. Phone emulator: nothing to press, lifts work by walking in.
+**Tune:** `SPEED` and `ENTRY_RADIUS` at the top of `src/server/Systems/LiftSystem.luau`.
+
+---
 # Big numbers, Aura Meteor, Supply Drops: what you are looking for (read this first)
 In Studio press Play; the Output says "Studio debug commands on". Type these in the chat:
 `/mog level 25`, `/mog gigachad`, `/mog mogod`, `/mog mogstar 5`, `/mog aura 1e9`, `/mog meteor`, `/mog drop`, `/mog gold`. They do nothing in a live game.

@@ -2,11 +2,13 @@
 -- Building kit for the territory interiors. A Kit remembers a centre (x, z), a ground height and a folder, and every
 -- position you give it is RELATIVE to that centre; `yb` is the height of the BOTTOM of the piece above the ground.
 -- Everything is anchored. Solid by default; walls and props can be tagged "Cover" (bots hide behind them).
--- Stairs, spirals and rooms are what make interiors: nothing here makes a ramp.
+-- Stairs, spirals and ladders are DECORATION now: nobody has to climb them. Every one comes with a BUBBLE LIFT (Kit:lift):
+-- step into the glowing bubbles and float up to the top (LiftSystem carries you; walk out at the top).
 
 local CollectionService = game:GetService("CollectionService")
 
 local Builder = require(script.Parent:WaitForChild("Builder"))
+local Lifts = require(script.Parent:WaitForChild("Lifts"))
 
 local Kit: any = {}
 Kit.__index = Kit
@@ -60,39 +62,84 @@ function Kit:ball(name: string, x: number, yb: number, z: number, sx: number, sy
 	return part
 end
 
--- A climbable ladder.
-function Kit:truss(name: string, x: number, yb: number, z: number, height: number)
+-- A BUBBLE LIFT along `points` (world positions of the rider's feet; the first is the entrance). A faint glowing tube with
+-- rising bubbles, a glowing pad at the entrance. `down` makes it a drop chute (bubbles fall). LiftSystem does the carrying.
+function Kit:liftWorld(name: string, points: { Vector3 }, down: boolean?)
+	Lifts.add(name, points, down)
+	local colour = if down then Color3.fromRGB(150, 255, 170) else Color3.fromRGB(150, 225, 255)
+	local pad = Builder.cylinder(name .. "Pad", 6, 0.4, points[1] + Vector3.new(0, 0.2, 0), colour, self.folder)
+	pad.Material = Enum.Material.Neon
+	pad.Transparency = 0.45
+	pad.CanCollide = false
+	pad.CanQuery = false
+	pad.CanTouch = false
+	local light = Instance.new("PointLight")
+	light.Color = colour
+	light.Range = 14
+	light.Parent = pad
+	for index = 1, #points - 1 do
+		local from, to = points[index] + Vector3.new(0, 3, 0), points[index + 1] + Vector3.new(0, 3, 0)
+		local length = (to - from).Magnitude
+		if length > 0.5 then
+			local tube = Instance.new("Part")
+			tube.Name = name .. "Bubbles"
+			tube.Anchored = true
+			tube.CanCollide = false
+			tube.CanQuery = false
+			tube.CanTouch = false
+			tube.Material = Enum.Material.Neon
+			tube.Color = colour
+			tube.Transparency = 0.9
+			tube.Size = Vector3.new(4.5, 4.5, length)
+			tube.CFrame = CFrame.lookAt((from + to) / 2, to)
+			tube.Parent = self.folder
+			local emitter = Instance.new("ParticleEmitter")
+			emitter.Shape = Enum.ParticleEmitterShape.Box
+			emitter.ShapeInOut = Enum.ParticleEmitterShapeInOut.InAndOut
+			emitter.Color = ColorSequence.new(Color3.new(1, 1, 1), colour)
+			emitter.LightEmission = 0.8
+			emitter.Size = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.5), NumberSequenceKeypoint.new(1, 1.1) })
+			emitter.Transparency = NumberSequence.new({ NumberSequenceKeypoint.new(0, 0.2), NumberSequenceKeypoint.new(1, 1) })
+			emitter.Lifetime = NumberRange.new(1.2, 2)
+			emitter.Speed = NumberRange.new(0, 0)
+			emitter.Acceleration = (to - from).Unit * 14
+			emitter.Rate = math.clamp(length * 1.2, 4, 60)
+			emitter.Parent = tube
+		end
+	end
+end
+
+-- Same, with positions relative to the kit (`yb` is the height of the feet above the ground).
+function Kit:lift(name: string, relative: { { number } }, down: boolean?)
+	local points = {}
+	for _, point in relative do
+		table.insert(points, self:at(point[1], point[2], point[3]))
+	end
+	self:liftWorld(name, points, down)
+end
+
+-- A ladder: decoration only. A bubble lift goes up beside it to the top, then (optionally) out over a rim to
+-- (exitX, exitZ) at `exitUp` studs above the top, so you can step off.
+function Kit:truss(name: string, x: number, yb: number, z: number, height: number, exitX: number?, exitZ: number?, exitUp: number?)
 	local truss = Instance.new("TrussPart")
 	truss.Name = name
 	truss.Size = Vector3.new(2, height, 2)
 	truss.Position = Vector3.new(self.cx + x, self.gy + yb + height / 2, self.cz + z)
 	truss.Anchored = true
+	truss.CanCollide = false
 	truss.Color = Color3.fromRGB(150, 110, 60)
 	truss.Parent = self.folder
+	local top = yb + height + (exitUp or 0)
+	local points = { { x, yb, z }, { x, top, z } }
+	if exitX and exitZ then
+		table.insert(points, { exitX, top, exitZ })
+	end
+	self:lift(name .. "Lift", points)
 	return truss
 end
 
--- An invisible, anchored slope that players actually walk on (the visible steps are not solid). It is a flat slab
--- tilted to follow the stairs, so a character slides smoothly up instead of catching on every step edge.
-local function walkRamp(kit: any, name: string, from: Vector3, to: Vector3, width: number)
-	local middle = (from + to) / 2
-	local length = (to - from).Magnitude
-	local ramp = Instance.new("Part")
-	ramp.Name = name .. "Ramp"
-	ramp.Anchored = true
-	ramp.Size = Vector3.new(width, 0.8, length + 0.6)
-	local look = CFrame.lookAt(middle, to)
-	ramp.CFrame = look * CFrame.new(0, -0.4, 0) -- the top surface runs exactly through `from` and `to`
-	ramp.Transparency = 1
-	ramp.CanCollide = true
-	ramp.CanQuery = false
-	ramp.CanTouch = false
-	ramp.Parent = kit.folder
-	return ramp
-end
-
 -- Straight stairs from (x0, z0) to (x1, z1), rising `rise` studs in steps no taller than 1.5. The steps are for
--- looks (CanCollide off); an invisible tilted ramp over the flight is what you walk on. `thin` treads leave the space
+-- looks (CanCollide off); a bubble lift beside it is what carries you. `thin` treads leave the space
 -- underneath open (doors, tunnels).
 function Kit:stairs(name: string, x0: number, yb: number, z0: number, x1: number, z1: number, rise: number, width: number, color: Color3, material: Enum.Material?, thin: boolean?)
 	local steps = math.max(1, math.ceil(rise / 1.0)) -- one-stud steps (never above 1.5)
@@ -115,9 +162,7 @@ function Kit:stairs(name: string, x0: number, yb: number, z0: number, x1: number
 		finish(part, color, material, { collide = false }) -- looks only; the ramp below is what you walk on
 	end
 	-- the ramp's surface runs through the middle of the step tops
-	local from = Vector3.new(self.cx + x0, self.gy + yb + 0.25, self.cz + z0)
-	local to = Vector3.new(self.cx + x1, self.gy + yb + rise + 0.25, self.cz + z1)
-	walkRamp(self, name, from, to, width)
+	self:lift(name .. "Lift", { { x0, yb, z0 }, { x1, yb + rise, z1 } })
 end
 
 -- A spiral staircase of thin treads around (x, z), rising `rise` studs over `turns` turns, one-stud steps. Treads run
@@ -130,7 +175,7 @@ function Kit:spiral(name: string, x: number, z: number, rInner: number, rOuter: 
 	end
 	local middle = (rInner + rOuter) / 2
 	local angleStep = turns * 2 * math.pi / steps
-	local previous: Vector3? = nil
+	local path: { { number } } = {}
 	for index = 0, steps do
 		local angle = startAngle + direction * angleStep * index
 		local height = yb + index * (rise / steps)
@@ -142,11 +187,12 @@ function Kit:spiral(name: string, x: number, z: number, rInner: number, rOuter: 
 			part.CFrame = CFrame.lookAt(position, position + Vector3.new(-math.sin(angle) * direction, 0, math.cos(angle) * direction))
 			finish(part, color, material, { collide = false })
 		end
-		if previous then
-			walkRamp(self, name, previous, top, rOuter - rInner)
+		if index % math.max(1, math.floor(steps / (turns * 4))) == 0 or index == steps then
+			table.insert(path, { x + math.cos(angle) * middle, height, z + math.sin(angle) * middle })
 		end
-		previous = top
 	end
+	table.insert(path, 1, { x + math.cos(startAngle) * middle, yb, z + math.sin(startAngle) * middle })
+	self:lift(name .. "Lift", path)
 end
 
 -- A flat slab (floor or roof) with an optional rectangular hole in its middle (for stairs to come up through).

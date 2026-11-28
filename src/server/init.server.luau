@@ -8,7 +8,7 @@ local Systems = script:WaitForChild("Systems")
 local Features = require(game:GetService("ReplicatedStorage"):WaitForChild("Shared"):WaitForChild("Features"))
 
 -- Only the systems for switched-on features are loaded (see src/shared/Features.luau).
-local order = { "DataService", "PopupSystem", "FriendService", "FactionSystem", "PlaceholderMap", "BotService", "CaptureSystem", "SpawnSystem", "ShoveSystem", "MovementSystem", "StealSystem", "ComboSystem", "QuestSystem", "AchievementSystem", "VoidSystem", "RankVisuals", "StashSystem" }
+local order = { "DataService", "PopupSystem", "FriendService", "FactionSystem", "PlaceholderMap", "BotService", "CaptureSystem", "SpawnSystem", "ShoveSystem", "MovementSystem", "StealSystem", "ComboSystem", "QuestSystem", "AchievementSystem", "VoidSystem", "RankVisuals", "StashSystem", "LiftSystem" }
 local function add(name: string, on: boolean)
 	if on then
 		table.insert(order, name)

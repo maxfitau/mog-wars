@@ -141,6 +141,19 @@ Pace.drops = {
 -- Sound ids (rbxassetid://...). Empty = silent. Add your own licensed or Roblox-made ids here.
 Pace.sounds = { alarm = "", boom = "", pop = "", gold = "" }
 
+-- CHUD CHAMBERS TRAP DUNGEON. Traps never hurt: they knock you back, fling you, or slime you back to the dungeon entrance.
+-- Every trap telegraphs (glow and sound) about `warnSeconds` before it fires. Rewards are in seconds of income.
+Pace.traps = {
+	warnSeconds = 1,
+	flagBonus = 1.5, -- aura from flags in Chud Chambers (harder to reach)
+	shoveSeconds = 20, -- "TRAP SHOVE!" reward for knocking an enemy into a trap
+	shoveWindowSeconds = 6, -- a trap hit counts as your shove if you shoved them this recently
+	treasureSeconds = 300, -- the hidden treasure room, once per war per player
+	trappedSeconds = 2, -- the slime hold before you are sent back to the entrance
+	knock = 38, -- how hard a swing, a boulder or the cans throw you back
+	sounds = { warn = "", boom = "", chomp = "", zap = "", fart = "", slime = "" }, -- rbxassetid:// ids; empty = silent
+}
+
 Pace.capture = {
 	secondsPerFlag = { gold = 4, diamond = 6, ultra = 8 }, -- one player alone, per flag
 	extraPlayerBonus = 0.25, -- each extra teammate on the flag adds this much speed

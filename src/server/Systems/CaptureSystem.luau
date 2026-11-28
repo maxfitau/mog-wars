@@ -313,7 +313,7 @@ local function payOut(territory: TerritoryState, winner: number, factorOwner: nu
 		local points = finalAmounts[userId] + bonus
 		DataService.addPoints(player, points)
 		PopupSystem.send(player, "points", points, "")
-		local aura = DataService.addAura(player, tier.aura)
+		local aura = DataService.addAura(player, tier.aura * (if territory.id == "chud_chambers" then Pace.traps.flagBonus else 1))
 		if aura > 0 then
 			Stats.add(player, "aura", aura)
 			PopupSystem.send(player, "aura", aura, "")
@@ -428,12 +428,12 @@ local function tick(dt: number)
 		-- +1 aura every second you stand on a flag you are capturing
 		if secondTick and not contested and not result.captured and result.state.capturer ~= 0 and result.state.owner ~= result.state.capturer then
 			for _, player in members[result.state.capturer] or {} do
-				giveAura(player, Pace.rewards.flagTickAura)
+				giveAura(player, Pace.rewards.flagTickAura * (if record.territory.id == "chud_chambers" then Pace.traps.flagBonus else 1))
 			end
 		end
 		if result.captured then
 			for _, player in members[result.newOwner] or {} do
-				giveAura(player, Pace.rewards.flagCapturedAura) -- +25 for everyone helping when a flag flips
+				giveAura(player, Pace.rewards.flagCapturedAura * (if record.territory.id == "chud_chambers" then Pace.traps.flagBonus else 1)) -- +25 for everyone helping when a flag flips
 				Stats.add(player, "flags", 1)
 				Events.fire(player, "flag", 1)
 				PopupSystem.fx("flagburst", record.part.Position, ownerColor(result.newOwner)) -- a burst of light in the new owner's colour

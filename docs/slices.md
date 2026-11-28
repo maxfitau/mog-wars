@@ -364,3 +364,8 @@ Four new rank abilities (Slam, Flip, Shield, Total Mog) with only the two newest
 Idle-game number formatting, 10 levels per rank with endless stars and a per-level income multiplier, level-up banners and a NEW TIER flash; a once-per-war Aura Meteor event; balloon supply drops (1 in 8 gold); Studio-only `/mog` debug commands.
 **Test:** `tests/NumberFormat.test.luau`, `tests/Levels.test.luau`, `tests/Pace.test.luau`; see `docs/PLAYTEST.md`.
 **Done when:** numbers read correctly up to the aa/ab suffixes, a level-up happens every minute or two early, the meteor lands once a war and a team can claim it, and crates open with a 1.5 s hold.
+
+## Slice 34: Bubble lifts and the Chud Chambers trap dungeon
+Bubble lifts replace every climb; six cartoon traps, a hidden treasure room, TRAPPED! and TRAP SHOVE! pop-ups, +50% flags in Chud Chambers.
+**Test:** see `docs/PLAYTEST.md` (needs Studio).
+**Done when:** each trap fires after a one second warning and never hurts, Moglings can pass or fail, and the treasure pays once per war.

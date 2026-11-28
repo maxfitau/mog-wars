@@ -1,3 +1,18 @@
+# Chud Chambers trap dungeon: what you are looking for (read this first)
+Needs playtest (written without Studio). No trap hurts: you get knocked back, flung, or slimed ("TRAPPED!", green glow, 2 s hold, then back to the shaft entrance). Each trap glows or shakes about a second before it fires. Sound ids are empty in `Pace.traps.sounds`, so everything is silent for now.
+1. **Boulder:** a striped yellow lane across the hall (south side). Step on the yellow plate: it turns red, the red CHUD CRUNCH bag shakes, then rolls the length of the lane. Dodge sideways.
+2. **Swinging chairs:** three red gaming chairs on chains in the north tunnel, swinging across the whole width on a 3 s rhythm; the glow gets brighter at the ends of the swing.
+3. **Can avalanche:** west tunnel to the Snack Hoard. A blue plate at the tunnel mouth; cans rattle on the ceiling, then drop and knock you back into the hall unless you sprint through.
+4. **Pizza floor:** east tunnel to the Gamer Throne. Tiles turn orange and shake, then some drop into an orange goo pit (one tile per row always stays). Four bubble lifts in the pit float you back up to the hall side.
+5. **Laser grid:** the corridor south of the Gamer Throne room. Three rainbow beams sweep slowly; jump them. A hit means "TRAPPED!" and back to the corridor start.
+6. **Mimic fridges:** one in the Snack Hoard (west side) and one in the Throne room; get close and its red eyes appear, then it chomps and spits you away.
+7. **Treasure room:** end of the laser corridor, golden chest, hold E: big aura burst, once per war.
+8. **TRAP SHOVE!** Shove a player into any trap (within 6 s): you get a banner and aura.
+9. **Chud flags** pay 1.5x aura.
+**Check Moglings:** they should wander into traps now and then (funny) and still capture. If they get stuck in the goo pit or never cross the pizza floor, tell me.
+**Tune:** `Pace.traps`, and the numbers in the TRAP DUNGEON block at the end of `ChudChambers.luau`.
+
+---
 # Bubble lifts: what you are looking for (read this first)
 Needs playtest (written without Studio). Every old staircase, spiral and ladder is now decoration with a glowing bubble lift beside it: a flat glowing pad on the floor and a faint tube of rising bubbles.
 1. Walk onto each pad: you float smoothly along the tube, then walk off at the top. Try: Gigachad Gate tower flights (four chained lifts), NPC statue (one big lift to the head), the NPC house stairs, the Lighthouse spiral, Chud Chambers spiral and rope ladder, the well and the Lighthouse cellar ladders.

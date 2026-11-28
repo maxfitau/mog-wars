@@ -130,6 +130,15 @@ function StealSystem.steal(victim: Player, attacker: Player?)
 	end
 end
 
+-- Who shoved this player within `seconds` (nil if nobody): used by the Chud Chambers traps for TRAP SHOVE!
+function StealSystem.recentAttacker(victim: Player, seconds: number): Player?
+	local hit = lastHit[victim]
+	if hit and hit.attacker and now() - hit.time <= seconds then
+		return hit.attacker
+	end
+	return nil
+end
+
 -- Called when a player falls off the world: if somebody pushed them recently, that is a knock-off.
 function StealSystem.onFall(victim: Player)
 	local hit = lastHit[victim]

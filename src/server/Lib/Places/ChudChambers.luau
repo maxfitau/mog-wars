@@ -17,6 +17,7 @@ local AmbientNpc = require(script.Parent.Parent:WaitForChild("AmbientNpc"))
 local Common = require(script.Parent:WaitForChild("Common"))
 local Kit = require(script.Parent.Parent:WaitForChild("Kit"))
 local TerrainKit = require(script.Parent.Parent:WaitForChild("TerrainKit"))
+local TrapSystem = require(script.Parent.Parent.Parent:WaitForChild("Systems"):WaitForChild("TrapSystem"))
 local MovementSystem = require(script.Parent.Parent.Parent:WaitForChild("Systems"):WaitForChild("MovementSystem"))
 
 local STONE = Color3.fromRGB(128, 122, 134)
@@ -42,6 +43,9 @@ return function(folder: Folder, territory: any)
 	TerrainKit.carve(48, 0, 0, 16, 12, 16)
 	TerrainKit.carve(-26, 0, 42, 12, 72, 12) -- the shaft up to the castle courtyard
 	TerrainKit.carve(28, 0, -70, 8, 12, 60) -- the north tunnel out to the rope ladder
+	TerrainKit.carve(48, -12, 0, 16, 12, 16) -- the cheese-dust goo pit under the east tunnel's pizza-box floor
+	TerrainKit.carve(72, 0, 40, 8, 10, 24) -- the laser corridor south of the Gamer Throne
+	TerrainKit.carve(72, 0, 66, 20, 12, 28) -- the hidden treasure room at its end
 	TerrainKit.carve(-68, 0, -36, 4, 8, 16) -- the secret tunnel ...
 	TerrainKit.carve(-68, 0, -48, 8, 8, 8) -- ... and its little room
 
@@ -199,6 +203,49 @@ return function(folder: Folder, territory: any)
 	for index, z in { -9, -3, 3, 9 } do
 		k:box("Cable", 74, 0.05, z, 16, 0.3, 0.3, palette[index], Enum.Material.Neon, { collide = false })
 	end
+
+
+	-- ===== THE TRAP DUNGEON (all kid-friendly: knock back, fling, or slime you back to the entrance) =====
+	local GOO = Color3.fromRGB(255, 150, 40)
+	TrapSystem.setEntrance(k:at(-24, 3, 32))
+	-- 1. rolling crisp-bag boulder down a striped lane across the hall (step on the yellow plate, dodge sideways)
+	for index = 0, 9 do
+		k:box("LaneStripe", -30 + index * 7, 0.02, 24, 3.5, 0.1, 10, if index % 2 == 0 then Color3.fromRGB(255, 205, 40) else Color3.fromRGB(40, 40, 50), Enum.Material.SmoothPlastic, { collide = false })
+	end
+	TrapSystem.boulder(folder, k:at(-36, 0, 24), k:at(-31, 0, 24), k:at(37, 0, 24))
+	-- 2. swinging gaming chairs across the north tunnel walkway
+	for index, z in { -58, -70, -82 } do
+		TrapSystem.swingingChair(folder, k:at(28, 11.5, z), Vector3.xAxis, 8, 0.8, 3, index * 1.1)
+	end
+	-- 3. energy-drink can avalanche in the west tunnel to the Snack Hoard
+	TrapSystem.canAvalanche(folder, k:at(-42.5, 0, 0), k:at(-49, 0, 0), Vector3.new(10, 0, 14), Vector3.xAxis, territory.height + 11.5)
+	-- 4. collapsing pizza-box floor in the east tunnel to the Gamer Throne, over a pit of orange cheese-dust goo
+	k:box("CheeseGoo", 48, -11, 0, 16, 1.5, 16, GOO, Enum.Material.Neon, { collide = false, transparency = 0.25 })
+	TrapSystem.pizzaFloor(folder, k:at(48, 0, 0), 4, 4, 4)
+	for _, pad in { { 44, -4 }, { 44, 4 }, { 52, -4 }, { 52, 4 } } do
+		k:lift("GooLift", { { pad[1], -12, pad[2] }, { pad[1], 4, pad[2] }, { 37, 4, 0 } }) -- the bubble lift back up to the start of the corridor
+	end
+	-- 5. RGB keyboard laser grid in the corridor to the treasure room
+	for index = 0, 5 do
+		k:box("KeyboardKey", 68.6, 1 + (index % 2) * 2, 30 + index * 4, 0.6, 1.4, 2.6, Color3.fromRGB(35, 35, 48), Enum.Material.SmoothPlastic, { collide = false })
+		k:box("KeyboardKey", 75.4, 1 + (index % 2) * 2, 30 + index * 4, 0.6, 1.4, 2.6, Color3.fromRGB(35, 35, 48), Enum.Material.SmoothPlastic, { collide = false })
+	end
+	TrapSystem.laserGrid(folder, k:at(72, 0, 31), k:at(72, 0, 49), 7, 3, k:at(72, 3, 25))
+	-- the hidden treasure room: a golden chest (once per war), warm light
+	TrapSystem.treasure(folder, k:at(72, 0, 70))
+	for _, x in { 64, 80 } do
+		local lamp = k:ball("TreasureLamp", x, 6, 70, 1.6, 2, 1.6, FLAME, Enum.Material.Neon, { collide = false })
+		local lampLight = Instance.new("PointLight")
+		lampLight.Color = FLAME
+		lampLight.Range = 22
+		lampLight.Parent = lamp
+	end
+	for index = 1, 12 do
+		k:cyl("Coin", 66 + (index % 6) * 2.4, 0, 66 + math.floor(index / 6) * 3, 1.6, 0.3, Color3.fromRGB(255, 205, 60), Enum.Material.Metal, { collide = false })
+	end
+	-- 6. mimic mini-fridges that look just like the real one
+	TrapSystem.mimic(folder, k:at(-60, 0, -10), Vector3.xAxis)
+	TrapSystem.mimic(folder, k:at(62, 0, 18), -Vector3.xAxis)
 
 	-- two cave dwellers who think this is normal
 	AmbientNpc.spawn(folder, k:at(-22, 0, 14), {

@@ -89,7 +89,11 @@ function SeasonPassHud.init()
 	local open = Instance.new("TextButton")
 	open.Text = "PASS"
 	open.AnchorPoint = Vector2.new(1, 0)
-	open.Position = UDim2.new(1, -16, 0, 250)
+	open.Position = UDim2.new(1, -12, 0, 34 + (function(): number -- right column, just below the minimap (its size follows MinimapHud) and its toggles
+		local camera = workspace.CurrentCamera
+		local view = if camera then camera.ViewportSize else Vector2.new(1280, 720)
+		return 112 + math.clamp(math.min(260, view.X * 0.31, view.Y - 230), 130, 260) + 76
+	end)())
 	open.Size = UDim2.new(0, 64, 0, 30)
 	open.BackgroundColor3 = UiTheme.colors.blue
 	open.Font = UiTheme.font

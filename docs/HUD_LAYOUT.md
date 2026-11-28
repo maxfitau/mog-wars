@@ -7,9 +7,13 @@
 | Card slot | y 172, centred, upper third | ONE pop-up card at a time (`HudSlots.card`): ENTERING a territory (smaller, 1.5 s, only on a real new entry, not again for the same place inside 20 s), unlock cards, achievement cards |
 | Left column | x 16, y 56 down | aura box (with the combo counter beside the quest pill at y 172), "Quests n/3" pill (tap to open), then the aura pop-ups (max 3, fade in 0.9 s) from y 214 |
 | Right column | x right, y 64 | the minimap, 128 px (25% smaller), with the map-control bar |
+| Right column, under the minimap | y 112 + map size + 76 | the "Weapons (B)" pill (opens the Weapon Index); the PASS button 34 px lower (only when the Season Pass is on) |
+| Right edge, top | y 64-104, 176x40 | the event pill ("Meteor Storm Saturday 2d 4h" / "LIVE 1h 40m"); tap for the event card |
 | Middle third | - | nothing permanent; short pop-ups only (screen punch, white flash, coins flying to the counter) |
 | Bounty | in the world | the crown, beam and "MOST AURA" tag above the leader's head; no HUD banner |
 
 Narrow screens: the left column scales to `clamp(width / 1200, 0.6, 1)`, the top-centre block to `clamp((width - 430) / 520, 0.55, 1)`, and the mission bar width to `clamp(width - 640, 200, 360)`.
 Checked by arithmetic at 844x390 (a landscape phone): left column right edge 16 + 270 x 0.70 = 205; top-centre block 214 to 630; mission bar 320 to 524; minimap 704 to 832; card 276 wide centred at 422 (284 to 560). At 667x375: left 178, top-centre 190 to 476, mission 233 to 433, minimap 527 to 655. No overlaps.
 Needs a real screenshot in Studio (device emulator) to confirm: see `docs/MAC_MCP_PROMPT.md` step 6.
+Also: the Quest Board (key J, opened from the Quests pill) sits in the left column at (16, 206) and is invisible while closed; the Weapon Index (key B) and the quest and event cards open on demand and never stay on screen.
+

@@ -1,3 +1,18 @@
+# Progression + weapons update: what you are looking for (read this first)
+Needs playtest (written without Studio; five agents built the pieces in separate files and the integrator merged them; no Luau runtime was available, so run every `tests/*.test.luau` with `luau` first).
+Use the debug commands (only for your user id, Studio only): `/mog weapons` (one of each), `/mog weapon <id>` (a duplicate adds a star), `/mog chest`, `/mog unequip`, `/mog event 3`, `/mog eventstop`, `/mog season winter`, `/mog leaguewin 2`, `/mog leaguechest`, `/mog reset`.
+1. **Small servers:** MaxPlayers 8 (also set it in Creator Hub), Moglings fill each team to 4.
+2. **War Chest:** after a war the chest opens with the aura, a weapon (odds shown: 62 / 27 / 8 / 2.5 / 0.5) and a reveal; a duplicate adds a star. Gold supply crates and every 5th achievement also give a weapon.
+3. **Weapon Index (B or the pill under the minimap):** all nine in a grid, silhouettes for unfound ones, stars, EQUIP / UNEQUIP. Rejoin and check the collection and the equipped weapon were saved.
+4. **Each weapon (equip, then use the Shove button / key):** Jawline Hammer, Mewing Fan, Sigma Shades (hits on the return), Rizz Rose, Glow-Up Mist, Mirror Shield (reflects shoves), Protein Shaker, Main Character Mic, Gigachad Gauntlet (hold to charge). Power is the same for every rarity; only visuals and sounds differ. Moglings carry Common or Rare weapons and use them now and then. With no weapon equipped Shove works as before.
+5. **Weekly event:** `/mog event 3`: gold pill "LIVE", banner, 2x aura, a meteor about every 90 s (it works outside a war), a one-off reward with a weapon; the pill counts down to Saturday 18:00 UTC the rest of the week (tap it for the card).
+6. **Season:** NPC Village shows snow and lights in Winter (`SeasonConfig.current`); the season name is on the event card. **League:** wars won per team this week on the card; `/mog leaguechest` tests the Monday chest and the "League Champion" title.
+7. **Quests:** key J: War, Daily (3) and Weekly (5) tabs with progress; completing pays aura and sometimes a weapon, once; resets at 00:00 UTC (weekly Monday). **Streak:** day 7 gives a guaranteed Rare weapon.
+8. **Reactions:** winners strike a smug pose with sunglasses for about 2.5 s on a capture; players who fall into the clouds flail, cry and show "NOOO".
+9. **Season Pass** is OFF (`Features.seasonPass`); turn it on to test the 20-tier free track.
+**Check first:** overlaps in the right column on a phone-sized screen (minimap, event pill, Weapons pill), weapon models in the hand, the Rizz Rose pull and the Glow-Up Mist slide (client tricks), the weekly quest "collect weapons" was left out, and the DataStore league/weekly stores only run in a live server.
+
+---
 # Minimap redo and audio pass: what you are looking for (read this first)
 Needs playtest (written without Studio).
 1. **Minimap:** top right, level with the mission bar's row, up to 260 px with a gold border: island blobs in the owner's colour (white = neutral) each with a ring in its tier colour (gold / blue / purple), team-coloured squares in the corners, white diamond flags, a white arrow for you turning with the camera, team dots, a pulsing dashed yellow ring on your mission territory, a meteor icon and crate icons. No blank squares anywhere. The map-control bar sits above it with a drawn crown. "M - tap to expand" under it, then MUSIC and SFX toggles.

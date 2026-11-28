@@ -238,3 +238,8 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 230 | Weapon drop odds live in `WeaponCatalog.odds` per source (chest, gold drop, quest, weekly, achievement, streak, mogling) and are shown in the chest UI | Open odds, and one place to tune them |
 | 231 | Work for this update was split across five parallel agents in separate worktrees with disjoint files (weapon gameplay, weapon UI and sources, events/season/league, quests and streak, reactions and season pass); the foundation (save data, catalog, DataService API, flags) was written first | No merge conflicts, one coordinated interface |
 | 232 | The Season Pass is built but OFF (`Features.seasonPass = false`); Rebirth is only noted in DESIGN.md for Update 2 | Scope for this update |
+| 233 | The weekly event is Saturday 18:00-21:00 UTC (`EventSchedule`), meteors every 90 s and 2x aura via the `EventAuraMultiplier` attribute that DataService applies; rewards once per event | The owner creates the matching Creator Hub event card |
+| 234 | League and weekly-reward persistence use DataStores (MogLeague, MogWeekly) that only run in live servers; Studio uses memory | No API access in Studio |
+| 235 | Weapon pill and Season Pass button sit below the minimap at a y computed from the minimap size; the event pill is at the right edge y 64-104 | The agents assumed an older minimap size; the integrator moved them so nothing overlaps |
+| 236 | Meteor claims and opened supply drops fire `Events.fire(player, "meteor" / "supply")` so the daily and weekly quests can count them; the "collect weapons" weekly quest was left out | No event existed for it |
+| 237 | The Mirror Shield is press-to-activate for 2.5 s (not a true hold) | Simpler and reliable on touch |

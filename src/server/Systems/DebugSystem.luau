@@ -8,6 +8,7 @@
 --   /mog aura 1e9      add that much aura (level scaling applies)
 --   /mog weapon <id>   give a weapon (a duplicate adds a star)   /mog weapons   one of every weapon   /mog chest   roll a chest weapon
 --   /mog event [min]   start the weekly event now (default 10 minutes)   /mog eventstop   end it   /mog unequip   plain Shove
+--   /mog season winter|spring|summer|autumn   /mog leaguewin <team>   /mog leaguechest
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -68,6 +69,31 @@ local function handle(player: Player, message: string)
 	elseif command == "chest" then
 		local id = DataService.rollWeapon(player, "chest")
 		note(player, "debug: chest gave " .. tostring(id))
+	elseif command == "season" and words[3] then
+		local ok, SeasonThemeSystem = pcall(function()
+			return require(script.Parent:WaitForChild("SeasonThemeSystem", 2))
+		end)
+		if ok then
+			(SeasonThemeSystem :: any).apply(words[3])
+			note(player, "debug: season " .. words[3])
+		end
+	elseif command == "leaguewin" and argument then
+		local ok, LeagueSystem = pcall(function()
+			return require(script.Parent:WaitForChild("LeagueSystem", 2))
+		end)
+		if ok then
+			(LeagueSystem :: any).addWin(math.floor(argument))
+			note(player, "debug: league win for team " .. tostring(math.floor(argument)))
+		end
+	elseif command == "leaguechest" then
+		local ok, LeagueSystem = pcall(function()
+			return require(script.Parent:WaitForChild("LeagueSystem", 2))
+		end)
+		local faction = player:GetAttribute("Faction")
+		if ok and type(faction) == "number" then
+			(LeagueSystem :: any).debugSetLastWinner(faction)
+			note(player, "debug: your team won last week; the chest arrives on your next check")
+		end
 	elseif command == "unequip" then
 		DataService.equipWeapon(player, "")
 	elseif command == "event" or command == "eventstop" then

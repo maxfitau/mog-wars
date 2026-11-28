@@ -23,7 +23,7 @@ QuestCatalog.SECONDS_PER_DAY = 86400
 
 -- Kinds nothing fires yet. Templates that need one are never picked. When SupplyDropSystem fires Events "supply" and
 -- EventSystem fires "meteor" for the players who claim them, remove them from this list.
-QuestCatalog.disabledKinds = { supply = true, meteor = true } :: { [string]: boolean }
+QuestCatalog.disabledKinds = {} :: { [string]: boolean }
 
 local function t(id: string, text: string, kinds: { string }, goal: number, auraSeconds: number, chest: boolean): Template
 	return { id = id, text = text, kinds = kinds, goal = goal, auraSeconds = auraSeconds, chest = chest }

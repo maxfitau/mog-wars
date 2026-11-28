@@ -223,7 +223,11 @@ local function buildScreen()
 	local pill = Instance.new("TextButton")
 	pill.Name = "WeaponsPill"
 	pill.AnchorPoint = Vector2.new(1, 0)
-	pill.Position = UDim2.new(1, -16, 0, 236)
+	pill.Position = UDim2.new(1, -12, 0, (function(): number -- right column, just below the minimap (its size follows MinimapHud) and its toggles
+		local camera = workspace.CurrentCamera
+		local view = if camera then camera.ViewportSize else Vector2.new(1280, 720)
+		return 112 + math.clamp(math.min(260, view.X * 0.31, view.Y - 230), 130, 260) + 76
+	end)())
 	pill.Size = UDim2.new(0, 96, 0, 26)
 	pill.BackgroundColor3 = UiTheme.panel
 	pill.BackgroundTransparency = 0.2

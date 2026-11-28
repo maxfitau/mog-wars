@@ -17,6 +17,7 @@ local Pace = require(Shared:WaitForChild("Pace"))
 local Config = require(Shared:WaitForChild("EconomyConfig"))
 local FactionRules = require(Shared:WaitForChild("FactionRules"))
 local Territories = require(Shared:WaitForChild("Territories"))
+local Events = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("Events"))
 local DataService = require(script.Parent:WaitForChild("DataService"))
 local PopupSystem = require(script.Parent:WaitForChild("PopupSystem"))
 local BotService = require(script.Parent:WaitForChild("BotService"))
@@ -310,6 +311,9 @@ local function runMeteor(storm: boolean)
 					PopupSystem.send(player, "aura", shown, "")
 				end
 			end
+		end
+		for _, claimer in claimers do
+			Events.fire(claimer, "meteor", 1) -- the weekly quests count meteor claims
 		end
 		local onClaim = EventSystem.onClaim
 		if onClaim then

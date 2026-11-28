@@ -402,7 +402,7 @@ local auraRemainder: { [Player]: number } = setmetatable({}, { __mode = "k" }) :
 -- the +1 ticks, the territory bonus and trickle, and the daily reward. Overtime and Main Character Mode (both off in
 -- the simple game) can multiply it. Returns the aura shown to the player (after any multiplier), or 0 if data is not
 -- loaded. A new rank is announced with a "rankup" pop-up.
-function DataService.addAura(player: Player, aura: number, alreadyScaled: boolean?): number
+function DataService.addAura(player: Player, aura: number, alreadyScaled: boolean?, plain: boolean?): number
 	local data = DataService.get(player)
 	if not data or aura ~= aura or aura <= 0 or aura == math.huge then
 		return 0
@@ -416,7 +416,9 @@ function DataService.addAura(player: Player, aura: number, alreadyScaled: boolea
 	local comboValue = player:GetAttribute("ComboMult")
 	local multiplier = if type(comboValue) == "number" and comboValue > 1 then comboValue else 1
 	local critTier: string? = nil
-	if base >= Pace.crit.minAura then
+	if plain == true then
+		multiplier = 1 -- the small "just for being here" ticks never combo or crit, so passive aura stays small and readable
+	elseif base >= Pace.crit.minAura then
 		local roll = math.random()
 		if roll < Pace.crit.ultraChance then
 			critTier = "ultra"
@@ -481,6 +483,22 @@ function DataService.debugSetLevel(player: Player, level: number)
 	player:SetAttribute("Aura", data.aura)
 	player:SetAttribute("Level", level)
 	player:SetAttribute("Rank", data.rank)
+end
+
+-- STUDIO DEBUG ONLY: reset a player's saved test data (aura, level, rank, stashes, counters) to a brand new player.
+function DataService.debugReset(player: Player)
+	local data = DataService.get(player)
+	if not data then
+		return
+	end
+	local fresh: any = PlayerData.template()
+	for key, value in fresh do
+		(data :: any)[key] = value
+	end
+	player:SetAttribute("Aura", 0)
+	player:SetAttribute("Level", 0)
+	player:SetAttribute("Rank", 1)
+	player:SetAttribute("StashesFound", 0)
 end
 
 -- Something to call when a gain is a crit ("mega" or "ultra"); set by ComboSystem.

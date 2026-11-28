@@ -3,6 +3,7 @@
 -- so a normal player in a live server has no debug access at all: this system does nothing there.
 --   /mog level 25      jump to level 25      /mog gigachad    jump to Gigachad I (level 41)
 --   /mog mogstar 5     jump to Mog God ★5    /mog mogod       jump to Mog God I (level 51)
+--   /mog reset         reset your test data to a brand new player
 --   /mog meteor        start the Aura Meteor now    /mog drop     drop a crate    /mog gold     drop a GOLD crate
 --   /mog aura 1e9      add that much aura (level scaling applies)
 
@@ -20,13 +21,24 @@ local PopupSystem = require(script.Parent:WaitForChild("PopupSystem"))
 
 local DebugSystem = {}
 
+-- Only in Studio, only for an allowed user id (Pace.debug.allowedUserIds, or the place owner when it is saved under a user).
+local function allowed(player: Player): boolean
+	if not RunService:IsStudio() then
+		return false
+	end
+	if table.find(Pace.debug.allowedUserIds, player.UserId) then
+		return true
+	end
+	return game.CreatorType == Enum.CreatorType.User and game.CreatorId ~= 0 and game.CreatorId == player.UserId
+end
+
 local function note(player: Player, text: string)
 	PopupSystem.send(player, "announce", 1, text)
 end
 
 local function handle(player: Player, message: string)
 	local words = string.split(string.lower(message), " ")
-	if words[1] ~= "/mog" then
+	if words[1] ~= "/mog" or not allowed(player) then
 		return
 	end
 	local command, argument = words[2], tonumber(words[3] or "")
@@ -42,6 +54,9 @@ local function handle(player: Player, message: string)
 	elseif command == "mogstar" then
 		DataService.debugSetLevel(player, 6 * Pace.levels.perRank + math.max(1, math.floor(argument or 5)))
 		note(player, "debug: Mog God star")
+	elseif command == "reset" then
+		DataService.debugReset(player)
+		note(player, "debug: your test data was reset")
 	elseif command == "aura" and argument then
 		DataService.addAura(player, argument)
 	elseif command == "meteor" or command == "drop" or command == "gold" then
@@ -68,10 +83,11 @@ function DebugSystem.start()
 		return -- a live server: no debug commands for anyone
 	end
 	local function watch(player: Player)
+		if not allowed(player) then
+			print(("[mog-wars] debug commands are OFF for user id %d. To use them, add %d to Pace.debug.allowedUserIds in src/shared/Pace.luau."):format(player.UserId, player.UserId))
+		end
 		player.Chatted:Connect(function(message)
-			if RunService:IsStudio() then
-				handle(player, message)
-			end
+			handle(player, message) -- (handle checks Studio and the allowed user ids again)
 		end)
 	end
 	Players.PlayerAdded:Connect(watch)

@@ -49,14 +49,16 @@ local function tick()
 	for _, player in Players:GetPlayers() do
 		local faction = player:GetAttribute("Faction")
 		local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-		if type(faction) == "number" and humanoid and humanoid.Health > 0 then
-			local amount = Pace.presence.base
+		if type(faction) == "number" and humanoid and humanoid.Health > 0 and player:GetAttribute("AFK") ~= true then -- AFK earns nothing
+			local amount = 0
 			local zone = CaptureSystem.zoneAt(player)
 			if zone and (zone:GetAttribute("OwnerFaction") == faction or zone:GetAttribute("CapturerFaction") == faction) then
-				amount = Pace.presence.onFlag
+				amount = Pace.presence.onFlag -- standing on a flag is an ACTION: it always pays
+			elseif (player:GetAttribute("Level") :: any or 0) < Pace.levels.passiveMaxLevel then
+				amount = Pace.presence.base -- the passive tick stops at the end of Rookie
 			end
 			amount += (held[faction] or 0) * Pace.presence.perTerritory
-			local shown = DataService.addAura(player, amount)
+			local shown = if amount > 0 then DataService.addAura(player, amount, false, true) else 0
 			if shown > 0 then
 				Stats.add(player, "aura", shown)
 				PopupSystem.send(player, "aura", shown, "")

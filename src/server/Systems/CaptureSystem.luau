@@ -508,6 +508,9 @@ function CaptureSystem.warTallies(): ({ [number]: number }, { [number]: number }
 end
 
 local function playerInZone(player: Player, zone: BasePart): boolean
+	if player:GetAttribute("AFK") == true then
+		return false -- AFK players cannot hold flags
+	end
 	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 	if not root or not root:IsA("BasePart") then
 		return false

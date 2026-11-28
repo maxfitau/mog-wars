@@ -12,13 +12,19 @@ local ROMAN = { "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X" }
 
 -- Seconds a level takes (at the nominal income) when you are leaving `level`.
 local function secondsFor(level: number): number
-	local result = settings.seconds[1][2]
-	for _, band in settings.seconds do
-		if level >= band[1] then
-			result = band[2]
+	local lastEnd = 0
+	for _, band in settings.bands do
+		lastEnd = band[1] + band[2]
+		if level >= band[1] and level < lastEnd then
+			return band[3] + (band[4] - band[3]) * (level - band[1]) / math.max(1, band[2] - 1)
 		end
 	end
-	return result
+	return settings.starSeconds * settings.starGrowth ^ (level - lastEnd) -- the star levels after Mog God X
+end
+
+-- Seconds an active player spends on the level they are leaving (used by the pacing test).
+function Levels.secondsFor(level: number): number
+	return secondsFor(level)
 end
 
 -- The multiplier on all aura income at a level.

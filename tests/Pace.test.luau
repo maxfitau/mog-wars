@@ -68,17 +68,11 @@ check("pickups come about every 30 seconds", Pace.pickups.everySeconds == 30)
 check("Main Character Mode doubles aura for 15 seconds", Pace.pickups.mainCharacterAuraMultiplier == 2 and Pace.pickups.mainCharacterSeconds == 15)
 
 -- the constant "+X" counter and the abilities
-check("+1 aura a second in the war, +3 on a flag, +1 per territory held", Pace.presence.base == 1 and Pace.presence.onFlag == 3 and Pace.presence.perTerritory == 1)
+check("passive aura is small (about 15 percent of active), +3 on a flag is an action, nothing for holding land", Pace.presence.base < Pace.presence.onFlag and Pace.presence.onFlag == 3 and Pace.presence.perTerritory == 0)
 check("Shove is NPC, Dash is Rookie, Mog Stare is Sigma", Pace.abilities.shove.rank == 1 and Pace.abilities.dash.rank == 2 and Pace.abilities.stare.rank == 3)
 check("Mog Stare freezes for 1 second on an 8 second cooldown", Pace.abilities.stare.freezeSeconds == 1 and Pace.abilities.stare.cooldownSeconds == 8)
 check("a hidden stash is a big burst", Pace.stash.aura == 100)
-do
-	-- Rookie takes about a minute of normal play: one second on a flag earns about +4 (3 for the flag, 1 per territory held)
-	local Config = require("../src/shared/EconomyConfig")
-	local perSecond = Pace.presence.onFlag + Pace.presence.perTerritory
-	local seconds = Config.ranks[2].cost / perSecond
-	check("Rookie takes about a minute of play", seconds > 25 and seconds < 90)
-end
+-- (level pacing now lives in tests/Pacing.test.luau)
 
 -- dopamine: crits, combos, quests, stealing, achievements, the chest
 do

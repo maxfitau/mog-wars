@@ -64,8 +64,8 @@ function EventController.init()
 	tint.Parent = Lighting
 
 	local function playSound(id: string)
-		if id == "" then
-			return
+		if type(id) ~= "string" or id == "" then
+			return -- no sound set: stay silent (a nil or empty id would error)
 		end
 		local sound = Instance.new("Sound")
 		sound.SoundId = id

@@ -98,12 +98,24 @@ Pace.chest = {
 Pace.levels = {
 	perRank = 10,
 	growth = 1.74,
-	nominalIncome = 4, -- aura a second a normal player earns at level 0 (+1 for the war, +3 on a flag, and so on)
-	-- How long a level takes at the nominal income, by the level you are leaving: { from this level, seconds per level }.
-	-- Early levels take about a minute, then it slows: Rookie ~1 min, Sigma ~10 min, Chadlite ~30 min, Chad ~1 hr,
-	-- Gigachad ~3 hr, Mog God about 2.5 days, and the star levels an hour each.
-	seconds = { { 0, 60 }, { 1, 54 }, { 11, 120 }, { 21, 180 }, { 31, 720 }, { 41, 21600 }, { 51, 3600 } },
+	-- Aura a second an ACTIVE player earns at level 0 (set from Pace.income below: tests/Pacing.test.luau checks they agree).
+	nominalIncome = 11.3,
+	-- How long each level takes for an active player, by the level you are leaving, in bands: { first level, how many levels,
+	-- seconds for the first, seconds for the last }. Inside a band it ramps up in a straight line, and every band starts above
+	-- where the last one ended, so EVERY level takes longer than the one before (thresholds grow faster than income).
+	-- Reach: Rookie 50 s, Sigma 10 min, Chadlite 30 min, Chad 1 hr, Gigachad 3 hr, Mog God I about 72 hours (3 days of play).
+	bands = {
+		{ 0, 11, 50, 59.1 },
+		{ 11, 10, 105, 135 },
+		{ 21, 10, 150, 210 },
+		{ 31, 10, 550, 890 },
+		{ 41, 10, 18000, 31680 },
+		{ 51, 10, 33000, 60000 },
+	},
+	starSeconds = 63000, -- each star level after Mog God X ...
+	starGrowth = 1.05, -- ... takes this much longer than the last
 	maxLevel = 400,
+	passiveMaxLevel = 10, -- the "just for being here" aura stops at the end of Rookie: you cannot idle past Rookie
 	maxAura = 1e300, -- saved aura is clamped here (a double holds up to about 1.8e308)
 }
 
@@ -118,7 +130,7 @@ Pace.meteor = {
 	activeSeconds = 70, -- the meteor crumbles if nobody has held it that long
 	flagRadius = 15,
 	flagValue = 5, -- worth 5x a normal flag to Moglings
-	rewardSeconds = 600, -- every member of the winning team gets this many seconds of income
+	rewardSeconds = 150, -- every member of the winning team gets this many seconds of income
 	orbCount = 14,
 	orbSeconds = 20, -- each scattered orb is worth this many seconds of income
 }
@@ -129,8 +141,8 @@ Pace.drops = {
 	holdSeconds = 1.5,
 	fallSeconds = 14,
 	lifetimeSeconds = 70,
-	auraSeconds = 90, -- the big aura burst, in seconds of income
-	goldAuraSeconds = 600,
+	auraSeconds = 25, -- the big aura burst, in seconds of income
+	goldAuraSeconds = 150,
 	mainCharacterSeconds = 15,
 	goldMainCharacterSeconds = 30,
 	shakeSeconds = 10,
@@ -148,10 +160,16 @@ Pace.traps = {
 	flagBonus = 1.5, -- aura from flags in Chud Chambers (harder to reach)
 	shoveSeconds = 20, -- "TRAP SHOVE!" reward for knocking an enemy into a trap
 	shoveWindowSeconds = 6, -- a trap hit counts as your shove if you shoved them this recently
-	treasureSeconds = 300, -- the hidden treasure room, once per war per player
+	treasureSeconds = 60, -- the hidden treasure room, once per war per player
 	trappedSeconds = 2, -- the slime hold before you are sent back to the entrance
 	knock = 38, -- how hard a swing, a boulder or the cans throw you back
 	sounds = { warn = "", boom = "", chomp = "", zap = "", fart = "", slime = "" }, -- rbxassetid:// ids; empty = silent
+}
+
+-- DEBUG: the "/mog" chat commands. They only work in Roblox Studio (never in a live server) and only for the user ids listed here
+-- (the place owner's id is added automatically for a place saved under a user). Put YOUR Roblox user id in this list.
+Pace.debug = {
+	allowedUserIds = {} :: { number },
 }
 
 Pace.capture = {
@@ -166,10 +184,38 @@ Pace.overtime = {
 	musicSpeed = 1.25,
 }
 
+-- PASSIVE aura (just for being here) is about 15 percent of an active player's income, and zero for an AFK player. ACTIONS are
+-- the main income: standing on a flag, captures, stashes, quests, steals, the war chest and events.
 Pace.presence = {
-	base = 1, -- aura every second just for being in the war
-	onFlag = 3, -- ... every second while you stand on a flag you are capturing or defending (instead of the base)
-	perTerritory = 1, -- ... plus this much for every territory your team holds
+	base = 1.7, -- aura every second just for being in the war (about 15 percent of an active player's income)
+	onFlag = 3, -- standing on a flag you are capturing or defending is an ACTION: this much a second instead of the base
+	perTerritory = 0, -- (no longer paid just for your team holding land: that let idle players level up)
+}
+
+-- AFK: no movement, ability or input for `seconds` = AFK. An AFK player earns nothing passive, shows an AFK tag and cannot
+-- hold flags; after `moveSeconds` AFK they are moved back to their team island.
+Pace.afk = {
+	seconds = 30,
+	moveSeconds = 180,
+	pingSeconds = 2, -- the client reports real input at most this often
+}
+
+-- The pacing model (tests/Pacing.test.luau reads this): what an ACTIVE player does in an average minute, in level-0 aura.
+-- Rewards that are "seconds of income" are listed with how many seconds per minute they add on average.
+Pace.income = {
+	flagHoldSecondsPerMinute = 30, -- standing on a flag you are capturing or defending (paid at Pace.presence.onFlag)
+	flagFlipsPerMinute = 1, -- paid Pace.rewards.flagCapturedAura each
+	territoryCapturesPerMinute = 0.35, -- paid the tier's aura (Territories.tiers): about 300 on average
+	averageTierAura = 300,
+	stashesPerMinute = 0.67, -- paid Pace.stash.aura
+	questsPerMinute = 0.5, -- paid about 70
+	averageQuestAura = 70,
+	stealAuraPerMinute = 20,
+	chestPerMinute = 1 / 6, -- the war chest after each war, about 175
+	averageChestAura = 175,
+	comboCritFactor = 1.25, -- combos and crits multiply the above by about this
+	eventSecondsPerMinute = 11.75, -- meteor wins, supply drops and the treasure room, as seconds of income per minute
+	passiveFraction = 0.15, -- passive aura as a share of an active player's income
 }
 
 Pace.rewards = {

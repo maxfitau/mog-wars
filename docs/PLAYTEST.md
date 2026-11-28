@@ -1,3 +1,12 @@
+# Airship taxis: what you are looking for (read this first)
+Needs playtest (written without Studio).
+1. Each spawn island has a wooden dock (gold ring, sign "AIRSHIP: Gigachad Gate") beside the island, with a cream airship hovering over it: a wooden gondola, a fat balloon with a band in the team colour, a banner, a lantern and a spinning propeller.
+2. Hold the prompt: "All aboard!", after 3 seconds the ship lifts, flies over the clouds and lands at your team's dock on the Gate plaza (about 15 seconds); you are carried on the deck and set down on the pad ("Landed!"). The Gate dock's sign says "AIRSHIP: Home island" and flies you back.
+3. Several players board together (up to 6). While it flies both signs say "Airship is away...".
+4. Check: riders cannot fall off, the landing pad is not blocked, nothing else (lifts, ziplines, launch pads) fights it.
+**Tune:** `Pace.taxi` (speed, cruise height, seats, countdown).
+
+---
 # Bog hero brain, hit-stop and rank-up moment: what you are looking for (read this first)
 Needs playtest (written without Studio).
 1. Brainrot Bog's brain: dark grooves between the lobes, red veins, glowing cyan, yellow and green neurons (a few with lights), slime puddles and drips round the foot. The inside is unchanged.

@@ -226,3 +226,5 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 218 | The "MOST AURA" bounty only shows above the leader's head | A HUD banner was repeating what the crown already says |
 | 219 | Hit-stop is a short field-of-view zoom on MEGA/ULTRA crits and the rank-up moment is a gold flash plus a wide stretch | Real slow motion would slow every other player; a camera kick gives the same feel for the one player |
 | 220 | The Bog's brain got grooves, veins, neurons, puddles and drips (the hero detail) | It was the plainest hero landmark left |
+| 221 | Airship taxis are free and run between each team's spawn island and a dock on the Gate plaza (not a menu of every island): hold the prompt, 3 s countdown, up to 6 riders, the server flies the ship and carries the riders | Simple to read and test; the Gate is the centre of the war and the bridges are slow; more routes can be added as docks |
+| 222 | While a ship is away both docks say "Airship is away..." and the prompt is off | No queue to manage |

@@ -172,6 +172,15 @@ Pace.debug = {
 	allowedUserIds = { 5387903118 } :: { number },
 }
 
+-- AIRSHIP TAXIS (free): one per team, between its spawn island and a dock on the Gigachad Gate plaza.
+Pace.taxi = {
+	speed = 48, -- studs a second
+	cruiseHeight = 55, -- how far above the higher dock it cruises
+	hoverHeight = 12, -- parked / landing height above a dock
+	seats = 6,
+	boardSeconds = 3, -- the countdown after the first player boards
+}
+
 Pace.capture = {
 	secondsPerFlag = { gold = 4, diamond = 6, ultra = 8 }, -- one player alone, per flag
 	extraPlayerBonus = 0.25, -- each extra teammate on the flag adds this much speed

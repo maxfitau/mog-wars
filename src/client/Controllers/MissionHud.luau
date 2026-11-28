@@ -106,6 +106,7 @@ local function update()
 	topLabel.TextColor3 = if defending then Color3.fromRGB(255, 215, 215) else Color3.fromRGB(255, 205, 60)
 	panel.Visible = true
 
+	player:SetAttribute("MissionPos", if target then target.Position else nil) -- the minimap highlights this flag
 	-- the GPS trail: glowing dots on the ground between you and the flag (hidden where there is no ground to put them on)
 	if not target then
 		hideDots()

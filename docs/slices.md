@@ -369,3 +369,8 @@ Idle-game number formatting, 10 levels per rank with endless stars and a per-lev
 Bubble lifts replace every climb; six cartoon traps, a hidden treasure room, TRAPPED! and TRAP SHOVE! pop-ups, +50% flags in Chud Chambers.
 **Test:** see `docs/PLAYTEST.md` (needs Studio).
 **Done when:** each trap fires after a one second warning and never hurts, Moglings can pass or fail, and the treasure pays once per war.
+
+## Slice 35: Territory names and minimap
+Giant name letters and entrance arches on every territory, ENTERING title cards, a corner minimap with a map-control bar and an M-key big map.
+**Test:** see `docs/PLAYTEST.md` (needs Studio).
+**Done when:** every name is readable from the next island and the minimap matches who owns what.

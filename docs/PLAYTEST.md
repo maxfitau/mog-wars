@@ -1,3 +1,13 @@
+# Name signs, ENTERING cards, minimap: what you are looking for (read this first)
+Needs playtest (written without Studio).
+1. **Letters:** each island has its name in big blocky letters on a rock plinth at its far rim, facing the middle of the map, in its own style: Gate stone, Rizz glowing pink, Canyon dark rock with lava seams, Lighthouse red and white stripes, NPC Village coloured wood blocks, Bog slimy green. Chud Chambers has snack-bag letters high on the hall's south wall. Check they read left to right (not mirrored) from the middle of the map.
+2. **Arches:** a stone arch with lanterns and a wooden plaque with the name, where you arrive from the middle of the map.
+3. **ENTERING card:** crossing into any territory slides "⚔ ENTERING <NAME>" in for 2 s, outlined in the owner's team colour; smaller the second time. The cave says CHUD CHAMBERS, not Gigachad Gate.
+4. **Minimap:** top right, below the top bar; Roblox's player list is hidden. Islands recolour as teams capture; flags are diamonds; you are an arrow turning with the camera; teammates are dots; a pulsing ring is your mission flag; a crate icon for supply drops; a comet for the meteor. The coloured "map control" bar above it splits by territories held with a crown over the leader.
+5. **Big map:** tap the map or press M: a near-fullscreen map with the names. You can still walk. Tap or M closes it.
+**Tune:** letter size is `pixel` in `src/server/Lib/TerritorySigns.luau`; map size is the numbers in `MinimapHud.luau`.
+
+---
 # Chud Chambers trap dungeon: what you are looking for (read this first)
 Needs playtest (written without Studio). No trap hurts: you get knocked back, flung, or slimed ("TRAPPED!", green glow, 2 s hold, then back to the shaft entrance). Each trap glows or shakes about a second before it fires. Sound ids are empty in `Pace.traps.sounds`, so everything is silent for now.
 1. **Boulder:** a striped yellow lane across the hall (south side). Step on the yellow plate: it turns red, the red CHUD CRUNCH bag shakes, then rolls the length of the lane. Dodge sideways.

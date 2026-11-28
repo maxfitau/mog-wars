@@ -197,3 +197,7 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 189 | Traps are a library (`TrapSystem`) called by the place builder; they hit players and Moglings alike, nothing deals damage | Server-controlled and synced; Moglings fail on their own by walking into them |
 | 190 | TRAP SHOVE! pays only when the victim is a player the attacker shoved within 6 s | Moglings have no shove history |
 | 191 | Flags in Chud Chambers pay 1.5x aura (`Pace.traps.flagBonus`) on tick, capture and territory reward | Harder to reach |
+| 192 | Name letters are drawn from a 5x7 pixel font, one block per horizontal run (about 100 parts a name), not solid, standing on a rock plinth at each island's far rim facing the middle of the map | Cheap, readable from other islands, never blocks a path; real meshes can replace them later |
+| 193 | The ENTERING card reads the flags' TerritoryOwner for its colour and is smaller after the first visit; the cave is checked before the Gate | Chud Chambers sits inside the Gate's footprint |
+| 194 | The minimap hides Roblox's own player list (top right) so the two never overlap; M or a tap opens the big map | The only way to guarantee no overlap on every screen |
+| 195 | The minimap draws the cave as a small circle beside the Gate and the supply drops, meteor and mission flag as icons | The cave shares the Gate's x and z |

@@ -1,3 +1,13 @@
+# Visual pass, Locked-In Lighthouse (fourth island): what you are looking for (read this first)
+Needs playtest (written without Studio). View from the pier, the door path and the gallery.
+1. A sandy shore with rock patches, pebbles, dune grass and a few windswept trees (no bare grey rock round the tower).
+2. A pebble path from the door to the base flag and on toward the bridge; a plank pier on the south shore with lantern posts and a red-striped rowboat.
+3. Shore clutter: barrels, crate stacks, lobster pots, red and white buoys, driftwood, a net, rope coils and a big anchor by the door.
+4. The tower has glowing windows up its side, stone door posts with lanterns, pennants on the gallery rail.
+5. The padlock (the hero) has a LOCKED IN plaque, gold rivets and a glowing keyhole; the turning beam still sweeps.
+6. The lighthouse lifts, the cellar lift and both flags still work; nothing blocks the door.
+
+---
 # Visual pass, Rizz Ravine (third island): what you are looking for (read this first)
 Needs playtest (written without Studio). View from the western hill, the bridge and under the heart.
 1. The cliff tops and the western hill are PINK grass (not green); pink strata on the cliffs as before.

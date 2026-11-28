@@ -208,3 +208,5 @@ One line each: what was chosen, and why. Newest at the bottom.
 | 200 | The statue lift now ends inside the head plate (-6, 86, -14); the plinth stays clear of the lift pad | The old end point was 2 studs off the plate edge |
 | 201 | Rizz Ravine's pink grass is Terrain material Salt recoloured pink (the cliff caps and the western hill) | Terrain colours are per material for the whole map and Salt is used nowhere else |
 | 202 | Plank paths, torii gates, blossom trees and drifting petals give Rizz Ravine its own look; the heart is the hero and got a bow and gold knot | ART.md: each island its own ground palette and props |
+| 203 | Lighthouse ground is a sand disc with rock patches (the sand/pebble palette); a pebble path leads from the door to the base flag and the bridge | ART.md ground palette per island |
+| 204 | Lighthouse got a plank pier with a rowboat, shore clutter (pots, buoys, nets, driftwood, rope, anchor) and a LOCKED IN plaque with rivets on the padlock (the hero) | Each landmark is the most detailed thing on its island |

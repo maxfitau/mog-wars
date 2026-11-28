@@ -8,6 +8,7 @@ local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Ambience = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Ambience"))
+local Detail = require(script.Parent.Parent:WaitForChild("Detail"))
 local Cover = require(script.Parent.Parent:WaitForChild("Cover"))
 local Common = require(script.Parent:WaitForChild("Common"))
 local Kit = require(script.Parent.Parent:WaitForChild("Kit"))
@@ -41,7 +42,11 @@ return function(folder: Folder, territory: any)
 	SkyKit.island(cx, cz, territory.height, territory.radius, 70)
 	SkyKit.vines(folder, cx, cz, territory.height, territory.radius, 14)
 	SkyKit.waterfall(folder, Vector3.new(cx + territory.radius - 3, territory.height, cz + 14), Vector3.new(1, 0, 0), 45)
-	TerrainKit.cylinder(cx, -3, cz, 62, 3, Enum.Material.Rock)
+	TerrainKit.cylinder(cx, -3, cz, 62, 3, Enum.Material.Sand) -- a sandy shore round the tower (rock patches below)
+	for index = 1, 8 do
+		local angle = index / 8 * math.pi * 2 + 0.4
+		TerrainKit.cylinder(cx + math.cos(angle) * 46, -3, cz + math.sin(angle) * 46, 9 + (index % 3) * 3, 3, Enum.Material.Rock)
+	end
 	-- the secret cellar: down a shaft with a ladder (the shaft is 4 studs wide so the edges are clean)
 	TerrainKit.carve(cx - 30, -16, cz + 10, 16, 12, 16)
 	TerrainKit.carve(cx - 30, -4, cz + 10, 4, 4, 4)
@@ -121,5 +126,93 @@ return function(folder: Folder, territory: any)
 	k:box("CellarRim", -30, 0, 10, 6, 1.5, 6, STONE, Enum.Material.Cobblestone, { collide = false }) -- the hatch frame
 	k:truss("CellarLadder", -29, -16, 10, 17, -29, 16, 2)
 	Common.stash(folder, k:at(-34, -16, 14), territory.id)
+	-- ===== DETAIL PASS (see ART.md): sand and pebbles, a pier and boat, fishing gear, windows, rivets, a lit door =====
+	local rng = Random.new(303)
+	local world = function(x: number, z: number): Vector3
+		return Vector3.new(cx + x, territory.height, cz + z)
+	end
+	-- pebble path from the door to the base flag and on toward the bridge, and a plank pier on the south shore
+	Detail.cobblePath(folder, world(21, 0), world(90, 0), 9, rng)
+	Detail.plankPath(folder, world(0, 52), world(0, 90), 6, rng)
+	for _, side in { -1, 1 } do
+		for along = 0, 3 do
+			k:cyl("PierPost", side * 3.6, -1, 56 + along * 10, 1.4, 5, Color3.fromRGB(96, 66, 44), Enum.Material.Wood)
+			if along % 2 == 0 then
+				Detail.lanternPost(folder, world(side * 4.6, 56 + along * 10), along == 0)
+			end
+		end
+	end
+	-- a rowboat tied up at the end of the pier
+	k:ball("BoatHull", 7, 0.2, 86, 4.5, 2.6, 11, Color3.fromRGB(120, 84, 52), Enum.Material.WoodPlanks, { collide = false })
+	k:box("BoatSeat", 7, 1.6, 86, 3.6, 0.35, 1, Color3.fromRGB(176, 128, 74), Enum.Material.WoodPlanks, { collide = false })
+	k:box("BoatStripe", 7, 2, 86, 4.7, 0.4, 11, Color3.fromRGB(215, 55, 55), Enum.Material.WoodPlanks, { collide = false })
+	k:box("BoatOar", 8.8, 1.6, 86, 0.3, 0.3, 6, Color3.fromRGB(190, 150, 100), Enum.Material.Wood, { collide = false, rotY = 0.4 })
+	-- shore clutter: barrels, crate stacks, lobster pots, buoys, driftwood, nets, rocks, coiled rope
+	for index = 1, 5 do
+		Detail.barrel(folder, world(34 + index * 3.2, -40), rng)
+		Detail.crateStack(folder, world(-42 + index * 4, 56 + (index % 2) * 3), rng)
+		k:box("LobsterPot", -30 + index * 5, 0, -50 - (index % 2) * 3, 3.4, 2.2, 2.4, Color3.fromRGB(150, 105, 62), Enum.Material.WoodPlanks, { collide = false, rotY = index })
+		k:ball("Buoy", 20 + index * 2.4, 0, 52, 2, 2, 2, if index % 2 == 0 then Color3.fromRGB(215, 55, 55) else WHITE, Enum.Material.Marble, { collide = false })
+	end
+	for index = 1, 4 do
+		local log = k:cyl("Driftwood", -50 + index * 12, 0.6, 60 + index * 3, 1.4, 8, Color3.fromRGB(150, 130, 112), Enum.Material.Wood, { collide = false })
+		log.CFrame = CFrame.new(log.Position) * CFrame.Angles(math.rad(90), index, 0)
+		Detail.rocks(folder, world(-60 + index * 30, -64), rng, 6)
+	end
+	k:box("FishingNet", -46, 0.2, 40, 9, 0.2, 6, Color3.fromRGB(190, 175, 140), Enum.Material.Fabric, { collide = false, rotY = 0.3 })
+	for index = 1, 5 do
+		k:cyl("RopeCoil", 38 + index * 1.4, 0, 20, 2.2, 0.8, Color3.fromRGB(215, 195, 150), Enum.Material.Fabric, { collide = false })
+	end
+	-- a big old anchor leaning by the door
+	k:cyl("AnchorShaft", 27, 0, 8, 0.9, 7, Color3.fromRGB(60, 58, 66), Enum.Material.Metal, { collide = false })
+	k:box("AnchorBar", 27, 5.2, 8, 4.4, 0.8, 0.8, Color3.fromRGB(60, 58, 66), Enum.Material.Metal, { collide = false })
+	k:ball("AnchorRing", 27, 6.6, 8, 1.8, 1.8, 0.5, Color3.fromRGB(60, 58, 66), Enum.Material.Metal, { collide = false })
+	-- windows with warm glow up the tower, a stone surround and warm lantern at the door
+	for index = 1, 5 do
+		local angle = index * 1.7
+		local radius = 20 - index * 1.1
+		local window = k:box("TowerWindow", math.cos(angle) * (radius - 0.1), index * (DECK / 6) + 3, math.sin(angle) * (radius - 0.1), 1.6, 3.4, 0.5, Color3.fromRGB(255, 200, 110), Enum.Material.Neon, { collide = false })
+		window.CFrame = CFrame.lookAt(window.Position, window.Position + Vector3.new(math.cos(angle), 0, math.sin(angle)))
+	end
+	for _, side in { -1, 1 } do
+		k:box("DoorPost", 19.2, 0, side * 4.6, 2, 9.4, 1.4, STONE, Enum.Material.Cobblestone, { collide = false })
+		k:ball("DoorLantern", 21, 6, side * 6, 1.6, 2, 1.6, Color3.fromRGB(255, 190, 90), Enum.Material.Neon, { collide = false })
+		for index = 0, 5 do -- pennants on the gallery rail
+			k:box("Pennant", math.cos(index * 2.1 + side) * 26.6, DECK + 2.6, math.sin(index * 2.1 + side) * 26.6, 1.8, 1.8, 0.2, if index % 2 == 0 then RED else WHITE, Enum.Material.Fabric, { collide = false })
+		end
+	end
+	-- the padlock (the hero): a plaque that says LOCKED IN, rivets round the body, a glowing keyhole ring
+	local plaque = k:box("PadlockPlaque", 20, DECK + 12, 11.5, 12, 3.6, 0.4, Color3.fromRGB(40, 36, 50), Enum.Material.Slate, { collide = false })
+	for _, face in { Enum.NormalId.Front } do
+		local gui = Instance.new("SurfaceGui")
+		gui.Face = face
+		gui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+		gui.PixelsPerStud = 40
+		gui.Parent = plaque
+		local label = Instance.new("TextLabel")
+		label.Size = UDim2.fromScale(1, 1)
+		label.BackgroundTransparency = 1
+		label.Font = Enum.Font.GothamBlack
+		label.TextScaled = true
+		label.Text = "LOCKED IN"
+		label.TextColor3 = GOLD
+		label.Parent = gui
+	end
+	plaque.CFrame = CFrame.lookAt(plaque.Position, plaque.Position + Vector3.zAxis)
+	for index = 0, 7 do
+		k:ball("PadlockRivet", 20 + math.cos(index * math.pi / 4) * 8, DECK + 11 + math.sin(index * math.pi / 4) * 9, 11.6, 1.2, 1.2, 1.2, Color3.fromRGB(255, 230, 120), Enum.Material.Metal, { collide = false })
+	end
+	k:ball("KeyholeGlow", 20, DECK + 8.5, 11.5, 5.4, 8.4, 0.3, Color3.fromRGB(255, 190, 90), Enum.Material.Neon, { collide = false, transparency = 0.6 })
+	-- a few wind-bent shore trees and dune grass, light and spray
+	for index = 1, 7 do
+		local angle = index * 0.9 + 0.5
+		local spot = Detail.ground(cx + math.cos(angle) * 70, cz + math.sin(angle) * 70, territory.height)
+		if spot then
+			Detail.tree(folder, spot, 0.9, Color3.fromRGB(120, 175, 80), rng)
+		end
+	end
+	Detail.tuftRing(folder, Vector3.new(cx, territory.height, cz), 28, 88, 110, rng)
+	Detail.fireflies(folder, world(0, 70) + Vector3.new(0, 4, 0), Vector3.new(30, 8, 40))
+	Common.sparkles(folder, "ShoreSpray", world(0, 92) + Vector3.new(0, 1, 0), Color3.fromRGB(235, 245, 255), 6, 40)
 	Common.ambience(folder, k:at(0, 6, 0), Ambience.locked_in_lighthouse, 0.4)
 end

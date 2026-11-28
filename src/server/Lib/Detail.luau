@@ -279,4 +279,40 @@ function Detail.cart(parent: Instance, position: Vector3, angle: number)
 	end
 end
 
+-- A desert cactus with two arms.
+function Detail.cactus(parent: Instance, position: Vector3, scale: number)
+	local green = Color3.fromRGB(80, 150, 80)
+	part(parent, "Cactus", Vector3.new(6 * scale, 2 * scale, 2 * scale), CFrame.new(position + Vector3.new(0, 3 * scale, 0)) * CFrame.Angles(0, 0, math.rad(90)), green, Enum.Material.Grass, Enum.PartType.Cylinder, true)
+	for _, side in { -1, 1 } do
+		part(parent, "CactusArm", Vector3.new(2.6 * scale, 1.1 * scale, 1.1 * scale), CFrame.new(position + Vector3.new(side * 1.5 * scale, 3.4 * scale, 0)), green, Enum.Material.Grass, Enum.PartType.Cylinder)
+		part(parent, "CactusArmUp", Vector3.new(2 * scale, 1.1 * scale, 1.1 * scale), CFrame.new(position + Vector3.new(side * 2.6 * scale, 4.4 * scale, 0)) * CFrame.Angles(0, 0, math.rad(90)), green, Enum.Material.Grass, Enum.PartType.Cylinder)
+	end
+	part(parent, "CactusFlower", Vector3.new(0.9 * scale, 0.5 * scale, 0.9 * scale), CFrame.new(position + Vector3.new(0, 6.2 * scale, 0)), Color3.fromRGB(255, 110, 150), Enum.Material.Marble, Enum.PartType.Ball)
+end
+
+-- A glowing mushroom (cap colour = its glow), with a soft light.
+function Detail.glowMushroom(parent: Instance, position: Vector3, colour: Color3, scale: number, withLight: boolean?)
+	part(parent, "MushroomStem", Vector3.new(0.9 * scale, 2.2 * scale, 0.9 * scale), CFrame.new(position + Vector3.new(0, 1.1 * scale, 0)), Color3.fromRGB(235, 228, 205), Enum.Material.Marble, Enum.PartType.Cylinder).CFrame = CFrame.new(position + Vector3.new(0, 1.1 * scale, 0)) * CFrame.Angles(0, 0, math.rad(90))
+	local cap = part(parent, "MushroomCap", Vector3.new(3.2 * scale, 1.9 * scale, 3.2 * scale), CFrame.new(position + Vector3.new(0, 2.5 * scale, 0)), colour, Enum.Material.Neon, Enum.PartType.Ball)
+	if withLight then
+		local light = Instance.new("PointLight")
+		light.Color = colour
+		light.Range = 14
+		light.Brightness = 0.9
+		light.Parent = cap
+	end
+end
+
+-- A clump of reeds with brown cattail heads.
+function Detail.reeds(parent: Instance, position: Vector3, rng: Random, count: number)
+	for _ = 1, count do
+		local height = 3 + rng:NextNumber() * 3
+		local spot = position + Vector3.new((rng:NextNumber() - 0.5) * 3, 0, (rng:NextNumber() - 0.5) * 3)
+		part(parent, "Reed", Vector3.new(0.18, height, 0.18), CFrame.new(spot + Vector3.new(0, height / 2, 0)) * CFrame.Angles(0, 0, (rng:NextNumber() - 0.5) * 0.2), Color3.fromRGB(100, 150, 70), Enum.Material.Grass)
+		if rng:NextNumber() < 0.5 then
+			part(parent, "Cattail", Vector3.new(0.45, 1.2, 0.45), CFrame.new(spot + Vector3.new(0, height, 0)), Color3.fromRGB(96, 60, 40), Enum.Material.Wood, Enum.PartType.Cylinder)
+		end
+	end
+end
+
 return Detail

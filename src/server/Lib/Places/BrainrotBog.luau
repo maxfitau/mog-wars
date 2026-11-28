@@ -6,6 +6,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Ambience = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Ambience"))
+local Detail = require(script.Parent.Parent:WaitForChild("Detail"))
 local Cover = require(script.Parent.Parent:WaitForChild("Cover"))
 local Common = require(script.Parent:WaitForChild("Common"))
 local Kit = require(script.Parent.Parent:WaitForChild("Kit"))
@@ -37,24 +38,24 @@ local function brain(k: any)
 			local fromNorth = math.abs(math.atan2(math.sin(angle + math.pi / 2), math.cos(angle + math.pi / 2)))
 			if not (ring.lat < 60 and fromNorth < 0.42) then
 				local colour = if index % 2 == 0 then PINK else PINK_DARK
-				k:ball("BrainBall", math.cos(angle) * radius, y - ring.size / 2, math.sin(angle) * radius, ring.size, ring.size, ring.size, colour, Enum.Material.SmoothPlastic)
+				k:ball("BrainBall", math.cos(angle) * radius, y - ring.size / 2, math.sin(angle) * radius, ring.size, ring.size, ring.size, colour, Enum.Material.Fabric)
 			end
 		end
 	end
-	k:ball("BrainBall", 0, BRAIN_RADIUS - 9, 0, 22, 18, 22, PINK, Enum.Material.SmoothPlastic)
+	k:ball("BrainBall", 0, BRAIN_RADIUS - 9, 0, 22, 18, 22, PINK, Enum.Material.Fabric)
 	-- the core chamber: a ring of fleshy walls around the flag with one gap on the east side, so the way in winds round
 	local count = 12
 	for index = 0, count - 1 do
 		local angle = index / count * math.pi * 2
 		if math.abs(math.atan2(math.sin(angle), math.cos(angle))) > 0.3 then -- the gap faces east (angle 0)
-			local part = k:box("CoreWall", math.cos(angle) * 15, 0, math.sin(angle) * 15, 8.2, 12, 2, FLESH, Enum.Material.SmoothPlastic, { cover = true })
+			local part = k:box("CoreWall", math.cos(angle) * 15, 0, math.sin(angle) * 15, 8.2, 12, 2, FLESH, Enum.Material.Fabric, { cover = true })
 			part.CFrame = CFrame.lookAt(part.Position, part.Position + Vector3.new(math.cos(angle), 0, math.sin(angle)))
 		end
 	end
 	-- fleshy pillars in the outer tunnel, and a glow in the core
 	for index = 0, 3 do
 		local angle = math.rad(45 + index * 90)
-		k:cyl("FleshPillar", math.cos(angle) * 21, 0, math.sin(angle) * 21, 4.5, 14, PINK_DARK, Enum.Material.SmoothPlastic, { cover = true })
+		k:cyl("FleshPillar", math.cos(angle) * 21, 0, math.sin(angle) * 21, 4.5, 14, PINK_DARK, Enum.Material.Fabric, { cover = true })
 	end
 	local core = k:cyl("CoreGlow", 0, 0.05, 0, 14, 0.3, Color3.fromRGB(255, 170, 200), Enum.Material.Neon, { collide = false })
 	local light = Instance.new("PointLight")
@@ -80,6 +81,10 @@ return function(folder: Folder, territory: any)
 	SkyKit.vines(folder, cx, cz, territory.height, territory.radius, 16)
 	SkyKit.waterfall(folder, Vector3.new(cx - territory.radius + 3, territory.height, cz - 20), Vector3.new(-1, 0, 0), 40)
 	TerrainKit.cylinder(cx, -6, cz, 105, 6, Enum.Material.Mud) -- swamp ground
+	for index = 1, 10 do -- moss patches (the moss palette) over the mud
+		local angle = index / 10 * math.pi * 2 + 0.3
+		TerrainKit.cylinder(cx + math.cos(angle) * (30 + (index % 3) * 22), -6, cz + math.sin(angle) * (30 + (index % 3) * 22), 10 + (index % 4) * 3, 6, Enum.Material.LeafyGrass)
+	end
 
 	-- ponds, each with a ring of lily pads to jump across
 	local ponds = { { -50, -40, 12 }, { 52, -34, 11 }, { -62, 28, 12 }, { 58, 42, 12 }, { -18, 68, 11 }, { 22, -72, 10 } }
@@ -124,6 +129,54 @@ return function(folder: Folder, territory: any)
 	for index, spot in { { 0, 0 }, { -50, -20 }, { 50, 20 }, { -20, 60 }, { 30, -60 }, { 0, 90 } } do
 		Common.smoke(folder, "BogFog" .. index, k:at(spot[1], 2, spot[2]), Color3.fromRGB(150, 220, 130), 2, 22)
 		Common.sparkles(folder, "Bubbles" .. index, k:at(spot[1] + 8, 0.5, spot[2] + 6), Color3.fromRGB(130, 255, 100), 5, 20)
+	end
+	-- ===== DETAIL PASS (see ART.md): boardwalks, glowing mushrooms, reeds, frogs, hanging moss, green light, fireflies =====
+	local rng = Random.new(66)
+	local world = function(x: number, z: number): Vector3
+		return Vector3.new(cx + x, territory.height, cz + z)
+	end
+	Detail.plankPath(folder, world(-96, -60), world(-40, -30), 5, rng) -- boardwalks to the brain from the north-west and south-east
+	Detail.plankPath(folder, world(-40, -30), world(-14, -6), 5, rng)
+	Detail.plankPath(folder, world(96, 60), world(40, 30), 5, rng)
+	Detail.plankPath(folder, world(40, 30), world(14, 6), 5, rng)
+	for index = 1, 14 do -- lanterns along them, glowing swamp-green
+		local x = if index <= 7 then -96 + index * 10 else 96 - (index - 7) * 10
+		local z = if index <= 7 then -60 + index * 6 else 60 - (index - 7) * 6
+		Detail.lanternPost(folder, world(x + 3, z - 3), index % 3 == 0)
+	end
+	for _, pond in ponds do
+		Detail.reeds(folder, world(pond[1] + pond[3] * 0.8, pond[2] - pond[3] * 0.4), rng, 9)
+		Detail.reeds(folder, world(pond[1] - pond[3] * 0.7, pond[2] + pond[3] * 0.6), rng, 7)
+		local frog = k:ball("Frog", pond[1] + pond[3] * 0.3, -0.8, pond[2] - pond[3] * 0.2, 2, 1.4, 2.4, Color3.fromRGB(90, 180, 70), Enum.Material.Marble, { collide = false })
+		for _, side in { -1, 1 } do
+			k:ball("FrogEye", pond[1] + pond[3] * 0.3 + side * 0.6, 0.1, pond[2] - pond[3] * 0.2 - 0.6, 0.8, 0.8, 0.8, Color3.new(1, 1, 1), Enum.Material.Marble, { collide = false })
+		end
+		frog.CFrame = CFrame.new(frog.Position)
+	end
+	for index = 1, 26 do -- glowing mushrooms in toxic green, magenta and cyan
+		local angle = index * 2.4
+		local radius = 25 + (index * 13) % 70
+		local spot = Detail.ground(cx + math.cos(angle) * radius, cz + math.sin(angle) * radius, territory.height)
+		if spot then
+			Detail.glowMushroom(folder, spot, ({ Color3.fromRGB(120, 255, 120), Color3.fromRGB(255, 110, 230), Color3.fromRGB(90, 240, 240) })[index % 3 + 1], 1 + (index % 3) * 0.3, index % 4 == 0)
+		end
+	end
+	for index, spot in { { -78, -10 }, { 75, 10 }, { -30, 82 }, { 40, 88 }, { -85, 60 }, { 84, -50 } } do -- hanging moss on the dead trees
+		for strand = 1, 4 do
+			k:box("HangingMoss", spot[1] + (strand - 2.5) * 1.6, 5 + (strand % 2) * 2, spot[2] + (index % 2) * 1.2, 0.5, 4 + strand % 3, 0.5, Color3.fromRGB(95, 140, 70), Enum.Material.Grass, { collide = false })
+		end
+	end
+	Detail.tuftRing(folder, Vector3.new(cx, territory.height, cz), 20, 98, 110, rng)
+	Detail.rocks(folder, world(-60, 50), rng, 5)
+	Detail.rocks(folder, world(64, -20), rng, 5)
+	for index, spot in { { -50, 10 }, { 50, -10 }, { 0, 70 }, { 0, -70 } } do
+		local glow = k:ball("BogGlow", spot[1], 6, spot[2], 2, 2, 2, Color3.fromRGB(120, 255, 130), Enum.Material.Neon, { collide = false, transparency = 0.4 })
+		local light = Instance.new("PointLight") -- a green glow over the bog
+		light.Color = Color3.fromRGB(120, 255, 130)
+		light.Range = 36
+		light.Brightness = 1.4
+		light.Parent = glow
+		Detail.fireflies(folder, world(spot[1], spot[2]) + Vector3.new(0, 4, 0), Vector3.new(36, 8, 36))
 	end
 	Common.ambience(folder, k:at(0, 6, 0), Ambience.brainrot_bog, 0.4)
 end

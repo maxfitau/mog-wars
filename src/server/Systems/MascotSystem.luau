@@ -12,6 +12,7 @@ local Workspace = game:GetService("Workspace")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local FactionRules = require(Shared:WaitForChild("FactionRules"))
 local MapLayout = require(Shared:WaitForChild("MapLayout"))
+local Detail = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("Detail"))
 local Mascots = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("Mascots"))
 local CaptureSystem = require(script.Parent:WaitForChild("CaptureSystem"))
 
@@ -61,6 +62,29 @@ function MascotSystem.start()
 		local npcPosition = centre + toMiddle * 15 - side * 8
 		local origin = CFrame.lookAt(npcPosition, npcPosition + toMiddle)
 		local built = Mascots.build(faction.id, origin, 0.55, false, colour)
+		-- the rest of the island (see ART.md): a cobble path toward the middle of the map, lantern posts, gardens, trees, tufts
+		local rng = Random.new(500 + index)
+		local detail = Instance.new("Folder")
+		detail.Name = "BaseDetail" .. index
+		detail.Parent = Workspace
+		Detail.cobblePath(detail, centre + toMiddle * 9, centre + toMiddle * 40, 8, rng)
+		for _, corner in { { 1, 1 }, { 1, -1 }, { -1, 1 }, { -1, -1 } } do
+			Detail.lanternPost(detail, centre + toMiddle * corner[1] * 11 + side * corner[2] * 11, corner[1] == 1)
+		end
+		Detail.flowerBed(detail, centre - toMiddle * 24 + side * 6, toMiddle:Cross(Vector3.yAxis), 14, 5, rng)
+		Detail.flowerBed(detail, centre - toMiddle * 12 - side * 24, toMiddle, 12, 5, rng)
+		Detail.fence(detail, centre - toMiddle * 30 - side * 20, centre - toMiddle * 30 - side * 4)
+		for tree = 1, 4 do
+			local angle = tree * 1.57 + index
+			local spot = Detail.ground(centre.X + math.cos(angle) * 36, centre.Z + math.sin(angle) * 36, height)
+			if spot then
+				Detail.tree(detail, spot, 0.9, Color3.fromRGB(110, 190, 70), rng)
+			end
+		end
+		Detail.bush(detail, centre + side * 14 + toMiddle * 18, 1.1, rng)
+		Detail.bush(detail, centre - side * 14 - toMiddle * 8, 1.1, rng)
+		Detail.tuftRing(detail, centre, 14, 42, 45, rng)
+		Detail.fireflies(detail, centre + Vector3.new(0, 4, 0), Vector3.new(60, 8, 60))
 		npcs[faction.id] = { built = built, origin = origin, rootLocal = origin:ToObjectSpace(built.root.CFrame), cheerUntil = 0, faction = faction.id, scale = 0.55 }
 	end
 	CaptureSystem.captureListeners[#CaptureSystem.captureListeners + 1] = function(_name: string, owner: number)

@@ -1,3 +1,11 @@
+# Visual pass, Brainrot Bog, Cooked Canyon, spawn islands: what you are looking for (read this first)
+Needs playtest (written without Studio).
+1. **Bog:** moss patches over the mud, boardwalks toward the brain from the north-west and south-east with green lanterns, reeds and frogs by the ponds, glowing green, magenta and cyan mushrooms, hanging moss on the dead trees, green glows with fireflies. The brain is no longer shiny plastic.
+2. **Canyon:** dark cracked rock and packed earth patches on the red floor, cacti, stone paths to the stepping stones, wagons, rails, barrels and torch posts, bones and a skull, fire under the pan, bacon beside the egg, giant salt and pepper shakers and a spatula, hot orange glows along the lava river.
+3. **Spawn islands:** a cobble path from the spawn pad toward the middle of the map, lantern posts at the pad corners, flower beds, a fence, trees, bushes, flowers and fireflies, plus the mascot statue and NPC.
+**Check:** nothing blocks a spawn pad, lift, launch pad or the Bog and Canyon lifts and routes; Moglings can still reach the brain and the pan.
+
+---
 # Flags, lighting, team mascots: what you are looking for (read this first)
 Needs playtest (written without Studio). Screenshot each spawn island and a few flags from far away.
 1. **Flags** from another island: a tall pole with a big waving cloth in the owner's colour (white while neutral), a tall light beam (it pulses while contested), a pie of coloured spokes on the ground that fills as a team captures, and a flag icon with the capture percent that shows through walls within about 150 studs. When a flag changes owner the cloth whips, the colour changes and confetti bursts.

@@ -1,3 +1,13 @@
+# Visual pass, NPC Village (second island): what you are looking for (read this first)
+Needs playtest (written without Studio). View from the plaza, a house front, and the statue.
+1. Houses: timber framing, door awnings, shutters, a flower box under the window, chimneys; one-storey houses have pitched coloured roofs with a ridge and stepped gables (nobody can stand on them); two-storey houses keep the flat roof deck (the rooftop stash is still there).
+2. Plaza: a cobble square with market stalls (striped awnings, fruit baskets), a hand cart, lantern posts, cobble paths to every door, picket fences, flower beds, bushes, trees round the edge, grass patches round the rim.
+3. Statue (the hero): plinth, carved eyes, brows, nose, mouth, ears, shoulder pads, belt and buckle, hands, moss, vines, cracks and block lines. Check the bubble lift at the statue's foot still carries you to the head plate and drops you onto it.
+4. Well: little roof and bucket. The secret room under it still works with its lift out.
+5. Fireflies and drifting leaves. Nothing blocks the house doors or the lift pads.
+**Check:** the loss of the flat roofs on one-storey houses (Moglings and players used to jump onto them); tell me if you miss them.
+
+---
 # Visual pass, Gigachad Gate (first island): what you are looking for (read this first)
 Needs playtest (written without Studio). Compare with your reference images from three angles (front gateway, a tower, the back courtyard).
 1. The face has cheekbones, brow ridges, lips, a chin, sideburns and an amber gleam behind the sunglasses; the jaws have brick lines.

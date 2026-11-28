@@ -194,4 +194,73 @@ function Detail.tuftRing(parent: Instance, centre: Vector3, innerRadius: number,
 	end
 end
 
+-- A chunky tree: a tapered trunk, roots and a clump of overlapping leaf balls (`leaf` colour so each island can differ).
+function Detail.tree(parent: Instance, position: Vector3, scale: number, leaf: Color3, rng: Random)
+	local height = (9 + rng:NextNumber() * 3) * scale
+	part(parent, "TreeTrunk", Vector3.new(height, 2 * scale, 2 * scale), CFrame.new(position + Vector3.new(0, height / 2, 0)) * CFrame.Angles(0, 0, math.rad(90)), Color3.fromRGB(104, 72, 48), Enum.Material.Wood, Enum.PartType.Cylinder, true)
+	for index = 1, 3 do
+		local angle = index * 2.1 + rng:NextNumber()
+		part(parent, "TreeRoot", Vector3.new(0.9 * scale, 0.9 * scale, 3 * scale), CFrame.new(position + Vector3.new(math.cos(angle) * 1.4 * scale, 0.3, math.sin(angle) * 1.4 * scale)) * CFrame.Angles(0, -angle, 0), Color3.fromRGB(96, 66, 44), Enum.Material.Wood)
+	end
+	for index = 1, 4 do
+		local size = (6.5 - index * 0.6 + rng:NextNumber() * 1.6) * scale
+		local offset = Vector3.new((rng:NextNumber() - 0.5) * 4 * scale, height + (index - 2) * 1.6 * scale, (rng:NextNumber() - 0.5) * 4 * scale)
+		part(parent, "TreeLeaves", Vector3.new(size, size * 0.85, size), CFrame.new(position + offset), leaf:Lerp(Color3.fromRGB(40, 110, 40), index * 0.07), Enum.Material.Grass, Enum.PartType.Ball)
+	end
+end
+
+-- A picket fence from `from` to `to` (posts every 4 studs, two rails, pointed-top pickets).
+function Detail.fence(parent: Instance, from: Vector3, to: Vector3)
+	local flat = Vector3.new(to.X - from.X, 0, to.Z - from.Z)
+	local length = flat.Magnitude
+	if length < 2 then
+		return
+	end
+	local frame = CFrame.lookAt(from, from + flat)
+	for _, height in { 1.2, 2.5 } do
+		part(parent, "FenceRail", Vector3.new(0.35, 0.4, length), frame * CFrame.new(0, height, -length / 2), Color3.fromRGB(150, 105, 62), Enum.Material.WoodPlanks)
+	end
+	for along = 0, length, 1.6 do
+		part(parent, "Picket", Vector3.new(0.5, 3.4, 0.35), frame * CFrame.new(0, 1.7, -along), Color3.fromRGB(235, 220, 190), Enum.Material.WoodPlanks)
+	end
+	for along = 0, length, 4 do
+		part(parent, "FencePost", Vector3.new(0.8, 3.9, 0.8), frame * CFrame.new(0, 1.9, -along), Color3.fromRGB(104, 72, 48), Enum.Material.Wood)
+	end
+end
+
+-- A market stall: four posts, a striped awning, a counter and baskets of fruit. `colours` are the awning stripes.
+function Detail.stall(parent: Instance, position: Vector3, facing: Vector3, colours: { Color3 }, rng: Random)
+	local frame = CFrame.lookAt(position, position + facing)
+	for _, dx in { -4, 4 } do
+		for _, dz in { -2.5, 2.5 } do
+			part(parent, "StallPost", Vector3.new(0.6, 8, 0.6), frame * CFrame.new(dx, 4, dz), Color3.fromRGB(104, 72, 48), Enum.Material.Wood)
+		end
+	end
+	for stripe = 1, 8 do
+		part(parent, "Awning", Vector3.new(1.05, 0.35, 6.4), frame * CFrame.new(-4.2 + (stripe - 0.5) * 1.05, 8.2 - 0.04 * stripe, 0) * CFrame.Angles(0, 0, math.rad(-4)), colours[stripe % #colours + 1], Enum.Material.Fabric)
+	end
+	part(parent, "Counter", Vector3.new(8, 2.4, 2.2), frame * CFrame.new(0, 1.2, 1.6), Color3.fromRGB(150, 105, 62), Enum.Material.WoodPlanks, nil, true)
+	local fruit = { Color3.fromRGB(230, 60, 60), Color3.fromRGB(250, 200, 50), Color3.fromRGB(110, 190, 70), Color3.fromRGB(240, 140, 50) }
+	for index = 1, 5 do
+		part(parent, "Basket", Vector3.new(1.4, 0.9, 1.4), frame * CFrame.new(-3 + (index - 1) * 1.5, 2.8, 1.6), Color3.fromRGB(170, 120, 70), Enum.Material.Wood)
+		for _ = 1, 3 do
+			part(parent, "Fruit", Vector3.new(0.6, 0.6, 0.6), frame * CFrame.new(-3 + (index - 1) * 1.5 + (rng:NextNumber() - 0.5) * 0.7, 3.4, 1.6 + (rng:NextNumber() - 0.5) * 0.7), fruit[rng:NextInteger(1, #fruit)], Enum.Material.Marble, Enum.PartType.Ball)
+		end
+	end
+end
+
+-- A wooden hand cart with two big wheels, loaded with sacks.
+function Detail.cart(parent: Instance, position: Vector3, angle: number)
+	local frame = CFrame.new(position) * CFrame.Angles(0, angle, 0)
+	part(parent, "CartBed", Vector3.new(5, 0.6, 3.2), frame * CFrame.new(0, 2.2, 0), Color3.fromRGB(150, 105, 62), Enum.Material.WoodPlanks, nil, true)
+	for _, dz in { -1.6, 1.6 } do
+		part(parent, "CartSide", Vector3.new(5, 1.2, 0.4), frame * CFrame.new(0, 3, dz), Color3.fromRGB(130, 90, 54), Enum.Material.WoodPlanks)
+		part(parent, "CartWheel", Vector3.new(0.5, 3.4, 3.4), frame * CFrame.new(0, 1.7, dz * 1.15) * CFrame.Angles(0, math.rad(90), 0), Color3.fromRGB(90, 62, 40), Enum.Material.Wood, Enum.PartType.Cylinder)
+	end
+	part(parent, "CartHandle", Vector3.new(3.6, 0.35, 0.35), frame * CFrame.new(-4, 2.4, 0), Color3.fromRGB(104, 72, 48), Enum.Material.Wood)
+	for index = 1, 3 do
+		part(parent, "Sack", Vector3.new(1.6, 1.4, 1.4), frame * CFrame.new(-1.2 + index * 1.1, 3.4, 0), Color3.fromRGB(215, 195, 150), Enum.Material.Fabric, Enum.PartType.Ball)
+	end
+end
+
 return Detail

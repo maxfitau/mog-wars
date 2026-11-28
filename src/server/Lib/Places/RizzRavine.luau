@@ -8,6 +8,7 @@ local CollectionService = game:GetService("CollectionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Ambience = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Ambience"))
+local Detail = require(script.Parent.Parent:WaitForChild("Detail"))
 local Cover = require(script.Parent.Parent:WaitForChild("Cover"))
 local Common = require(script.Parent:WaitForChild("Common"))
 local Kit = require(script.Parent.Parent:WaitForChild("Kit"))
@@ -34,8 +35,8 @@ return function(folder: Folder, territory: any)
 	TerrainKit.block(cx, -2, cz, 72, 2, 64, Enum.Material.Limestone) -- ravine floor
 	for _, side in { -1, 1 } do
 		TerrainKit.block(cx, 0, cz + side * 42, 72, 24, 36, Enum.Material.Limestone)
-		TerrainKit.block(cx, 22, cz + side * 42, 72, 2, 36, Enum.Material.LeafyGrass)
-		TerrainKit.dome(cx - 46, cz + side * 42, 75, 24, Enum.Material.LeafyGrass) -- the way up: a wide, gentle hill from the west
+		TerrainKit.block(cx, 22, cz + side * 42, 72, 2, 36, Enum.Material.Salt)
+		TerrainKit.dome(cx - 46, cz + side * 42, 75, 24, Enum.Material.Salt) -- the way up: a wide, gentle hill from the west
 	end
 
 	-- layered pink cliffs: coloured strata bands on both faces of the ravine, and a waterfall pouring into it
@@ -53,7 +54,7 @@ return function(folder: Folder, territory: any)
 		local x = ((index * 37) % 64) - 32
 		local z = side * (30 + ((index * 53) % 26))
 		k:cyl("FlowerStem", x, DECK_Y, z, 0.3, 1.8, Color3.fromRGB(70, 150, 70), Enum.Material.Grass, { collide = false })
-		k:ball("Flower", x, DECK_Y + 1.6, z, 1.4, 1.4, 1.4, ({ Color3.fromRGB(255, 120, 190), Color3.new(1, 1, 1), Color3.fromRGB(255, 220, 90), Color3.fromRGB(190, 120, 255) })[index % 4 + 1], Enum.Material.SmoothPlastic, { collide = false })
+		k:ball("Flower", x, DECK_Y + 1.6, z, 1.4, 1.4, 1.4, ({ Color3.fromRGB(255, 120, 190), Color3.new(1, 1, 1), Color3.fromRGB(255, 220, 90), Color3.fromRGB(190, 120, 255) })[index % 4 + 1], Enum.Material.Marble, { collide = false })
 	end
 	-- the rope bridge: individual planks (with little gaps) and rails
 	for index = 0, 24 do
@@ -84,7 +85,7 @@ return function(folder: Folder, territory: any)
 			local t = index / steps * math.pi * 2
 			local hx = 16 * math.sin(t) ^ 3
 			local hy = 13 * math.cos(t) - 5 * math.cos(2 * t) - 2 * math.cos(3 * t) - math.cos(4 * t)
-			local part = k:ball("HeartBalloon", hx * scale, centreY + hy * scale - 2.5, z, 5, 5, 5, if index % 2 == 0 then PINK else ROSE, Enum.Material.SmoothPlastic, { cover = true })
+			local part = k:ball("HeartBalloon", hx * scale, centreY + hy * scale - 2.5, z, 5, 5, 5, if index % 2 == 0 then PINK else ROSE, Enum.Material.Foil, { cover = true })
 			part.Reflectance = 0.15
 		end
 	end
@@ -124,6 +125,58 @@ return function(folder: Folder, territory: any)
 	end
 	k:box("Ledge", 0, 10.5, -22, 10, 1, 6, PINK, Enum.Material.Rock)
 	Common.stash(folder, k:at(0, 11.5, -22), territory.id)
+
+	-- ===== DETAIL PASS (see ART.md): pink grass, blossom trees, plank paths, torii gates, gardens, a stream, a bow on the heart =====
+	local rng = Random.new(77)
+	local capY = territory.height + DECK_Y
+	local world = function(x: number, z: number): Vector3
+		return Vector3.new(cx + x, capY, cz + z)
+	end
+	local blossom = { Color3.fromRGB(255, 160, 205), Color3.fromRGB(245, 120, 175), Color3.fromRGB(255, 195, 220) }
+	for _, side in { -1, 1 } do
+		-- plank paths from the western hill to the flag, and from the flag to the bridge end
+		Detail.plankPath(folder, world(-60, side * 42), world(-8, side * 42), 6, rng)
+		Detail.plankPath(folder, world(0, side * 36), world(0, side * 25.5), 7, rng)
+		-- cherry-blossom trees along the cliff edges and in the corners
+		for index = 1, 6 do
+			Detail.tree(folder, world(-34 + index * 11, side * (56 + (index % 2) * 2)), 1, blossom[index % 3 + 1], rng)
+		end
+		Detail.tree(folder, world(-40, side * 30), 1.1, blossom[1], rng)
+		Detail.tree(folder, world(36, side * 32), 1.1, blossom[2], rng)
+		Detail.leaves(folder, world(-20, side * 50) + Vector3.new(0, 18, 0), blossom[1]) -- drifting petals
+		Detail.leaves(folder, world(24, side * 50) + Vector3.new(0, 18, 0), blossom[3])
+		-- gardens round the flags, pink paper-lantern posts, a torii gate at each bridge end
+		Detail.flowerBed(folder, world(-14, side * 42), Vector3.zAxis, 10, 4, rng)
+		Detail.flowerBed(folder, world(14, side * 42), Vector3.zAxis, 10, 4, rng)
+		Detail.flowerBed(folder, world(-26, side * 48), Vector3.xAxis, 12, 4, rng)
+		for _, x in { -8, 8 } do
+			Detail.lanternPost(folder, world(x, side * 30), true)
+			Detail.bush(folder, world(x * 2.2, side * 28), 1.2, rng)
+		end
+		for _, x in { -6, 6 } do
+			k:cyl("ToriiPost", x, DECK_Y, side * 28, 1.6, 13, Color3.fromRGB(235, 70, 100), Enum.Material.Wood)
+		end
+		k:box("ToriiBeam", 0, DECK_Y + 11, side * 28, 17, 1.2, 1.8, Color3.fromRGB(235, 70, 100), Enum.Material.Wood, { collide = false })
+		k:box("ToriiCap", 0, DECK_Y + 12.2, side * 28, 20, 0.9, 2.6, Color3.fromRGB(70, 48, 40), Enum.Material.Wood, { collide = false })
+		k:box("ToriiTie", 0, DECK_Y + 8.6, side * 28, 15, 0.8, 1.2, Color3.fromRGB(235, 70, 100), Enum.Material.Wood, { collide = false })
+		Detail.rocks(folder, world(-30, side * 36), rng, 5)
+		Detail.rocks(folder, world(32, side * 46), rng, 5)
+	end
+	Detail.tuftRing(folder, Vector3.new(cx, capY, cz), 14, 100, 140, rng)
+	-- the ravine floor: a gentle stream with lily pads, and rocks along its edges
+	k:box("RavineStream", 0, 0, 0, 70, 0.3, 9, Color3.fromRGB(150, 215, 245), Enum.Material.Glass, { collide = false, transparency = 0.35 })
+	for index = 1, 8 do
+		k:cyl("LilyPad", -30 + index * 7, 0.3, -2 + (index % 3) * 2, 3, 0.2, Color3.fromRGB(110, 190, 90), Enum.Material.Grass, { collide = false })
+	end
+	Detail.rocks(folder, Vector3.new(cx - 20, territory.height + 0.5, cz + 6), rng, 6)
+	Detail.rocks(folder, Vector3.new(cx + 24, territory.height + 0.5, cz - 6), rng, 6)
+	-- the heart's big bow and gold knot
+	for _, side in { -1, 1 } do
+		k:ball("HeartBow", side * 4, centreY + 4, 0, 6, 4, 4, Color3.fromRGB(255, 120, 185), Enum.Material.Foil, { collide = false })
+	end
+	k:ball("HeartKnot", 0, centreY + 4, 0, 3, 3, 3, Color3.fromRGB(255, 200, 60), Enum.Material.Metal, { collide = false })
+	Detail.fireflies(folder, world(0, 45) + Vector3.new(0, 5, 0), Vector3.new(60, 8, 20))
+	Detail.fireflies(folder, world(0, -45) + Vector3.new(0, 5, 0), Vector3.new(60, 8, 20))
 
 	Common.ambience(folder, k:at(0, 20, 0), Ambience.rizz_ravine, 0.35)
 end

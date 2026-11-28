@@ -54,6 +54,7 @@ function TerrainKit.colors()
 	local colors: { [Enum.Material]: Color3 } = {
 		[Enum.Material.Grass] = Color3.fromRGB(112, 178, 86), -- a natural, softer green
 		[Enum.Material.LeafyGrass] = Color3.fromRGB(88, 150, 70),
+		[Enum.Material.Salt] = Color3.fromRGB(255, 176, 208), -- Rizz Ravine's pink grass
 		[Enum.Material.Sand] = Color3.fromRGB(245, 220, 150),
 		[Enum.Material.Ground] = Color3.fromRGB(160, 112, 72),
 		[Enum.Material.Rock] = Color3.fromRGB(125, 120, 140),

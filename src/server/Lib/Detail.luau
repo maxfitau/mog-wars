@@ -194,6 +194,22 @@ function Detail.tuftRing(parent: Instance, centre: Vector3, innerRadius: number,
 	end
 end
 
+-- A plank walkway from `from` to `to`: boards laid across the path with darker side beams.
+function Detail.plankPath(parent: Instance, from: Vector3, to: Vector3, width: number, rng: Random)
+	local flat = Vector3.new(to.X - from.X, 0, to.Z - from.Z)
+	local length = flat.Magnitude
+	if length < 1 then
+		return
+	end
+	local frame = CFrame.lookAt(from + Vector3.new(0, 0.15, 0), from + Vector3.new(0, 0.15, 0) + flat)
+	for _, side in { -1, 1 } do
+		part(parent, "PathBeam", Vector3.new(0.5, 0.4, length), frame * CFrame.new(side * (width / 2 + 0.2), 0, -length / 2), Color3.fromRGB(104, 72, 48), Enum.Material.Wood)
+	end
+	for along = 0.5, length - 0.5, 1.3 do
+		part(parent, "PathPlank", Vector3.new(width, 0.35, 1.1), frame * CFrame.new((rng:NextNumber() - 0.5) * 0.3, 0, -along), Color3.fromRGB(176 + rng:NextInteger(-12, 12), 128, 74), Enum.Material.WoodPlanks)
+	end
+end
+
 -- A chunky tree: a tapered trunk, roots and a clump of overlapping leaf balls (`leaf` colour so each island can differ).
 function Detail.tree(parent: Instance, position: Vector3, scale: number, leaf: Color3, rng: Random)
 	local height = (9 + rng:NextNumber() * 3) * scale

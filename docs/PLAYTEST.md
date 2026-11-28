@@ -1,3 +1,14 @@
+# Visual pass, Rizz Ravine (third island): what you are looking for (read this first)
+Needs playtest (written without Studio). View from the western hill, the bridge and under the heart.
+1. The cliff tops and the western hill are PINK grass (not green); pink strata on the cliffs as before.
+2. Plank paths run from the hill to each flag and from each flag to the bridge; a red torii gate stands at each bridge end; pink-lit lantern posts, flower beds round both flags, rocks, bushes.
+3. Cherry-blossom trees along the cliff edges, petals drifting down, fireflies over the flags.
+4. Ravine floor: a shallow stream, lily pads, pebbles, flowers on the floor.
+5. The giant heart is glossy (foil) with a pink bow and gold knot on top and its sparkles.
+6. The jump pads, the heart walk-through and the secret ledge stash still work; nothing blocks the bridge ends.
+**Not done yet:** MaterialVariants, Creator Store kits, real meshes. See ART.md.
+
+---
 # Visual pass, NPC Village (second island): what you are looking for (read this first)
 Needs playtest (written without Studio). View from the plaza, a house front, and the statue.
 1. Houses: timber framing, door awnings, shutters, a flower box under the window, chimneys; one-storey houses have pitched coloured roofs with a ridge and stepped gables (nobody can stand on them); two-storey houses keep the flat roof deck (the rooftop stash is still there).

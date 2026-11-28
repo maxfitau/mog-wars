@@ -128,7 +128,7 @@ local config: Config = {
 	war = {
 		durationSeconds = 360, -- 6 minutes; fast wars (WarRules keeps it between 3 and 15 minutes)
 		intermissionSeconds = 9, -- 5 seconds of results, then 4 of war chest, then straight into the next war
-		playersPerServer = 16,
+		playersPerServer = 8, -- small servers make every action personal; Moglings fill each team to 4
 		winnerBonusPoints = 60,
 		participantBonusPoints = 20,
 		minContributionForBonus = 5,
@@ -184,7 +184,7 @@ local config: Config = {
 		refreshSeconds = 60, -- how often a server reads the shared faction totals
 	},
 	bots = {
-		minFighters = 8, -- a war with fewer fighters than this is filled up with bots
+		minFighters = 16, -- a war with fewer fighters than this is filled up with bots
 		rewardFactor = 0.4, -- Mog Points for beating a bot are 40 percent of the normal amount
 		tapRateBase = 3.0, -- taps a second a bot taps against an NPC-rank player in a mog-off
 		tapRatePerRank = 0.4, -- plus this much for each rank of the player it faces

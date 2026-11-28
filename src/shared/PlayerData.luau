@@ -32,18 +32,52 @@ export type Data = {
 	lifetimeWars: number, -- wars the player took part in (used to reveal screens gradually)
 	lifetimeCaptures: number, -- zone captures the player was paid for
 	season: { week: number, points: { [string]: number }, prevWeek: number, prevPoints: { [string]: number }, claimed: number },
+	-- v14: the weapon collection, daily and weekly quests, the team league, and the (switched off) season pass
+	collection: { [string]: number }, -- weapon id to stars owned (1 to 5); every weapon you have found
+	equippedWeapon: string, -- the weapon that replaces Shove ("" = plain Shove)
+	questState: { dailyDay: number, daily: { [string]: number }, weeklyWeek: number, weekly: { [string]: number }, claimed: { [string]: boolean } },
+	leagueClaimedWeek: number, -- the last league week whose Monday chest was claimed
+	pass: { tier: number, xp: number, claimed: { [string]: boolean } },
 }
 
 local PlayerData = {}
 
-PlayerData.CURRENT_VERSION = 13
+PlayerData.CURRENT_VERSION = 14
+PlayerData.MAX_STARS = 5
 PlayerData.MAX_RECEIPT_ENTRIES = 400
 PlayerData.MAX_UNITS = 1000
 PlayerData.MAX_BOXES_PER_TIER = 1000
 PlayerData.MAX_POINTS = 1_000_000_000 -- far above anything reachable; stops runaway or overflowing values
 
 function PlayerData.template(): Data
-	return { version = PlayerData.CURRENT_VERSION, points = 0, rank = 1, warsToday = 0, lastWarDay = 0, boxes = {}, units = {}, cosmetics = {}, boxDay = 0, boxesToday = 0, streakDay = 0, lastClaimDay = 0, barracksSince = 0, trainingLevel = 0, trainingProgress = 0, trainingDay = 0, trainingToday = 0, equipped = {}, receipts = {}, weapons = {}, aura = 0, unlocksSeen = {}, stashes = {}, achievements = {}, counters = {}, title = "", lifetimeWars = 0, lifetimeCaptures = 0, season = { week = 0, points = {}, prevWeek = 0, prevPoints = {}, claimed = 0 } }
+	return { version = PlayerData.CURRENT_VERSION, points = 0, rank = 1, warsToday = 0, lastWarDay = 0, boxes = {}, units = {}, cosmetics = {}, boxDay = 0, boxesToday = 0, streakDay = 0, lastClaimDay = 0, barracksSince = 0, trainingLevel = 0, trainingProgress = 0, trainingDay = 0, trainingToday = 0, equipped = {}, receipts = {}, weapons = {}, aura = 0, unlocksSeen = {}, stashes = {}, achievements = {}, counters = {}, title = "", lifetimeWars = 0, lifetimeCaptures = 0, season = { week = 0, points = {}, prevWeek = 0, prevPoints = {}, claimed = 0 }, collection = {}, equippedWeapon = "", questState = { dailyDay = 0, daily = {}, weeklyWeek = 0, weekly = {}, claimed = {} }, leagueClaimedWeek = 0, pass = { tier = 0, xp = 0, claimed = {} } }
+end
+
+-- True when `collection` maps weapon ids to whole star counts from 1 to MAX_STARS.
+function PlayerData.collectionValid(collection: any): boolean
+	if type(collection) ~= "table" then
+		return false
+	end
+	for id, stars in collection do
+		if type(id) ~= "string" or id == "" or #id > 40 or not (type(stars) == "number" and stars == math.floor(stars) and stars >= 1 and stars <= PlayerData.MAX_STARS) then
+			return false
+		end
+	end
+	return true
+end
+
+-- Add one copy of a weapon: new = 1 star, a duplicate adds a star up to MAX_STARS. Returns (isNew, stars after).
+function PlayerData.addWeapon(data: Data, id: string): (boolean, number)
+	if type(id) ~= "string" or id == "" or #id > 40 then
+		return false, 0
+	end
+	local current = data.collection[id]
+	if not current then
+		data.collection[id] = 1
+		return true, 1
+	end
+	data.collection[id] = math.min(PlayerData.MAX_STARS, current + 1)
+	return false, data.collection[id]
 end
 
 local function isWholeNumber(value: any): boolean
@@ -326,6 +360,14 @@ function PlayerData.migrate(data: any): boolean
 		data.title = ""
 		data.version = 13
 	end
+	if data.version == 13 then
+		data.collection = {}
+		data.equippedWeapon = ""
+		data.questState = { dailyDay = 0, daily = {}, weeklyWeek = 0, weekly = {}, claimed = {} }
+		data.leagueClaimedWeek = 0
+		data.pass = { tier = 0, xp = 0, claimed = {} }
+		data.version = 14
+	end
 	return true
 end
 
@@ -405,6 +447,12 @@ function PlayerData.isValid(data: any): boolean
 		and data.lifetimeWars >= 0
 		and isWholeNumber(data.lifetimeCaptures)
 		and data.lifetimeCaptures >= 0
+		and PlayerData.collectionValid(data.collection)
+		and type(data.equippedWeapon) == "string"
+		and #data.equippedWeapon <= 40
+		and type(data.questState) == "table"
+		and type(data.leagueClaimedWeek) == "number"
+		and type(data.pass) == "table"
 end
 
 -- Add points to a save table. Returns true if it changed. Rejects bad amounts and never exceeds the cap.

@@ -8,6 +8,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Workspace = game:GetService("Workspace")
 
 local ProfileStore = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("ProfileStore"))
+local WeaponCatalog = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("WeaponCatalog"))
 local Levels = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("Levels"))
 local RankRules = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("RankRules"))
 local BoxRoll = require(ReplicatedStorage:WaitForChild("Shared"):WaitForChild("BoxRoll"))
@@ -94,6 +95,18 @@ local function syncCosmetics(player: Player, data: PlayerData.Data)
 	end
 end
 
+-- Mirror the weapon collection: "Collection" (id:stars,...), "Weapon" (the equipped id) and "WeaponStars" (its stars).
+local function syncWeapons(player: Player, data: PlayerData.Data)
+	player:SetAttribute("Collection", WeaponCatalog.encode(data.collection))
+	local equipped = data.equippedWeapon
+	if equipped ~= "" and not data.collection[equipped] then
+		equipped = ""
+		data.equippedWeapon = ""
+	end
+	player:SetAttribute("Weapon", equipped)
+	player:SetAttribute("WeaponStars", if equipped ~= "" then data.collection[equipped] else 0)
+end
+
 -- Mirror this week's season points (all factions together) to the "SeasonPoints" attribute.
 local function syncSeason(player: Player, data: PlayerData.Data)
 	player:SetAttribute("SeasonPoints", SeasonRules.total(data.season.points))
@@ -160,6 +173,7 @@ local function load(player: Player)
 	syncCosmetics(player, profile.Data :: any)
 	syncSeason(player, profile.Data :: any)
 	syncReveal(player, profile.Data :: any)
+	syncWeapons(player, profile.Data :: any)
 end
 
 -- The live save table for a player, or nil while loading or after they leave.
@@ -388,6 +402,10 @@ function DataService.auraMultiplier(player: Player): number
 	if Workspace:GetAttribute("Overtime") == true then
 		multiplier *= Pace.overtime.auraMultiplier
 	end
+	local boost = Workspace:GetAttribute("EventAuraMultiplier") -- a weekly event (Meteor Storm Saturday: 2)
+	if type(boost) == "number" and boost > 1 and boost <= 5 then
+		multiplier *= boost
+	end
 	local until_ = player:GetAttribute("MainCharacterUntil")
 	if type(until_) == "number" and until_ > Workspace:GetServerTimeNow() then
 		multiplier *= Pace.pickups.mainCharacterAuraMultiplier
@@ -499,6 +517,47 @@ function DataService.debugReset(player: Player)
 	player:SetAttribute("Level", 0)
 	player:SetAttribute("Rank", 1)
 	player:SetAttribute("StashesFound", 0)
+end
+
+local grantedRemote: RemoteEvent? = nil -- (set in init)
+
+-- WEAPONS. Give a player one copy of a weapon (a new weapon = 1 star, a duplicate adds a star, up to 5). Fires "WeaponGranted"
+-- (id, stars, isNew, source) to that player's client for the reveal. Returns (isNew, stars), or (false, 0) if not allowed.
+function DataService.grantWeapon(player: Player, id: string, source: string?): (boolean, number)
+	local data = DataService.get(player)
+	if not data or WeaponCatalog.byId[id] == nil then
+		return false, 0
+	end
+	local isNew, stars = PlayerData.addWeapon(data, id)
+	syncWeapons(player, data)
+	if grantedRemote and stars > 0 then
+		grantedRemote:FireClient(player, id, stars, isNew, source or "")
+	end
+	return isNew, stars
+end
+
+-- Roll a weapon from a source's odds (WeaponCatalog.odds) and give it. Returns the weapon id, whether it is new, and its stars.
+function DataService.rollWeapon(player: Player, source: string): (string?, boolean, number)
+	local weapon = WeaponCatalog.roll(source, math.random)
+	local isNew, stars = DataService.grantWeapon(player, weapon.id, source)
+	if stars == 0 then
+		return nil, false, 0
+	end
+	return weapon.id, isNew, stars
+end
+
+-- Equip a weapon you own ("" = plain Shove). Returns true if it was applied.
+function DataService.equipWeapon(player: Player, id: string): boolean
+	local data = DataService.get(player)
+	if not data or type(id) ~= "string" or #id > 40 then
+		return false
+	end
+	if id ~= "" and not data.collection[id] then
+		return false
+	end
+	data.equippedWeapon = id
+	syncWeapons(player, data)
+	return true
 end
 
 -- Something to call when a gain is a crit ("mega" or "ultra"); set by ComboSystem.
@@ -723,6 +782,31 @@ function DataService.recordCapture(player: Player)
 end
 
 function DataService.init()
+	local folder = ReplicatedStorage:FindFirstChild("Remotes")
+	if not folder then
+		folder = Instance.new("Folder")
+		folder.Name = "Remotes"
+		folder.Parent = ReplicatedStorage
+	end
+	local granted = Instance.new("RemoteEvent")
+	granted.Name = "WeaponGranted"
+	granted.Parent = folder
+	grantedRemote = granted
+	local equip = Instance.new("RemoteEvent")
+	equip.Name = "EquipWeapon"
+	equip.Parent = folder
+	local lastEquip: { [Player]: number } = {}
+	equip.OnServerEvent:Connect(function(player: Player, id: any)
+		if type(id) ~= "string" or #id > 40 then
+			return -- validate every payload: a string of a sane length
+		end
+		local now = os.clock()
+		if now - (lastEquip[player] or 0) < 0.3 then
+			return -- rate limit
+		end
+		lastEquip[player] = now
+		DataService.equipWeapon(player, id) -- ownership is checked in there
+	end)
 	store = ProfileStore.New("MogWarsPlayerData", PlayerData.template() :: any)
 	Players.PlayerAdded:Connect(function(player)
 		task.spawn(load, player)

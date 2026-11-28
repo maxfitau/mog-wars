@@ -76,7 +76,7 @@ local function assign(player: Player)
 		return
 	end
 	if #Players:GetPlayers() > Config.war.playersPerServer then
-		-- The place setting "Maximum Players" should already be 16; this is a safety net.
+		-- The place setting "Maximum Players" should already be 8; this is a safety net.
 		player:Kick("This server is full. Please join another one.")
 		return
 	end

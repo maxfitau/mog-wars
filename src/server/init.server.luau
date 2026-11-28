@@ -23,6 +23,14 @@ add("ZiplineSystem", Features.ziplines)
 add("AbilitySystem", Features.abilities)
 add("RiftSystem", Features.rifts)
 add("TaxiSystem", Features.airshipTaxis)
+add("WeaponSystem", Features.weapons)
+add("MoglingWeapons", Features.weapons)
+add("WeeklyEventSystem", Features.weeklyEvents)
+add("SeasonThemeSystem", Features.seasonTheme)
+add("LeagueSystem", Features.league)
+add("DailyQuestSystem", Features.dailyQuests)
+add("ReactionSystem", Features.reactions)
+add("SeasonPassSystem", Features.seasonPass)
 add("EventSystem", Features.events)
 add("SupplyDropSystem", Features.supplyDrops)
 add("DebugSystem", Features.debugCommands)
@@ -40,7 +48,7 @@ type System = { init: () -> (), start: () -> () }
 local loaded: { { name: string, system: System } } = {}
 for _, name in order do
 	local ok, result = pcall(function()
-		return require(Systems:WaitForChild(name))
+		return require(Systems:WaitForChild(name, 10) :: ModuleScript)
 	end)
 	if ok then
 		table.insert(loaded, { name = name, system = result :: System })

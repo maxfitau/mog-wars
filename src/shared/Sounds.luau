@@ -46,6 +46,16 @@ Sounds.ids = {
 	trap_slime = "",
 	trap_zap = "",
 	trap_chomp = "",
+	-- weapons, chests and reactions
+	weapon_swing = "",
+	weapon_hit = "",
+	weapon_rare = "", -- a Rare or Epic weapon effect
+	weapon_legendary = "", -- Legendary or Mythic: bigger and flashier
+	chest_open = "",
+	chest_rare = "", -- a Rare or better weapon in the chest
+	noooo = "", -- knocked into the clouds
+	smug = "", -- the winner's pose after a capture
+	event_start = "", -- the weekly event begins
 	-- interface
 	ui_click = "",
 	announcer = "", -- a short sting whenever a banner appears

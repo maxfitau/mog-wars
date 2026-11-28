@@ -23,6 +23,10 @@ add("TerritoryBanner", true)
 add("FlagVisuals", true)
 add("MoodController", true)
 add("ActivityPing", true)
+add("WeaponController", Features.weapons)
+add("WeaponIndex", Features.weapons)
+add("EventCountdown", Features.weeklyEvents)
+add("ReactionController", Features.reactions)
 add("MinimapHud", true)
 add("QuestPanel", true)
 add("AchievementCards", true)
@@ -46,7 +50,7 @@ type Controller = { init: () -> (), start: () -> () }
 local loaded: { { name: string, controller: Controller } } = {}
 for _, name in order do
 	local ok, result = pcall(function()
-		return require(Controllers:WaitForChild(name))
+		return require(Controllers:WaitForChild(name, 10) :: ModuleScript)
 	end)
 	if ok then
 		table.insert(loaded, { name = name, controller = result :: Controller })

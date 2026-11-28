@@ -59,7 +59,7 @@ local function showCard(title: string, subtitle: string, day: number?)
 	HudSlots.card(function(done)
 		local card = Instance.new("Frame")
 		card.AnchorPoint = Vector2.new(0.5, 0)
-		card.Position = UDim2.new(0.5, 0, 0, 172) -- the card slot: centred, upper third
+		card.Position = UDim2.new(0.5, 0, 0, HudSlots.cardY) -- the card slot: centred, upper third
 		card.Size = UDim2.new(0, 276, 0, if day then 92 else 52)
 		card.BackgroundColor3 = UiTheme.panel
 		card.BackgroundTransparency = 0.1

@@ -26,6 +26,7 @@ local panelStroke: UIStroke
 local topLabel: TextLabel
 local nameLabel: TextLabel
 local chipLabel: TextLabel
+local chipFrame: Frame
 local dots: { Part } = {}
 local DOT_COUNT = 10
 local DOT_SPACING = 7
@@ -50,8 +51,12 @@ local function update()
 	local character = player.Character
 	local root = character and character:FindFirstChild("HumanoidRootPart")
 	local mine = player:GetAttribute("Faction")
+	if overriding then
+		return -- a banner is using the line slot right now (it stays visible even outside a war)
+	end
 	if not root or not root:IsA("BasePart") or type(mine) ~= "number" or Workspace:GetAttribute("WarPhase") ~= "War" then
 		panel.Visible = false
+		player:SetAttribute("MissionPos", nil)
 		hideDots()
 		return
 	end
@@ -182,7 +187,7 @@ function MissionHud.init()
 	topLabel = Instance.new("TextLabel")
 	topLabel.BackgroundTransparency = 1
 	topLabel.Position = UDim2.new(0, 46, 0, 4)
-	topLabel.Size = UDim2.new(1, -140, 0, 13)
+	topLabel.Size = UDim2.new(1, -118, 0, 13)
 	topLabel.Font = UiTheme.font
 	topLabel.TextScaled = true
 	topLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -192,7 +197,7 @@ function MissionHud.init()
 	nameLabel = Instance.new("TextLabel")
 	nameLabel.BackgroundTransparency = 1
 	nameLabel.Position = UDim2.new(0, 46, 0, 17)
-	nameLabel.Size = UDim2.new(1, -140, 0, 24)
+	nameLabel.Size = UDim2.new(1, -118, 0, 24)
 	nameLabel.Font = UiTheme.font
 	nameLabel.TextScaled = true
 	nameLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -200,9 +205,10 @@ function MissionHud.init()
 	nameLabel.Text = ""
 	nameLabel.Parent = panel
 	local chip = Instance.new("Frame") -- the white distance chip
+	chipFrame = chip
 	chip.AnchorPoint = Vector2.new(1, 0.5)
 	chip.Position = UDim2.new(1, -8, 0.5, 0)
-	chip.Size = UDim2.new(0, 84, 0, 28)
+	chip.Size = UDim2.new(0, 64, 0, 28)
 	chip.BackgroundColor3 = Color3.new(1, 1, 1)
 	chip.Parent = panel
 	UiTheme.round(chip, UDim.new(0, 14))
@@ -242,10 +248,12 @@ function MissionHud.start()
 			nameLabel.Text = string.upper(text)
 			nameLabel.TextColor3 = colour
 			chipLabel.Text = ""
+			chipFrame.Visible = false
 			hideDots()
 		end,
 		hide = function()
 			overriding = false
+			chipFrame.Visible = true
 		end,
 	})
 	local clock = 0

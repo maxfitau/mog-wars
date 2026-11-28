@@ -117,7 +117,11 @@ local function makeTile(parent: Frame, id: number, x: number): Tile
 	crown.BackgroundTransparency = 1
 	crown.Font = UiTheme.font
 	crown.TextScaled = true
-	crown.Text = "👑"
+	crown.Text = ""
+	crown.BackgroundTransparency = 0
+	crown.BackgroundColor3 = Color3.fromRGB(255, 205, 60)
+	crown.Size = UDim2.new(0, 14, 0, 14)
+	crown.Rotation = 45
 	crown.Visible = false
 	crown.ZIndex = 5
 	crown.Parent = frame

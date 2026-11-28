@@ -222,12 +222,12 @@ local function buildScreen()
 	-- The left column (aura box, Quests pill) is untouched and the middle third stays clear until the screen is opened.
 	local pill = Instance.new("TextButton")
 	pill.Name = "WeaponsPill"
-	pill.AnchorPoint = Vector2.new(1, 0)
-	pill.Position = UDim2.new(1, -12, 0, (function(): number -- right column, just below the minimap (its size follows MinimapHud) and its toggles
-		local camera = workspace.CurrentCamera
-		local view = if camera then camera.ViewportSize else Vector2.new(1280, 720)
-		return 112 + math.clamp(math.min(260, view.X * 0.31, view.Y - 230), 130, 260) + 76
-	end)())
+	local fit = HudSlots.leftScale() -- the same shrink as the rest of the left column
+	pill.AnchorPoint = Vector2.new(0, 0)
+	pill.Position = UDim2.new(0, 16 + 126 * fit, 0, 172) -- the left column, in the Quests pill's row (always on screen, also on phones)
+	local pillScale = Instance.new("UIScale")
+	pillScale.Scale = fit
+	pillScale.Parent = pill
 	pill.Size = UDim2.new(0, 96, 0, 26)
 	pill.BackgroundColor3 = UiTheme.panel
 	pill.BackgroundTransparency = 0.2
@@ -331,7 +331,7 @@ local function reveal(id: string, stars: number, isNew: boolean)
 			}):Play()
 		end
 		SoundController.play(if rank >= 2 then "chest_rare" else "chest_open")
-		TweenService:Create(card, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Position = UDim2.new(0.5, 0, 0, 172) }):Play()
+		TweenService:Create(card, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Position = UDim2.new(0.5, 0, 0, HudSlots.cardY) }):Play()
 		task.delay(if stars >= 5 or rank >= 4 then 3.4 else 2.6, function()
 			local out = TweenService:Create(card, TweenInfo.new(0.35), { Position = UDim2.new(0.5, 0, 0, -140) })
 			out.Completed:Connect(function()

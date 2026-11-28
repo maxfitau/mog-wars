@@ -15,6 +15,7 @@ local Workspace = game:GetService("Workspace")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Features = require(Shared:WaitForChild("Features"))
 local WeaponCatalog = require(Shared:WaitForChild("WeaponCatalog"))
+local HudSlots = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("HudSlots"))
 local UiTheme = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("UiTheme"))
 
 local ShoveController = {}
@@ -143,7 +144,7 @@ function ShoveController.init()
 	button = Instance.new("TextButton")
 	button.AnchorPoint = Vector2.new(1, 1)
 	button.Position = UDim2.new(1, -24, 1, -28)
-	button.Size = UDim2.new(0, 132, 0, 132)
+	button.Size = UDim2.new(0, HudSlots.shoveSize(), 0, HudSlots.shoveSize())
 	button.BackgroundColor3 = UiTheme.colors.orange
 	button.Font = UiTheme.font
 	button.TextScaled = true

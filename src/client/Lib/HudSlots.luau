@@ -89,6 +89,29 @@ function HudSlots.card(show: (done: () -> ()) -> ())
 	runCard()
 end
 
+-- Shared layout numbers. The card slot sits BELOW the capture bar (which spans y 164 to 240) in the upper third.
+HudSlots.cardY = 250
+
+-- A short (landscape phone) screen: the big buttons shrink and the minimap's extras move into the big map.
+function HudSlots.shortScreen(): boolean
+	local camera = workspace.CurrentCamera
+	return camera ~= nil and camera.ViewportSize.Y < 500
+end
+
+-- The Shove button size, and the minimap size that fits ABOVE it (using the real GUI inset, not a guess).
+function HudSlots.shoveSize(): number
+	return if HudSlots.shortScreen() then 88 else 132
+end
+
+function HudSlots.mapSize(): number
+	local camera = workspace.CurrentCamera
+	local view = if camera then camera.ViewportSize else Vector2.new(1280, 720)
+	local inset = game:GetService("GuiService"):GetGuiInset().Y
+	local extras = if view.Y < 500 then 0 else 44 -- the hint and the toggles under the map (only on tall screens)
+	local available = view.Y - 28 - HudSlots.shoveSize() - 8 - inset - 112 - 26 - extras
+	return math.clamp(math.min(260, view.X * 0.31, available), 70, 260)
+end
+
 -- The left column (aura box, quest pill, pop-ups) shrinks on narrow screens so it never reaches the top-centre tiles or timer.
 function HudSlots.leftScale(): number
 	local camera = workspace.CurrentCamera

@@ -28,7 +28,7 @@ local GOLD = Color3.fromRGB(255, 205, 60)
 local GOLD_BRIGHT = Color3.fromRGB(255, 240, 150)
 local WHITE = Color3.new(1, 1, 1)
 local PILL_WIDTH, PILL_HEIGHT = 176, 40
-local CARD_TOP = 172 -- the shared card slot
+local CARD_TOP = HudSlots.cardY -- the shared card slot
 
 local nameLabel: TextLabel
 local timeLabel: TextLabel

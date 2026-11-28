@@ -99,7 +99,7 @@ function TerritoryBanner.init()
 		HudSlots.card(function(done)
 			card.Visible = true
 			card.Position = UDim2.new(0.5, 0, 0, -80)
-			TweenService:Create(card, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Position = UDim2.new(0.5, 0, 0, 172) }):Play()
+			TweenService:Create(card, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Position = UDim2.new(0.5, 0, 0, HudSlots.cardY) }):Play()
 			task.delay(1.5, function()
 				TweenService:Create(card, TweenInfo.new(0.25), { Position = UDim2.new(0.5, 0, 0, -80) }):Play()
 				task.wait(0.3)

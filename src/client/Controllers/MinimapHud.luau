@@ -21,6 +21,7 @@ local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Territories = require(Shared:WaitForChild("Territories"))
 local FactionRules = require(Shared:WaitForChild("FactionRules"))
 local MapLayout = require(Shared:WaitForChild("MapLayout"))
+local HudSlots = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("HudSlots"))
 local SoundController = require(script.Parent:WaitForChild("SoundController"))
 
 local MinimapHud = {}
@@ -415,7 +416,8 @@ function MinimapHud.init()
 	end)
 	local camera = Workspace.CurrentCamera
 	local viewport = if camera then camera.ViewportSize else Vector2.new(1280, 720)
-	local S = math.clamp(math.min(260, viewport.X * 0.31, viewport.Y - 230), 130, 260)
+	local S = HudSlots.mapSize() -- sized to fit above the Shove button (and clear of it on phones)
+	local short = HudSlots.shortScreen()
 	local gui = Instance.new("ScreenGui")
 	gui.Name = "MinimapHud"
 	gui.ResetOnSpawn = false
@@ -426,13 +428,14 @@ function MinimapHud.init()
 	small.Name = "Corner"
 	small.AnchorPoint = Vector2.new(1, 0)
 	small.Position = UDim2.new(1, -12, 0, 112) -- below the top-centre block and level with the mission bar's row, never under it
-	small.Size = UDim2.fromOffset(S, S + 70)
+	small.Size = UDim2.fromOffset(S, S + (if short then 28 else 70))
 	small.BackgroundTransparency = 1
 	small.Parent = gui
 	local updateSmallBar = makeBar(small, S)
 	local smallView = makeView(small, S, false)
 	smallView.frame.Position = UDim2.fromOffset(0, 26)
 	local hint = Instance.new("TextLabel")
+	hint.Visible = not short -- on a landscape phone the hint and toggles live in the big map instead
 	hint.Position = UDim2.fromOffset(0, 28 + S)
 	hint.Size = UDim2.fromOffset(S, 14)
 	hint.BackgroundTransparency = 1
@@ -442,21 +445,25 @@ function MinimapHud.init()
 	hint.TextStrokeTransparency = 0.4
 	hint.Text = "M - tap to expand"
 	hint.Parent = small
-	toggle(small, "MUSIC", UDim2.fromOffset(0, 44 + S), SoundController.isMusicOn, SoundController.setMusic)
-	toggle(small, "SFX", UDim2.fromOffset(66, 44 + S), SoundController.isSfxOn, SoundController.setSfx)
+	if not short then
+		toggle(small, "MUSIC", UDim2.fromOffset(0, 44 + S), SoundController.isMusicOn, SoundController.setMusic)
+		toggle(small, "SFX", UDim2.fromOffset(66, 44 + S), SoundController.isSfxOn, SoundController.setSfx)
+	end
 
-	local bigSize = math.clamp(math.min(540, viewport.X - 40, viewport.Y - 120), 260, 540)
+	local bigSize = math.clamp(math.min(540, viewport.X - 40, viewport.Y - 150 - game:GetService("GuiService"):GetGuiInset().Y), 220, 540)
 	local big = Instance.new("Frame")
 	big.Name = "Expanded"
 	big.AnchorPoint = Vector2.new(0.5, 0.5)
 	big.Position = UDim2.fromScale(0.5, 0.54)
-	big.Size = UDim2.fromOffset(bigSize, bigSize + 40)
+	big.Size = UDim2.fromOffset(bigSize, bigSize + 60)
 	big.BackgroundTransparency = 1
 	big.Visible = false
 	big.Parent = gui
 	local updateBigBar = makeBar(big, bigSize)
 	local bigView = makeView(big, bigSize, true)
 	bigView.frame.Position = UDim2.fromOffset(0, 30)
+	toggle(big, "MUSIC", UDim2.fromOffset(0, 36 + bigSize), SoundController.isMusicOn, SoundController.setMusic)
+	toggle(big, "SFX", UDim2.fromOffset(66, 36 + bigSize), SoundController.isSfxOn, SoundController.setSfx)
 
 	local function flip()
 		big.Visible = not big.Visible

@@ -60,17 +60,29 @@ for _, name in order do
 		warn(("[mog-wars] FAILED to load %s: %s"):format(name, tostring(result)))
 	end
 end
+-- each controller starts on its own thread, so one that waits on something that never arrives cannot block the HUD
+local pendingInit = #loaded
 for _, entry in loaded do
-	local ok, err = pcall(entry.controller.init)
-	if not ok then
-		warn(("[mog-wars] FAILED in %s.init: %s"):format(entry.name, tostring(err)))
-	end
+	task.spawn(function()
+		local ok, err = pcall(entry.controller.init)
+		if not ok then
+			warn(("[mog-wars] FAILED in %s.init: %s"):format(entry.name, tostring(err)))
+		end
+		pendingInit -= 1
+	end)
+end
+local waited = 0
+while pendingInit > 0 and waited < 8 do
+	task.wait(0.1)
+	waited += 0.1
 end
 for _, entry in loaded do
-	local ok, err = pcall(entry.controller.start)
-	if not ok then
-		warn(("[mog-wars] FAILED in %s.start: %s"):format(entry.name, tostring(err)))
-	end
+	task.spawn(function()
+		local ok, err = pcall(entry.controller.start)
+		if not ok then
+			warn(("[mog-wars] FAILED in %s.start: %s"):format(entry.name, tostring(err)))
+		end
+	end)
 end
 
 print(("[mog-wars] client started (%d of %d screens loaded)"):format(#loaded, #order))

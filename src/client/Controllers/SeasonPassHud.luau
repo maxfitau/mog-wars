@@ -4,6 +4,7 @@
 -- reward and a CLAIM button once you reach it. Display only: the server owns xp and claims; this reads the player attributes
 -- PassXp, PassTier and PassClaimed and asks with Remotes.ClaimPassTier (one tier number). Drawn shapes and ASCII text only.
 
+local HudSlots = require(script.Parent.Parent:WaitForChild("Lib"):WaitForChild("HudSlots"))
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -88,12 +89,8 @@ function SeasonPassHud.init()
 	-- the small button: right column, under the minimap (move it if the layout changes, see docs/HUD_LAYOUT.md)
 	local open = Instance.new("TextButton")
 	open.Text = "PASS"
-	open.AnchorPoint = Vector2.new(1, 0)
-	open.Position = UDim2.new(1, -12, 0, 34 + (function(): number -- right column, just below the minimap (its size follows MinimapHud) and its toggles
-		local camera = workspace.CurrentCamera
-		local view = if camera then camera.ViewportSize else Vector2.new(1280, 720)
-		return 112 + math.clamp(math.min(260, view.X * 0.31, view.Y - 230), 130, 260) + 76
-	end)())
+	open.AnchorPoint = Vector2.new(0, 0)
+	open.Position = UDim2.new(0, 16 + 230 * HudSlots.leftScale(), 0, 172) -- the Quests row, right of the Weapons pill (the pass is off)
 	open.Size = UDim2.new(0, 64, 0, 30)
 	open.BackgroundColor3 = UiTheme.colors.blue
 	open.Font = UiTheme.font

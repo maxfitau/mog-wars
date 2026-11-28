@@ -248,7 +248,7 @@ function PopupController.init()
 	gui = Instance.new("ScreenGui")
 	gui.Name = "RewardPopups" -- not in RevealRules: pop-ups are never hidden by it
 	gui.ResetOnSpawn = false
-	gui.IgnoreGuiInset = true
+	gui.IgnoreGuiInset = false -- the same inset as every other HUD gui, so y numbers line up
 	gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
 
 	flash = Instance.new("Frame")
@@ -271,7 +271,7 @@ function PopupController.init()
 
 	comboLabel = Instance.new("TextLabel")
 	comboLabel.AnchorPoint = Vector2.new(0, 0)
-	comboLabel.Position = UDim2.new(0, 146, 0, 172) -- small, right beside the quest pill under the aura box
+	comboLabel.Position = UDim2.new(0, 16 + 234 * HudSlots.leftScale(), 0, 172) -- small, in the Quests row, right of the Weapons pill
 	comboLabel.Size = UDim2.new(0, 100, 0, 28)
 	comboLabel.BackgroundTransparency = 1
 	comboLabel.Font = UiTheme.font

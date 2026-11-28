@@ -79,7 +79,9 @@ local function finishWar()
 	end
 
 	for _, player in Players:GetPlayers() do
-		Events.fire(player, "war", 1)
+		if player:GetAttribute("AFK") ~= true then -- idling through wars must not finish "play 12 wars"
+			Events.fire(player, "war", 1)
+		end
 	end
 	Workspace:SetAttribute("WarWinner", winner)
 	Workspace:SetAttribute("Overtime", false)

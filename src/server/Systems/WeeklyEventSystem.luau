@@ -102,7 +102,7 @@ local function reward(player: Player)
 	if not claimOnce(player) then
 		return
 	end
-	local shown = DataService.addAura(player, SETTINGS.rewardAuraSeconds * Pace.levels.nominalIncome)
+	local shown = DataService.addAura(player, SETTINGS.rewardAuraSeconds * Pace.levels.nominalIncome, false, true, true)
 	if shown > 0 then
 		PopupSystem.send(player, "aura", shown, "")
 	end

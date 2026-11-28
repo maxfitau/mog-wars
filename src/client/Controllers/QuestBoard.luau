@@ -145,7 +145,7 @@ local function refresh()
 		button.TextColor3 = if name == currentTab then Color3.fromRGB(60, 40, 0) else Color3.new(1, 1, 1)
 	end
 	local resetAt = player:GetAttribute(if daily then "DailyResetAt" else "WeeklyResetAt")
-	local left = if type(resetAt) == "number" then resetAt - os.time() else 0
+	local left = if type(resetAt) == "number" then resetAt - game:GetService("Workspace"):GetServerTimeNow() else 0
 	resetLabel.Text = (if daily then "New daily quests in " else "New weekly quests in ") .. QuestCatalog.timeText(left)
 	panel.Size = UDim2.new(0, 280, 0, 54 + (if daily then QuestCatalog.dailyCount else QuestCatalog.weeklyCount) * ROW_HEIGHT)
 end

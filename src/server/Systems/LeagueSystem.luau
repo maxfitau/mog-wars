@@ -215,7 +215,7 @@ local function claimFor(player: Player)
 	end
 	data.leagueClaimedWeek = week -- mark first: a second look can never pay twice
 	DataService.setTitle(player, SETTINGS.title)
-	local shown = DataService.addAura(player, SETTINGS.rewardAuraSeconds * Pace.levels.nominalIncome)
+	local shown = DataService.addAura(player, SETTINGS.rewardAuraSeconds * Pace.levels.nominalIncome, false, true, true)
 	if shown > 0 then
 		PopupSystem.send(player, "aura", shown, "")
 	end

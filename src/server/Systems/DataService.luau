@@ -43,7 +43,7 @@ end
 -- DailyReady (bool), DailyDay (the streak day the next claim would be), BarracksPending (points waiting).
 local function syncRewards(player: Player, data: PlayerData.Data)
 	local now = os.time()
-	local ready, day = StreakRules.preview(data.streakDay, data.lastClaimDay, PlayerData.dayNumber(now), #Config.dailyStreak.rewards)
+	local ready, day = StreakRules.preview(data.streakDay, data.lastClaimDay, PlayerData.dayNumber(now), #Config.dailyStreak.auraRewards)
 	player:SetAttribute("DailyReady", ready)
 	player:SetAttribute("DailyDay", day)
 	player:SetAttribute("BarracksPending", if Features.barracks then BarracksRules.pending(now, data.barracksSince, data.rank, Config.barracks) else 0)
@@ -420,7 +420,7 @@ local auraRemainder: { [Player]: number } = setmetatable({}, { __mode = "k" }) :
 -- the +1 ticks, the territory bonus and trickle, and the daily reward. Overtime and Main Character Mode (both off in
 -- the simple game) can multiply it. Returns the aura shown to the player (after any multiplier), or 0 if data is not
 -- loaded. A new rank is announced with a "rankup" pop-up.
-function DataService.addAura(player: Player, aura: number, alreadyScaled: boolean?, plain: boolean?): number
+function DataService.addAura(player: Player, aura: number, alreadyScaled: boolean?, plain: boolean?, fixed: boolean?): number
 	local data = DataService.get(player)
 	if not data or aura ~= aura or aura <= 0 or aura == math.huge then
 		return 0
@@ -428,13 +428,14 @@ function DataService.addAura(player: Player, aura: number, alreadyScaled: boolea
 	-- BIG NUMBERS: every level multiplies all income (Levels.multiplier), so every reward is "N seconds of current income".
 	-- Values that already come from the war tally (stolen orbs, bounty) pass alreadyScaled=true so they are not scaled twice.
 	local levelMultiplier = if alreadyScaled then 1 else Levels.multiplier(player:GetAttribute("Level") :: any or 0)
-	local base = math.floor(aura * DataService.auraMultiplier(player) * levelMultiplier + 0.5)
+	-- `fixed` rewards ("N seconds of income" for a quest, league, weekly or meteor prize) skip the event, overtime and Main Character boosts
+	local base = math.floor(aura * (if fixed == true then 1 else DataService.auraMultiplier(player)) * levelMultiplier + 0.5)
 	local shown = base
 	-- combo (captures, shoves, orbs and stashes close together) and crits (MEGA MOG! x5, ULTRA MOG! x10) multiply the gain
 	local comboValue = player:GetAttribute("ComboMult")
 	local multiplier = if type(comboValue) == "number" and comboValue > 1 then comboValue else 1
 	local critTier: string? = nil
-	if plain == true then
+	if plain == true or fixed == true then
 		multiplier = 1 -- the small "just for being here" ticks never combo or crit, so passive aura stays small and readable
 	elseif base >= Pace.crit.minAura then
 		local roll = math.random()
@@ -746,7 +747,7 @@ function DataService.claimDaily(player: Player): (boolean, string, string, numbe
 	data.streakDay = day
 	data.lastClaimDay = today
 	syncRewards(player, data)
-	DataService.addAura(player, reward)
+	DataService.addAura(player, reward, false, true, true)
 	return true, "", tostring(reward), day
 end
 

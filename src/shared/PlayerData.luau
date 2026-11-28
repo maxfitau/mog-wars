@@ -66,6 +66,24 @@ function PlayerData.collectionValid(collection: any): boolean
 	return true
 end
 
+local function whole(value: any): boolean
+	return type(value) == "number" and value == value and value ~= math.huge and value ~= -math.huge and value == math.floor(value)
+end
+
+-- True when the quest state has whole-number progress and a claimed set.
+function PlayerData.questStateValid(state: any): boolean
+	return type(state) == "table"
+		and whole(state.dailyDay)
+		and whole(state.weeklyWeek)
+		and PlayerData.countsValid(state.daily, 1e9)
+		and PlayerData.countsValid(state.weekly, 1e9)
+		and PlayerData.cosmeticsValid(state.claimed)
+end
+
+function PlayerData.passValid(pass: any): boolean
+	return type(pass) == "table" and whole(pass.tier) and pass.tier >= 0 and whole(pass.xp) and pass.xp >= 0 and PlayerData.cosmeticsValid(pass.claimed)
+end
+
 -- Add one copy of a weapon: new = 1 star, a duplicate adds a star up to MAX_STARS. Returns (isNew, stars after).
 function PlayerData.addWeapon(data: Data, id: string): (boolean, number)
 	if type(id) ~= "string" or id == "" or #id > 40 then
@@ -450,9 +468,10 @@ function PlayerData.isValid(data: any): boolean
 		and PlayerData.collectionValid(data.collection)
 		and type(data.equippedWeapon) == "string"
 		and #data.equippedWeapon <= 40
-		and type(data.questState) == "table"
-		and type(data.leagueClaimedWeek) == "number"
-		and type(data.pass) == "table"
+		and PlayerData.questStateValid(data.questState)
+		and isWholeNumber(data.leagueClaimedWeek)
+		and data.leagueClaimedWeek >= 0
+		and PlayerData.passValid(data.pass)
 end
 
 -- Add points to a save table. Returns true if it changed. Rejects bad amounts and never exceeds the cap.

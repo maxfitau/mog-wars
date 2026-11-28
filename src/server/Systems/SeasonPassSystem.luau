@@ -77,7 +77,7 @@ local function give(player: Player, pass: { tier: number, xp: number, claimed: {
 		local income = Levels.nominalIncome(if type(level) == "number" then level else 0)
 		local amount = SeasonPassConfig.auraAmount(reward, income)
 		if amount > 0 then
-			local shown = DataService.addAura(player, amount, true)
+			local shown = DataService.addAura(player, amount, true, true, true)
 			if shown > 0 then
 				PopupSystem.send(player, "aura", shown, "")
 			end

@@ -302,11 +302,11 @@ local function runMeteor(storm: boolean)
 		fxAll("claim", landing, winner)
 		local claimers: { Player } = {}
 		for _, player in Players:GetPlayers() do
-			if player:GetAttribute("Faction") == winner then
+			if player:GetAttribute("Faction") == winner and player:GetAttribute("AFK") ~= true then
 				if stood[player] then
 					table.insert(claimers, player)
 				end
-				local shown = DataService.addAura(player, Pace.meteor.rewardSeconds * Pace.levels.nominalIncome)
+				local shown = DataService.addAura(player, Pace.meteor.rewardSeconds * Pace.levels.nominalIncome, false, true, true)
 				if shown > 0 then
 					PopupSystem.send(player, "aura", shown, "")
 				end
@@ -359,6 +359,12 @@ function EventSystem.trigger(id: string, storm: boolean?): boolean
 			clearState()
 			fxAll("clear")
 			BotService.setExtraZones(nil)
+			for _, child in Workspace:GetChildren() do -- a meteor that failed part way leaves nothing behind
+				if child.Name == "MeteorMarker" or child.Name == "Meteor" or child.Name == "MeteorFlag" then
+					child:Destroy()
+				end
+			end
+			flagPart = nil
 		end
 		running = false
 	end)

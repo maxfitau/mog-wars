@@ -48,6 +48,25 @@ local function rollOver(state: QuestState, today: number)
 	end
 end
 
+local dailyCache: { [number]: any } = {}
+local weeklyCache: { [number]: any } = {}
+local function dailyCached(day: number): any -- the same pool shuffle every time, so remember it
+	local found = dailyCache[day]
+	if not found then
+		found = QuestCatalog.dailyFor(day)
+		dailyCache[day] = found
+	end
+	return found
+end
+local function weeklyCached(week: number): any
+	local found = weeklyCache[week]
+	if not found then
+		found = QuestCatalog.weeklyFor(week)
+		weeklyCache[week] = found
+	end
+	return found
+end
+
 local function entriesOf(state: QuestState, templates: { QuestCatalog.Template }, store: { [string]: number }): { QuestCatalog.Entry }
 	local entries: { QuestCatalog.Entry } = {}
 	for _, template in templates do
@@ -63,8 +82,8 @@ end
 
 local function publish(player: Player, state: QuestState)
 	local today = state.dailyDay
-	player:SetAttribute("DailyQuests", QuestCatalog.encode(entriesOf(state, QuestCatalog.dailyFor(today), state.daily)))
-	player:SetAttribute("WeeklyQuests", QuestCatalog.encode(entriesOf(state, QuestCatalog.weeklyFor(state.weeklyWeek), state.weekly)))
+	player:SetAttribute("DailyQuests", QuestCatalog.encode(entriesOf(state, dailyCached(today), state.daily)))
+	player:SetAttribute("WeeklyQuests", QuestCatalog.encode(entriesOf(state, weeklyCached(state.weeklyWeek), state.weekly)))
 	local now = os.time()
 	player:SetAttribute("DailyResetAt", QuestCatalog.dailyResetAt(now))
 	player:SetAttribute("WeeklyResetAt", QuestCatalog.weeklyResetAt(now))
@@ -87,7 +106,7 @@ local function pay(player: Player, state: QuestState, template: QuestCatalog.Tem
 	end
 	state.claimed[template.id] = true
 	PopupSystem.send(player, "announce", 1, (if weekly then "WEEKLY QUEST DONE! " else "DAILY QUEST DONE! ") .. template.text)
-	local shown = DataService.addAura(player, template.auraSeconds * Pace.levels.nominalIncome)
+	local shown = DataService.addAura(player, template.auraSeconds * Pace.levels.nominalIncome, false, true, true)
 	if shown > 0 then
 		PopupSystem.send(player, "aura", shown, "")
 	end
@@ -112,8 +131,8 @@ local function count(player: Player, kind: string, amount: number)
 			end
 		end
 	end
-	bump(QuestCatalog.dailyFor(state.dailyDay), state.daily, false)
-	bump(QuestCatalog.weeklyFor(state.weeklyWeek), state.weekly, true)
+	bump(dailyCached(state.dailyDay), state.daily, false)
+	bump(weeklyCached(state.weeklyWeek), state.weekly, true)
 	publish(player, state)
 end
 

@@ -12,6 +12,8 @@ local Workspace = game:GetService("Workspace")
 
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local Config = require(Shared:WaitForChild("EconomyConfig"))
+local Features = require(Shared:WaitForChild("Features"))
+local WeaponRules = require(Shared:WaitForChild("WeaponRules"))
 local ShoveRules = require(Shared:WaitForChild("ShoveRules"))
 local BotService = require(script.Parent:WaitForChild("BotService"))
 local CaptureSystem = require(script.Parent:WaitForChild("CaptureSystem"))
@@ -26,6 +28,23 @@ local ShoveSystem = {}
 
 local lastRequest: { [Player]: number } = {}
 local lastShove: { [Player]: number } = {}
+local knockRemote: RemoteEvent? = nil -- ShoveKnockback (set in init); the weapons use it too
+
+-- An equipped weapon REPLACES plain Shove (the weapon button sends UseWeapon instead).
+local function hasWeapon(player: Player): boolean
+	if not Features.weapons then
+		return false
+	end
+	local weapon = player:GetAttribute("Weapon")
+	return type(weapon) == "string" and weapon ~= ""
+end
+
+-- Push a player (their own client applies it). Used by WeaponSystem too.
+function ShoveSystem.knockPlayer(target: Player, dx: number, dz: number, studs: number)
+	if knockRemote then
+		knockRemote:FireClient(target, dx, dz, WeaponRules.clampStuds(studs))
+	end
+end
 
 local function rootOf(player: Player): BasePart?
 	local character = player.Character
@@ -42,6 +61,9 @@ local function handle(player: Player, knockbackRemote: RemoteEvent)
 
 	if Workspace:GetAttribute("WarPhase") ~= "War" then
 		return
+	end
+	if hasWeapon(player) then
+		return -- the weapon button (UseWeapon) is used instead
 	end
 	if ShoveRules.tooFast(now, lastRequest[player] or -1000, Config.shove) then
 		return
@@ -125,9 +147,17 @@ local function handle(player: Player, knockbackRemote: RemoteEvent)
 	end
 	lastShove[player] = now
 	player:SetAttribute("ShoveReadyAt", now + Config.shove.cooldownSeconds)
-	target:SetAttribute("PushPenaltyUntil", now + Config.shove.penaltySeconds)
-
 	local dx, dz = ShoveRules.direction(origin.X, origin.Z, targetRoot.Position.X, targetRoot.Position.Z)
+	if WeaponRules.reflecting(now, target:GetAttribute("ReflectUntil")) then
+		-- Mirror Shield: the shove bounces back at the shover
+		player:SetAttribute("PushPenaltyUntil", now + Config.shove.penaltySeconds)
+		knockbackRemote:FireClient(player, -dx, -dz, Config.shove.knockbackStuds)
+		StealSystem.noteHit(player, target)
+		PopupSystem.send(player, "announce", 1, "REFLECTED!")
+		PopupSystem.send(target, "announce", 1, "REFLECTED!")
+		return
+	end
+	target:SetAttribute("PushPenaltyUntil", now + Config.shove.penaltySeconds)
 	knockbackRemote:FireClient(target, dx, dz, Config.shove.knockbackStuds)
 	PopupSystem.send(player, "bonk", 1, "") -- BONK! for the shover ...
 	PopupSystem.send(target, "bonk", 2, "") -- ... and for whoever got bonked
@@ -171,7 +201,14 @@ local function botShoves(knockbackRemote: RemoteEvent)
 			end
 			if best or bestBot then
 				botNextShove[bot.id] = now + Config.shove.cooldownSeconds * (1.5 + math.random() * 2)
-				if best and not Shield.active(best) then
+				if best and WeaponRules.reflecting(now, best:GetAttribute("ReflectUntil")) then
+					-- Mirror Shield: the Mogling's shove bounces back
+					local bestRoot = rootOf(best) or bot.root
+					local dx, dz = ShoveRules.direction(bestRoot.Position.X, bestRoot.Position.Z, bot.root.Position.X, bot.root.Position.Z)
+					BotService.weaken(bot, now + Config.shove.penaltySeconds)
+					BotService.knockback(bot, dx, dz, Config.shove.knockbackStuds)
+					PopupSystem.send(best, "announce", 1, "REFLECTED!")
+				elseif best and not Shield.active(best) then
 					local root = rootOf(best)
 					if root then
 						StealSystem.noteHit(best, nil)
@@ -204,6 +241,7 @@ function ShoveSystem.init()
 	local knockback = Instance.new("RemoteEvent")
 	knockback.Name = "ShoveKnockback"
 	knockback.Parent = folder
+	knockRemote = knockback
 
 	request.OnServerEvent:Connect(function(player: Player)
 		-- Any arguments the client sent are ignored on purpose.
